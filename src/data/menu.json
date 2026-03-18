@@ -1,0 +1,65 @@
+[
+  {
+    "id": "ai-1773857243115-1",
+    "name": "Hand Tossed Salad",
+    "description": "Fresh hand-tossed classic salad.",
+    "price": 12,
+    "category": "Salads"
+  },
+  {
+    "id": "ai-1773857243115-2",
+    "name": "Roast Beef with Mushroom Sauce",
+    "description": "Local roast beef topped with a rich mushroom sauce.",
+    "price": 17,
+    "category": "Mains"
+  },
+  {
+    "id": "ai-1773857243115-3",
+    "name": "Caesar salad",
+    "description": "Classic low-fat Caesar salad with fresh greens.",
+    "price": 8,
+    "category": "Salads"
+  },
+  {
+    "id": "ai-1773857243115-4",
+    "name": "Loaded Baked Potato",
+    "description": "Baked potato completely loaded with toppings.",
+    "price": 12,
+    "category": "Sides"
+  },
+  {
+    "id": "ai-1773857243115-5",
+    "name": "Roasted Vegetables",
+    "description": "Seasonal roasted mixed vegetables.",
+    "price": 15,
+    "category": "Sides"
+  },
+  {
+    "id": "ai-1773857243115-6",
+    "name": "Peach & Blackberry Cobbler",
+    "description": "Delicious homemade cobbler with peach and blackberry.",
+    "price": 5,
+    "category": "Desserts"
+  },
+  {
+    "id": "ai-1773857243115-7",
+    "name": "Strawberry Cake",
+    "description": "Fresh and sweet strawberry cake slice.",
+    "price": 7,
+    "category": "Desserts"
+  },
+  {
+    "id": "ai-1773857243115-8",
+    "name": "Tea/Coffee/Cappucino",
+    "description": "Selection of hot beverages.",
+    "price": 2,
+    "category": "Drinks"
+  },
+  {
+    "id": "ai-1773857243115-9",
+    "name": "Fresh Juice",
+    "description": "Freshly squeezed everyday.",
+    "price": 2,
+    "category": "Drinks"
+  }
+]
