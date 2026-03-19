@@ -1,43 +1,65 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { supabase } from '@/lib/supabase';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const restaurantId = searchParams.get('restaurantId');
   if (!restaurantId) return NextResponse.json({ error: 'restaurantId richiesto' }, { status: 400 });
 
-  const dataFilePath = path.join(process.cwd(), 'src', 'data', 'db.json');
   try {
-    if (!fs.existsSync(dataFilePath)) return NextResponse.json(null);
-    const db = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
-    return NextResponse.json(db[restaurantId] || null);
+    const { data, error } = await supabase
+      .from('menus')
+      .select('data')
+      .eq('restaurant_id', restaurantId)
+      .single();
+
+    if (error || !data) {
+      return NextResponse.json(null);
+    }
+    
+    return NextResponse.json(data.data);
   } catch (error) {
+    console.error("Supabase GET Error:", error);
     return NextResponse.json(null);
   }
 }
 
 export async function POST(request) {
-  const dataFilePath = path.join(process.cwd(), 'src', 'data', 'db.json');
   try {
-    const { restaurantId, data } = await request.json();
+    const { restaurantId, data, userId } = await request.json();
     if (!restaurantId) return NextResponse.json({ success: false, error: 'restaurantId mancante' }, { status: 400 });
 
-    const dir = path.dirname(dataFilePath);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
+    const { error } = await supabase
+      .from('menus')
+      .upsert({
+        restaurant_id: restaurantId,
+        data: data,
+        user_id: userId || null
+      });
 
-    let db = {};
-    if (fs.existsSync(dataFilePath)) {
-      db = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
-    }
+    if (error) throw error;
 
-    db[restaurantId] = data;
-
-    fs.writeFileSync(dataFilePath, JSON.stringify(db, null, 2), 'utf8');
-    return NextResponse.json({ success: true, message: 'Menù salvato con successo!' });
+    return NextResponse.json({ success: true, message: 'Menù salvato con successo su Supabase!' });
   } catch (error) {
-    return NextResponse.json({ success: false, error: 'Errore durante il salvataggio' }, { status: 500 });
+    console.error("Supabase POST Error:", error);
+    return NextResponse.json({ success: false, error: 'Errore durante il salvataggio su Supabase' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const restaurantId = searchParams.get('restaurantId');
+    if (!restaurantId) return NextResponse.json({ success: false, error: 'restaurantId mancante' }, { status: 400 });
+
+    const { error } = await supabase
+      .from('menus')
+      .delete()
+      .eq('restaurant_id', restaurantId);
+
+    if (error) throw error;
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }

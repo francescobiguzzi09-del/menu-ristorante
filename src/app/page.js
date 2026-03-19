@@ -1,9 +1,34 @@
+"use client";
+
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
+import { useState, useEffect } from 'react';
 
 export default function SaaSLanding() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user || null);
+    });
+  }, []);
+
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center text-center px-4 font-sans bg-grid-slate-100">
-      <div className="max-w-3xl bg-white p-16 rounded-[40px] shadow-2xl border border-slate-100 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center text-center px-4 font-sans bg-grid-slate-100 relative w-full">
+      
+      {/* Top Navigation */}
+      <div className="absolute top-0 w-full p-6 flex justify-end z-10 max-w-5xl mx-auto">
+        {user ? (
+          <Link href="/dashboard" className="text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors">Torna alla Dashboard</Link>
+        ) : (
+          <div className="flex gap-4 items-center">
+            <Link href="/login" className="text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors">Accedi</Link>
+            <Link href="/login" className="text-sm font-bold bg-slate-900 text-white px-5 py-2.5 rounded-xl hover:bg-black transition-all shadow-md">Registrati</Link>
+          </div>
+        )}
+      </div>
+
+      <div className="max-w-3xl bg-white p-10 sm:p-16 rounded-[40px] shadow-2xl border border-slate-100 relative overflow-hidden mt-12 w-full">
         
         {/* Decorative elements */}
         <div className="absolute top-[-50px] right-[-50px] w-[200px] h-[200px] bg-gradient-to-br from-indigo-500/10 to-purple-600/10 rounded-full blur-[40px] pointer-events-none"></div>

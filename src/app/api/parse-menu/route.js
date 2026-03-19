@@ -17,14 +17,19 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: "La chiave API OpenRouter non è stata inserita correttamente nel file .env.local" }, { status: 401 });
     }
 
-    // Inizializza client OpenAI Ufficiale (non più OpenRouter)
+    // Inizializza client OpenAI per usare OpenRouter
     const openai = new OpenAI({ 
+      baseURL: "https://openrouter.ai/api/v1",
       apiKey: rawKey,
+      defaultHeaders: {
+        "HTTP-Referer": "http://localhost:3000", // Consigliato per OpenRouter
+        "X-Title": "Menu Ristorante Digital", // Opzionale per OpenRouter
+      }
     });
 
     const response = await openai.chat.completions.create({
-      // Usiamo gpt-4o-mini, il modello definitivo, economico e super performante
-      model: "gpt-4o-mini", 
+      // Usiamo gpt-4o-mini tramite OpenRouter
+      model: "openai/gpt-4o-mini", 
       messages: [
         {
           role: "system",
@@ -38,6 +43,7 @@ REGOLE STRETTISSIME:
 3. Se un elemento non ha descrizione, usa una stringa vuota "".
 4. "price" deve essere un NUMERO puro (float), es: 5.50 e non "5.50$".
 5. Dividi logicamente le "category" se percepisci sezioni nell'immagine (es. Antipasti, Primi, Salads).
+6. IMPORTANTISSIMO: NON INCLUDERE assolutamente l'ACQUA o le bevande generiche come l'acqua e NON INCLUDERE il COPERTO / SERVIZIO. Ignorali completamente e non inserirli nel JSON.
           `
         },
         {

@@ -79,35 +79,48 @@ export default async function RestaurantMenu(props) {
 
             <div className="space-y-12">
               {items.map(item => (
-                <div key={item.id} className="group cursor-default">
-                  <div className="flex justify-between items-baseline mb-3 gap-6">
-                    <h3 className="text-xl md:text-2xl font-serif text-white tracking-wide group-hover:text-[#c9a66b] transition-colors leading-tight">
-                      {item.name}
-                    </h3>
-                    <div className="border-b border-dotted border-[#444] flex-1 mx-2 mb-1 group-hover:border-[#c9a66b] transition-colors"></div>
-                    <span className="text-[#c9a66b] font-medium text-lg whitespace-nowrap">
-                      $ {item.price.toFixed(2)}
-                    </span>
-                  </div>
-                  
-                  {item.description && (
-                    <p className="text-[#8e8d89] leading-relaxed text-sm max-w-[85%] font-light">
-                      {item.description}
-                    </p>
+                <div key={item.id} className="group cursor-default flex gap-5 sm:gap-6 items-start">
+                  {item.image && (
+                    <div className="w-20 h-20 md:w-24 md:h-24 shrink-0 rounded-2xl overflow-hidden border border-[#2a2a2a] shadow-lg mt-1 relative bg-[#111]">
+                      <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    </div>
                   )}
+                  <div className="flex-1 w-full">
+                    <div className="flex justify-between items-baseline mb-3 gap-4 sm:gap-6">
+                      <h3 className="text-xl md:text-2xl font-serif text-white tracking-wide group-hover:text-[#c9a66b] transition-colors leading-tight">
+                        {item.name}
+                      </h3>
+                      <div className="border-b border-dotted border-[#444] flex-1 mx-2 mb-1 group-hover:border-[#c9a66b] transition-colors"></div>
+                      <span className="text-[#c9a66b] font-medium text-lg whitespace-nowrap">
+                        $ {item.price.toFixed(2)}
+                      </span>
+                    </div>
+                    
+                    {item.description && (
+                      <p className="text-[#8e8d89] leading-relaxed text-sm max-w-[90%] font-light">
+                        {item.description}
+                      </p>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
           </section>
         ))}
+
+        {/* PREZZO COPERTO (se impostato) */}
+        {settings?.coverCharge && (
+          <div className="mt-16 text-center border-t border-[#222] pt-8 animate-in fade-in duration-1000">
+            <p className="text-[#a19f9b] text-sm uppercase tracking-widest">
+              Coperto / Servizio: <span className="text-[#c9a66b] font-bold ml-2">$ {parseFloat(settings.coverCharge).toFixed(2)}</span>
+            </p>
+          </div>
+        )}
       </main>
 
       {/* FOOTER */}
-      <footer className="relative z-10 mt-24 text-center pb-8">
-        <div className="w-8 h-8 rounded-full border border-[#333] flex items-center justify-center mx-auto mb-4 text-[#c9a66b] text-xs">
-          IE
-        </div>
-        <p className="text-[#555] text-xs tracking-widest uppercase text-center w-full block">Menù interattivo offerto d SmartMenu AI</p>
+      <footer className="relative z-10 mt-24 text-center pb-8 border-t border-[#1a1815] pt-8">
+        <p className="text-[#555] text-xs tracking-widest uppercase text-center w-full block">Buon Appetito.</p>
       </footer>
     </div>
   );
