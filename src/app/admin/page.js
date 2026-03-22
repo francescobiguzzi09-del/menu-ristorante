@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import QRCode from 'react-qr-code';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import MenuRenderer from '@/components/MenuRenderer';
 
 function AdminDashboardContent() {
   const searchParams = useSearchParams();
@@ -20,10 +21,14 @@ function AdminDashboardContent() {
   // Stati di caricamento
   const [isLoading, setIsLoading] = useState(true);
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   
   // Stato per la modale di successo
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showGuestWarning, setShowGuestWarning] = useState(false);
+  const [translateSuccess, setTranslateSuccess] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   
   const fileInputRef = useRef(null);
   
@@ -130,9 +135,35 @@ function AdminDashboardContent() {
     }
   };
 
-  const handleSaveMenu = async () => {
+  const handleTranslate = async () => {
+    if (items.length === 0) return alert("Nessun piatto da tradurre!");
+    setIsTranslating(true);
+    setTranslateSuccess(false);
+    try {
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items, targetLanguages: ['en', 'de', 'fr', 'es'] })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+
+      setItems(data.data);
+      setSettings(prev => ({ ...prev, languages: ['en', 'de', 'fr', 'es'] }));
+      
+      setTranslateSuccess(true);
+      setTimeout(() => setTranslateSuccess(false), 6000);
+    } catch (err) {
+      alert("Errore traduzione: " + err.message);
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  const processSaveMenu = async () => {
     if (!restaurantId) return;
     setIsSaving(true);
+    setShowGuestWarning(false);
     try {
       const res = await fetch('/api/menu', {
         method: 'POST',
@@ -150,6 +181,14 @@ function AdminDashboardContent() {
       alert('❌ Errore durante il salvataggio: ' + err.message);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleSaveMenuClick = () => {
+    if (!user) {
+      setShowGuestWarning(true);
+    } else {
+      processSaveMenu();
     }
   };
 
@@ -228,18 +267,20 @@ function AdminDashboardContent() {
 
       {/* GUEST BANNER */}
       {!user && (
-        <div className="bg-gradient-to-r from-amber-100 to-orange-50 border-b border-amber-200 px-6 py-3.5 flex flex-col sm:flex-row items-center justify-center gap-4 text-center sm:text-left z-10 relative">
-          <div className="flex items-center gap-2 text-amber-800 text-sm font-medium">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            <span>Stai usando l'App come <strong className="font-black">Ospite</strong>. Se perdi il link o svuoti il browser perderai il tuo lavoro.</span>
+        <div className="max-w-4xl mx-auto mt-6 px-6 relative z-10">
+          <div className="bg-gradient-to-r from-amber-100 to-orange-50 border border-amber-200 px-5 py-3 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left shadow-sm">
+            <div className="flex items-center gap-3 text-amber-900 text-xs sm:text-sm font-medium">
+              <svg className="shrink-0 text-amber-600" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <span>Stai usando l'App come <strong className="font-black border-b border-amber-900/30">Ospite</strong>. Se perdi il link perderai il tuo lavoro.</span>
+            </div>
+            <button onClick={() => router.push('/login')} className="shrink-0 bg-amber-500 hover:bg-amber-600 text-white shadow-sm shadow-amber-500/20 text-xs font-black uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all whitespace-nowrap">
+              Crea Account Gratis
+            </button>
           </div>
-          <button onClick={() => router.push('/login')} className="bg-amber-500 hover:bg-amber-600 text-white shadow-md shadow-amber-500/20 text-xs font-black uppercase tracking-wider px-4 py-2 rounded-xl transition-all whitespace-nowrap border border-amber-600/20">
-            Crea Account Gratis
-          </button>
         </div>
       )}
 
-      <main className="max-w-5xl mx-auto px-6 py-10 space-y-12">
+      <main className="max-w-5xl mx-auto px-6 py-10 space-y-8">
         
         {/* IMPOSTAZIONI RISTORANTE E CONDIVISIONE */}
         <section>
@@ -272,24 +313,247 @@ function AdminDashboardContent() {
                 />
               </div>
               <div className="md:col-span-2 flex flex-col pt-6 border-t border-slate-100">
-                <label className="text-sm font-bold text-slate-700 block mb-1">Prezzo Coperto (Opzionale)</label>
-                <p className="text-xs text-slate-500 mb-3">Se indicato, apparirà in fondo al tuo menù digitale come costo del servizio.</p>
-                <div className="relative md:w-1/2 mt-auto">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
-                  <input 
-                    type="number" 
-                    step="0.50"
-                    name="coverCharge"
-                    value={settings.coverCharge || ""} 
-                    onChange={handleSettingsChange}
-                    className="w-full pl-8 pr-4 py-3 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white text-md font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all" 
-                    placeholder="Es. 2.50"
-                  />
+                <div className="flex flex-col md:flex-row gap-8 items-start justify-between">
+                  <div className="w-full md:w-1/2 flex flex-col h-full">
+                    <label className="text-sm font-bold text-slate-700 block mb-1">Prezzo Coperto (Opzionale)</label>
+                    <p className="text-xs text-slate-500 mb-3">Se indicato, apparirà in fondo al tuo menù digitale come costo del servizio.</p>
+                    <div className="relative mt-auto">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                      <input 
+                        type="number" 
+                        step="0.50"
+                        name="coverCharge"
+                        value={settings.coverCharge || ""} 
+                        onChange={handleSettingsChange}
+                        className="w-full pl-8 pr-4 py-3 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white text-md font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all" 
+                        placeholder="Es. 2.50"
+                      />
+                    </div>
+                  </div>
+                  <div className="w-full md:w-1/2 md:border-l border-slate-100 md:pl-8 flex flex-col h-full">
+                    <label className="text-sm font-bold text-slate-700 flex items-center justify-between gap-2 mb-1">
+                      <span>White-Label <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded uppercase tracking-wider ml-2">Premium</span></span>
+                      <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                        <input type="checkbox" className="sr-only peer" checked={settings.whiteLabel || false} onChange={(e) => setSettings({...settings, whiteLabel: e.target.checked})} />
+                        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                      </label>
+                    </label>
+                    <p className="text-xs text-slate-500 mt-2">Rimuove il marchio "Powered by SmartMenu AI" in fondo alla pagina per un'esperienza 100% dedicata al tuo brand.</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </section>
+
+        {/* SCELTA STILE */}
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+             <div className="h-6 w-1 bg-pink-500 rounded-full"></div>
+             <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest">Design Menù</h2>
+          </div>
+          <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
+            <h3 className="text-xl font-bold text-slate-900 mb-6 tracking-tight">Qual è l'atmosfera del tuo locale?</h3>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6">
+              
+              {/* Elegant */}
+              <div 
+                onClick={() => setSettings({...settings, template: 'elegant', palette: 'default'})}
+                className={`relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${(!settings.template || settings.template === 'elegant') ? 'border-indigo-500 shadow-lg scale-[1.02] z-10' : 'border-slate-100 hover:border-indigo-200 opacity-70 hover:opacity-100'}`}
+              >
+                 <div className="absolute inset-0 bg-[#0a0a0b] -z-10"></div>
+                 <div className="w-10 h-10 mb-auto mt-4 rounded-full border border-[#c9a66b] flex items-center justify-center">
+                    <span className="text-[#c9a66b] font-serif italic text-lg">E</span>
+                 </div>
+                 <h4 className="text-white font-serif tracking-widest text-sm uppercase mb-1">Elegant</h4>
+                 <div className="h-0.5 w-6 bg-[#c9a66b]"></div>
+                 {(!settings.template || settings.template === 'elegant') && <div className="absolute top-3 right-3 w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center text-white"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
+              </div>
+
+              {/* Modern */}
+              <div 
+                onClick={() => setSettings({...settings, template: 'modern', palette: 'default'})}
+                className={`relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'modern' ? 'border-zinc-900 shadow-lg scale-[1.02] z-10' : 'border-slate-100 hover:border-zinc-300 opacity-70 hover:opacity-100'}`}
+              >
+                 <div className="absolute inset-0 bg-white -z-10"></div>
+                 <div className="absolute inset-0 border-[10px] border-zinc-100/50 -z-10"></div>
+                 <div className="w-10 h-10 mb-auto mt-4 rounded border-2 border-zinc-900 flex items-center justify-center">
+                    <span className="text-zinc-900 font-sans font-black text-lg">M</span>
+                 </div>
+                 <h4 className="text-zinc-900 font-sans font-black tracking-tighter text-sm uppercase mb-1">Modern</h4>
+                 <div className="h-1 w-6 bg-zinc-900"></div>
+                 {settings.template === 'modern' && <div className="absolute top-3 right-3 w-6 h-6 bg-zinc-900 rounded-full flex items-center justify-center text-white"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
+              </div>
+
+              {/* Rustic */}
+              <div 
+                onClick={() => setSettings({...settings, template: 'rustic', palette: 'default'})}
+                className={`relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'rustic' ? 'border-[#d97757] shadow-lg scale-[1.02] z-10' : 'border-slate-100 hover:border-[#e8dbce] opacity-70 hover:opacity-100'}`}
+              >
+                 <div className="absolute inset-0 bg-[#fdfbf7] -z-10"></div>
+                 <div className="absolute top-[-20%] right-[-20%] w-32 h-32 bg-[#e8dbce] rounded-full blur-xl -z-10"></div>
+                 <div className="w-10 h-10 mb-auto mt-4 rounded-full border-2 border-dashed border-[#d97757] flex items-center justify-center">
+                    <span className="text-[#2d241c] font-serif font-bold text-lg">R</span>
+                 </div>
+                 <h4 className="text-[#2d241c] font-serif font-bold text-sm capitalize mb-1">Rustic</h4>
+                 <div className="h-0.5 border-t border-dashed border-[#d97757] w-8"></div>
+                 {settings.template === 'rustic' && <div className="absolute top-3 right-3 w-6 h-6 bg-[#d97757] rounded-full flex items-center justify-center text-white"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
+              </div>
+
+              {/* Vibrant */}
+              <div 
+                onClick={() => setSettings({...settings, template: 'vibrant', palette: 'default'})}
+                className={`relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'vibrant' ? 'border-slate-900 shadow-[6px_6px_0px_#fde047] scale-[1.02] -translate-y-1 z-10' : 'border-slate-100 hover:border-slate-300 opacity-70 hover:opacity-100'}`}
+              >
+                 <span className="absolute top-2 right-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">Premium</span>
+                 <div className="absolute inset-0 bg-pink-50 -z-10"></div>
+                 <div className="absolute bottom-[-10%] left-[-10%] w-24 h-24 bg-yellow-400 rounded-full -z-10"></div>
+                 <div className="w-12 h-10 mb-auto mt-4 bg-blue-600 rounded-xl transform -rotate-6 flex items-center justify-center shadow-sm border border-blue-700">
+                    <span className="text-white font-sans font-black text-lg">V</span>
+                 </div>
+                 <h4 className="text-slate-900 font-sans font-black tracking-tighter text-sm uppercase mb-1">Vibrant</h4>
+                 <div className="h-1.5 w-6 bg-slate-900 rounded-full"></div>
+                 {settings.template === 'vibrant' && <div className="absolute top-3 right-3 w-6 h-6 bg-slate-900 rounded-full flex items-center justify-center text-white"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
+              </div>
+              {/* Cinematic (Premium) */}
+              <div 
+                onClick={() => setSettings({...settings, template: 'cinematic', palette: 'default'})}
+                className={`relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'cinematic' ? 'border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.3)] scale-[1.02] z-10' : 'border-slate-100 hover:border-amber-300 opacity-70 hover:opacity-100'}`}
+              >
+                 <div className="absolute inset-0 bg-slate-950 -z-10"></div>
+                 <div className="absolute top-[-20%] right-[-20%] w-32 h-32 bg-amber-500/20 rounded-full blur-xl -z-10 animate-pulse"></div>
+                 <div className="w-10 h-10 mb-auto mt-4 rounded-full bg-white/5 border border-white/20 backdrop-blur-md flex items-center justify-center">
+                    <span className="text-amber-400 font-sans font-light text-lg">C</span>
+                 </div>
+                 <h4 className="text-white font-sans font-black tracking-widest text-sm uppercase mb-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Cinematic</h4>
+                 <div className="h-px w-6 bg-amber-500/50"></div>
+                 {settings.template === 'cinematic' && <div className="absolute top-3 left-3 w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center text-white"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
+              </div>
+
+              {/* Luxury (Premium) */}
+              <div 
+                onClick={() => setSettings({...settings, template: 'luxury', palette: 'default'})}
+                className={`relative cursor-pointer rounded-2xl border-[3px] transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'luxury' ? 'border-stone-800 shadow-2xl scale-[1.02] z-10' : 'border-slate-200 hover:border-stone-400 opacity-70 hover:opacity-100'}`}
+              >
+                 <span className="absolute top-2 right-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">Premium</span>
+                 <div className="absolute inset-0 bg-stone-100 -z-10"></div>
+                 <div className="absolute top-0 inset-x-0 h-1/2 bg-gradient-to-b from-stone-200 to-transparent -z-10"></div>
+                 <div className="w-10 h-14 mb-auto mt-2 border border-stone-800 flex items-center justify-center bg-transparent">
+                    <span className="text-stone-800 font-serif text-xl">L</span>
+                 </div>
+                 <h4 className="text-stone-800 font-serif tracking-widest text-sm uppercase mb-1">Luxury</h4>
+                 <div className="h-[1px] w-6 bg-stone-800"></div>
+                 {settings.template === 'luxury' && <div className="absolute top-3 left-3 w-6 h-6 bg-stone-800 rounded-full flex items-center justify-center text-white"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
+              </div>
+
+            </div>
+
+            {/* PALETTE SCELTA - DYNAMIC COMPONENT */}
+            <div className="mt-8 pt-8 border-t border-slate-100">
+              <h4 className="text-sm font-bold text-slate-700 mb-4 uppercase tracking-wider">Palette Colori</h4>
+              <div className="flex flex-wrap gap-3">
+                {(() => {
+                   const currTemplate = settings.template || 'elegant';
+                   const palettes = {
+                     elegant: [
+                       { id: 'default', name: 'Gold', hex: '#c9a66b' },
+                       { id: 'sapphire', name: 'Sapphire', hex: '#3b82f6' },
+                       { id: 'ruby', name: 'Ruby', hex: '#e11d48' }
+                     ],
+                     modern: [
+                       { id: 'default', name: 'Mono', hex: '#09090b' },
+                       { id: 'ocean', name: 'Ocean', hex: '#0ea5e9' },
+                       { id: 'forest', name: 'Forest', hex: '#10b981' }
+                     ],
+                     rustic: [
+                       { id: 'default', name: 'Cotto', hex: '#d97757' },
+                       { id: 'olive', name: 'Olivo', hex: '#65a30d' },
+                       { id: 'wine', name: 'Vino', hex: '#9f1239' }
+                     ],
+                     vibrant: [
+                       { id: 'default', name: 'Pop', hex: '#3b82f6' },
+                       { id: 'neon', name: 'Cyber', hex: '#000000' },
+                       { id: 'sunset', name: 'Sunset', hex: '#f97316' }
+                     ],
+                     cinematic: [
+                       { id: 'default', name: 'Gold', hex: '#fbbf24' },
+                       { id: 'sapphire', name: 'Sapphire', hex: '#3b82f6' },
+                       { id: 'ruby', name: 'Ruby', hex: '#f43f5e' }
+                     ],
+                     supreme: [
+                       { id: 'default', name: 'Indigo', hex: '#4f46e5' },
+                       { id: 'neon', name: 'Neon', hex: '#a3e635' },
+                       { id: 'sunset', name: 'Sunset', hex: '#f43f5e' }
+                     ]
+                   };
+                   const activePalettes = palettes[currTemplate] || palettes.elegant;
+                   const activePaletteId = settings.palette || 'default';
+
+                   return activePalettes.map(pal => (
+                     <button
+                       key={pal.id}
+                       onClick={() => setSettings({...settings, palette: pal.id})}
+                       className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 transition-all ${activePaletteId === pal.id ? 'border-slate-900 shadow-md scale-105' : 'border-slate-200 hover:border-slate-300'}`}
+                     >
+                       <span className="w-5 h-5 rounded-full shadow-inner border border-black/10" style={{backgroundColor: pal.hex}}></span>
+                       <span className={`text-sm font-bold ${activePaletteId === pal.id ? 'text-slate-900' : 'text-slate-600'}`}>{pal.name}</span>
+                     </button>
+                   ));
+                })()}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* TRADUZIONE IA */}
+        {items.length > 0 && (
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+             <div className="h-6 w-1 bg-fuchsia-500 rounded-full"></div>
+             <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest">Traduzioni IA (Premium)</h2>
+          </div>
+          <div className="bg-gradient-to-br from-fuchsia-50 to-purple-50 rounded-3xl border border-fuchsia-100 p-8 shadow-sm">
+            <div className="text-center max-w-xl mx-auto">
+              <div className="inline-block bg-fuchsia-500 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-md shadow-fuchsia-500/20">Esclusiva Plus</div>
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">Multilingua Automatico</h3>
+              <p className="text-slate-600 mb-6 text-sm leading-relaxed">
+                Rendi il tuo menù internazionale. Usa l'Intelligenza Artificiale per tradurre istantaneamente tutti i piatti (titoli, descrizioni e categorie) in Inglese, Tedesco, Francese e Spagnolo.
+              </p>
+              
+              <button 
+                onClick={handleTranslate} 
+                disabled={isTranslating}
+                className={`${translateSuccess ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/30' : 'bg-fuchsia-600 hover:bg-fuchsia-700 shadow-fuchsia-500/30'} text-white font-black py-3.5 px-6 rounded-xl transition-all shadow-lg flex items-center justify-center gap-3 w-full sm:w-auto mx-auto relative overflow-hidden`}
+              >
+                {isTranslating ? (
+                   <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                ) : translateSuccess ? (
+                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m2 5 6-3 6 3 6-3v16l-6 3-6-3-6 3v-16Z"/><path d="M8 2v16"/><path d="M16 6v16"/></svg>
+                )}
+                {isTranslating ? 'Traduzione in corso...' : translateSuccess ? 'Traduzione Completata!' : 'Genera Traduzioni IA (EN, DE, FR, ES)'}
+              </button>
+              
+              {translateSuccess && (
+                <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-sm font-medium animate-in fade-in slide-in-from-top-2">
+                  Fantastico! Ricordati di cliccare <strong>"Genera Menù Definitivo"</strong> in fondo alla pagina per salvare e pubblicare le modifiche online.
+                </div>
+              )}
+              
+              {settings.languages && settings.languages.includes('en') && (
+                 <div className="mt-6 flex flex-wrap gap-2 justify-center">
+                    <span className="bg-white border border-fuchsia-200 text-fuchsia-700 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-sm"><span className="text-lg">🇬🇧</span> Inglese ATTIVO</span>
+                    <span className="bg-white border border-fuchsia-200 text-fuchsia-700 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-sm"><span className="text-lg">🇩🇪</span> Tedesco ATTIVO</span>
+                    <span className="bg-white border border-fuchsia-200 text-fuchsia-700 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-sm"><span className="text-lg">🇫🇷</span> Francese ATTIVO</span>
+                    <span className="bg-white border border-fuchsia-200 text-fuchsia-700 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-sm"><span className="text-lg">🇪🇸</span> Spagnolo ATTIVO</span>
+                 </div>
+              )}
+            </div>
+          </div>
+        </section>
+        )}
 
         {/* SEZIONE GENERAZIONE IA */}
         <section>
@@ -483,18 +747,27 @@ function AdminDashboardContent() {
                   Salva il tuo menù per aggiornare il tuo link dinamico online. Il QR Code rifletterà a vita questo aggiornamento.
                 </p>
 
-                <button 
-                  onClick={handleSaveMenu}
-                  disabled={isSaving}
-                  className="w-full max-w-md bg-gradient-to-r from-slate-900 to-slate-800 hover:from-slate-800 hover:to-slate-700 text-white font-bold text-lg py-5 px-8 rounded-2xl transition-all shadow-xl shadow-slate-900/20 mb-10 flex items-center justify-center gap-3 disabled:opacity-50"
-                >
-                  {isSaving ? (
-                     <svg className="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                  )}
-                  {isSaving ? 'Generazione in corso...' : 'GENERA MENÙ DEFINITIVO'}
-                </button>
+                <div className="flex flex-col sm:flex-row gap-4 w-full justify-center max-w-2xl mx-auto mb-10">
+                   <button 
+                     onClick={() => setShowPreview(true)}
+                     className="bg-white border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-4 px-6 rounded-2xl transition-all shadow-sm flex items-center justify-center gap-3 flex-1"
+                   >
+                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                     Anteprima Live
+                   </button>
+                   <button 
+                     onClick={handleSaveMenuClick}
+                     disabled={isSaving}
+                     className="flex-[1.5] bg-gradient-to-r from-slate-900 to-slate-800 hover:from-slate-800 hover:to-slate-700 text-white font-bold text-lg py-4 px-8 rounded-2xl transition-all shadow-xl shadow-slate-900/20 flex items-center justify-center gap-3 disabled:opacity-50"
+                   >
+                     {isSaving ? (
+                        <svg className="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                     ) : (
+                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                     )}
+                     {isSaving ? 'Salvataggio...' : 'Crea Menù'}
+                   </button>
+                </div>
 
              </div>
           </section>
@@ -554,6 +827,70 @@ function AdminDashboardContent() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* GUEST WARNING MODAL POPUP */}
+      {showGuestWarning && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl relative animate-in zoom-in-95 duration-300 flex flex-col items-center text-center border border-slate-100">
+            
+            <button 
+              onClick={() => setShowGuestWarning(false)}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+            
+            <div className="w-16 h-16 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mb-5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            
+            <h3 className="text-2xl font-black tracking-tight text-slate-900 mb-2">Attenzione, sei Ospite!</h3>
+            <p className="text-slate-500 mb-8 text-sm leading-relaxed">
+              Il tuo menù verrà generato, ma se  <strong className="text-slate-700">perdi l'URL o chiudi questo browser</strong> non potrai più modificarlo in futuro e andrà perso.
+            </p>
+            
+            <div className="space-y-3 w-full">
+              <button 
+                onClick={() => router.push('/login')}
+                className="w-full bg-amber-500 hover:bg-amber-600 text-white font-black uppercase tracking-wider py-4 px-4 rounded-xl transition-all shadow-lg shadow-amber-500/20 text-sm"
+              >
+                Crea Account / Accedi
+              </button>
+              
+              <button 
+                onClick={processSaveMenu}
+                className="w-full bg-white border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600 font-bold py-3.5 px-4 rounded-xl transition-all text-sm"
+              >
+                Continua e Genera (Senza salvare)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* LIVE PREVIEW MODAL POPUP */}
+      {showPreview && (
+        <div className="fixed inset-0 z-[200] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 sm:p-10 animate-in fade-in duration-300">
+           <div className="bg-slate-950 w-full max-w-[375px] h-[812px] max-h-[85vh] mx-auto rounded-[3rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden relative border-[12px] border-slate-800 animate-in zoom-in-95 duration-300 transform translate-x-0 translate-y-0">
+              <div className="h-7 border-b border-slate-800 flex items-center justify-between px-5 shrink-0 z-50 bg-slate-950">
+                 <div className="flex items-center gap-2">
+                    <span className="flex h-1.5 w-1.5 relative"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span></span>
+                    <span className="text-white font-bold text-[8px] tracking-widest uppercase">Anteprima Live</span>
+                 </div>
+                 <button onClick={() => setShowPreview(false)} className="text-slate-500 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-1 rounded-lg flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                 </button>
+              </div>
+              <div className="flex-1 overflow-y-auto overflow-x-hidden relative w-full bg-slate-50 iphone-scrollbar">
+                 <MenuRenderer 
+                    menu={items} 
+                    settings={settings} 
+                    restaurantId={null} 
+                 />
+              </div>
+           </div>
         </div>
       )}
 

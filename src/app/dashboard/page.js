@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import AnalyticsPanel from '@/components/AnalyticsPanel';
 
 export default function DashboardPage() {
   const [menus, setMenus] = useState([]);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('menus'); // 'menus' | 'analytics'
   const router = useRouter();
 
   useEffect(() => {
@@ -111,7 +113,29 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* STATS */}
+        {/* TABS */}
+        <div className="flex gap-6 mb-8 border-b border-slate-200">
+          <button 
+            onClick={() => setActiveTab('menus')} 
+            className={`pb-4 font-bold text-sm px-2 transition-colors relative ${activeTab === 'menus' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            I Miei Menù
+            {activeTab === 'menus' && <span className="absolute bottom-0 left-0 w-full h-[3px] bg-indigo-600 rounded-t-full"></span>}
+          </button>
+          <button 
+            onClick={() => setActiveTab('analytics')} 
+            className={`pb-4 font-bold text-sm px-2 transition-colors relative flex items-center gap-1.5 ${activeTab === 'analytics' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            Analytics <span className="text-[9px] bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm">Premium</span>
+            {activeTab === 'analytics' && <span className="absolute bottom-0 left-0 w-full h-[3px] bg-indigo-600 rounded-t-full"></span>}
+          </button>
+        </div>
+
+        {activeTab === 'analytics' ? (
+          <AnalyticsPanel menus={menus} />
+        ) : (
+          <>
+            {/* STATS */}
         <div className="flex gap-4 mb-10 overflow-x-auto pb-4 hide-scrollbar">
            <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm min-w-[200px] flex-1">
              <div className="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center mb-4">
@@ -194,6 +218,8 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
+        )}
+        </>
         )}
       </main>
     </div>
