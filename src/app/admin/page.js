@@ -23,16 +23,100 @@ function AdminDashboardContent() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isConnectingStripe, setIsConnectingStripe] = useState(false);
   
   // Stato per la modale di successo
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showGuestWarning, setShowGuestWarning] = useState(false);
   const [translateSuccess, setTranslateSuccess] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [previewDevice, setPreviewDevice] = useState('s8');
+  const [previewScale, setPreviewScale] = useState(1);
   
   const fileInputRef = useRef(null);
+  const iframeRef = useRef(null);
+  const lastTranslatedContent = useRef('');
   
-  const [newItem, setNewItem] = useState({ name: '', description: '', price: '', category: 'Salads', image: null });
+  const [newItem, setNewItem] = useState({ name: '', description: '', price: '', category: 'Salads', image: null, dietaryTags: [] });
+
+  const DIETARY_OPTIONS = [
+    { id: 'glutenFree', label: 'Senza Glutine', icon: '🌾' },
+    { id: 'lactoseFree', label: 'Senza Lattosio', icon: '🥛' },
+    { id: 'vegetarian', label: 'Vegetariano', icon: '🥬' },
+    { id: 'vegan', label: 'Vegano', icon: '🌱' },
+    { id: 'nutFree', label: 'Senza Frutta a Guscio', icon: '🥜' },
+  ];
+
+  // States per IA Enhancement
+  const [enhancingItemId, setEnhancingItemId] = useState(null);
+  const [generatingCopyId, setGeneratingCopyId] = useState(null);
+
+  // Migliora foto con Canvas (luminosità, contrasto, saturazione)
+  const enhanceImage = async (itemId) => {
+    const item = items.find(i => i.id === itemId);
+    if (!item?.image) return;
+    setEnhancingItemId(itemId);
+    try {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = item.image;
+      await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      
+      // Applica filtri: luminosità +20%, contrasto +15%, saturazione +30%
+      ctx.filter = 'brightness(1.2) contrast(1.15) saturate(1.3)';
+      ctx.drawImage(img, 0, 0);
+      
+      // Leggero effetto sharpen via unsharp mask
+      ctx.globalCompositeOperation = 'overlay';
+      ctx.globalAlpha = 0.15;
+      ctx.filter = 'blur(0px) contrast(1.5) brightness(1.1)';
+      ctx.drawImage(canvas, 0, 0);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1.0;
+
+      const enhancedUrl = canvas.toDataURL('image/jpeg', 0.92);
+      setItems(items.map(i => i.id === itemId ? { ...i, image: enhancedUrl } : i));
+    } catch (err) {
+      console.error('Errore enhancement:', err);
+      alert('Errore nel miglioramento immagine.');
+    } finally {
+      setEnhancingItemId(null);
+    }
+  };
+
+  // Genera copy persuasivo con IA
+  const generateCopy = async (itemId) => {
+    const item = items.find(i => i.id === itemId);
+    if (!item) return;
+    setGeneratingCopyId(itemId);
+    try {
+      const res = await fetch('/api/generate-copy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: item.name,
+          category: item.category,
+          currentDescription: item.description
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setItems(items.map(i => i.id === itemId ? { ...i, description: data.description } : i));
+      } else {
+        alert(data.error || 'Errore generazione copy');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Errore di connessione al server IA.');
+    } finally {
+      setGeneratingCopyId(null);
+    }
+  };
 
   // Funzioni per l'upload immagine del piatto
   const triggerItemImageUpload = (id) => document.getElementById(`upload-image-${id}`).click();
@@ -53,6 +137,27 @@ function AdminDashboardContent() {
     const reader = new FileReader();
     reader.onloadend = () => setNewItem({ ...newItem, image: reader.result });
     reader.readAsDataURL(file);
+  };
+
+  const handleConnectStripe = async () => {
+    setIsConnectingStripe(true);
+    try {
+      const res = await fetch('/api/stripe/create-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ restaurantId, existingStripeAccountId: settings.stripeAccountId })
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Impossibile avviare il collegamento con Stripe.");
+      }
+    } catch (err) {
+      alert("Errore di connessione a Stripe.");
+    } finally {
+      setIsConnectingStripe(false);
+    }
   };
 
   useEffect(() => {
@@ -84,6 +189,16 @@ function AdminDashboardContent() {
       .catch(() => setIsLoading(false));
   }, [restaurantId]);
 
+  // Handle Stripe redirect
+  useEffect(() => {
+    const stripeAccountParam = searchParams.get('stripe_account');
+    if (stripeAccountParam) {
+      setSettings(prev => ({ ...prev, stripeAccountId: stripeAccountParam }));
+      router.replace(`/admin?id=${restaurantId}`);
+      setTimeout(() => alert('Conto Stripe collegato con successo! Ricordati di Salvare le modifiche al menu.'), 500);
+    }
+  }, [searchParams, restaurantId, router]);
+
   // Sync QR appUrl based on customUrl settings mapping
   useEffect(() => {
     if (typeof window !== 'undefined' && restaurantId) {
@@ -97,6 +212,41 @@ function AdminDashboardContent() {
       }
     }
   }, [settings.customUrl, restaurantId]);
+
+  // SIMULATORE DEVICE E MESSAGGISTICA IFRAME
+  useEffect(() => {
+    if (!showPreview) return;
+    const calculateScale = () => {
+      const selectorBarHeight = 80; // altezza approssimativa barra selettore + margini
+      const verticalPadding = 40; // padding superiore e inferiore
+      const availableHeight = window.innerHeight - selectorBarHeight - verticalPadding;
+      const availableWidth = window.innerWidth - 80; // padding laterale
+      const targetHeight = previewDevice === 'ipad' ? 1024 : previewDevice === 'iphone' ? 852 : 740;
+      const targetWidth = previewDevice === 'ipad' ? 768 : previewDevice === 'iphone' ? 393 : 360;
+      const scaleH = availableHeight / targetHeight;
+      const scaleW = availableWidth / targetWidth;
+      setPreviewScale(Math.min(scaleH, scaleW, 1));
+    };
+    calculateScale();
+    window.addEventListener('resize', calculateScale);
+    return () => window.removeEventListener('resize', calculateScale);
+  }, [previewDevice, showPreview]);
+
+  useEffect(() => {
+    // Aggiorna iframe se è già aperto
+    if (showPreview && iframeRef.current?.contentWindow) {
+      iframeRef.current.contentWindow.postMessage({ type: 'UPDATE_PREVIEW', menu: items, settings }, '*');
+    }
+    
+    // Ascolta il segnale di "pronto" dall'iframe appena montato
+    const handleMessage = (e) => {
+      if (e.data?.type === 'PREVIEW_READY' && iframeRef.current) {
+        iframeRef.current.contentWindow.postMessage({ type: 'UPDATE_PREVIEW', menu: items, settings }, '*');
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [items, settings, showPreview]);
 
   const triggerFileInput = () => fileInputRef.current.click();
 
@@ -137,6 +287,15 @@ function AdminDashboardContent() {
 
   const handleTranslate = async () => {
     if (items.length === 0) return alert("Nessun piatto da tradurre!");
+    
+    // Hash check to save AI costs
+    const currentContentHash = JSON.stringify(items.map(i => ({ n: i.name, d: i.description })));
+    const hasTranslations = items.some(i => i.translations && Object.keys(i.translations).length > 0);
+    
+    if (hasTranslations && currentContentHash === lastTranslatedContent.current) {
+      return alert("Il menu è già stato tradotto e non ci sono modifiche ai testi dall'ultima traduzione!");
+    }
+
     setIsTranslating(true);
     setTranslateSuccess(false);
     try {
@@ -151,6 +310,14 @@ function AdminDashboardContent() {
       setItems(data.data);
       setSettings(prev => ({ ...prev, languages: ['en', 'de', 'fr', 'es'] }));
       
+      // Save content hash to prevent redundant calls
+      lastTranslatedContent.current = currentContentHash;
+      
+      // Auto-save the menu to persist translations
+      if (restaurantId) {
+        processSaveMenu(data.data, { ...settings, languages: ['en', 'de', 'fr', 'es'] });
+      }
+      
       setTranslateSuccess(true);
       setTimeout(() => setTranslateSuccess(false), 6000);
     } catch (err) {
@@ -160,7 +327,7 @@ function AdminDashboardContent() {
     }
   };
 
-  const processSaveMenu = async () => {
+  const processSaveMenu = async (overrideItems = null, overrideSettings = null) => {
     if (!restaurantId) return;
     setIsSaving(true);
     setShowGuestWarning(false);
@@ -170,7 +337,10 @@ function AdminDashboardContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           restaurantId: restaurantId,
-          data: { settings, menu: items },
+          data: { 
+            settings: overrideSettings || settings, 
+            menu: overrideItems || items 
+          },
           userId: user?.id || null
         })
       });
@@ -205,10 +375,11 @@ function AdminDashboardContent() {
       description: newItem.description,
       price: parseFloat(newItem.price) || 0,
       category: newItem.category,
-      image: newItem.image
+      image: newItem.image,
+      dietaryTags: newItem.dietaryTags || []
     };
     setItems([...items, product]);
-    setNewItem({ name: '', description: '', price: '', category: 'Salads', image: null });
+    setNewItem({ name: '', description: '', price: '', category: 'Salads', image: null, dietaryTags: [] });
   };
 
   const handleDownloadQR = () => {
@@ -341,6 +512,72 @@ function AdminDashboardContent() {
                     <p className="text-xs text-slate-500 mt-2">Rimuove il marchio "Powered by SmartMenu AI" in fondo alla pagina per un'esperienza 100% dedicata al tuo brand.</p>
                   </div>
                 </div>
+
+                {/* Link TripAdvisor / Recensioni */}
+                <div className="border-t border-slate-100 pt-6 mt-6">
+                  <label className="text-sm font-bold text-slate-700 flex items-center gap-2 mb-2">
+                    Link Recensioni TripAdvisor
+                    <span className="text-[9px] bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm">Premium</span>
+                  </label>
+                  <p className="text-xs text-slate-500 mb-3">Inserisci il link alla pagina TripAdvisor del tuo ristorante. I clienti potranno lasciare una recensione direttamente dal menu e verranno invitati a recensire anche su TripAdvisor.</p>
+                  <input
+                    type="url"
+                    name="tripadvisorUrl"
+                    value={settings.tripadvisorUrl || ''}
+                    onChange={handleSettingsChange}
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white text-sm font-medium focus:ring-2 focus:ring-amber-500 outline-none transition-all"
+                    placeholder="https://www.tripadvisor.it/Restaurant_Review-..."
+                  />
+                </div>
+
+                {/* Ordina dal Menu */}
+                <div className="border-t border-slate-100 pt-6 mt-6">
+                  <label className="text-sm font-bold text-slate-700 flex items-center justify-between gap-2 mb-1">
+                    <span>Funzione Ordina <span className="text-[9px] bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm ml-2">Premium</span></span>
+                    <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                      <input type="checkbox" className="sr-only peer" checked={settings.enableOrdering || false} onChange={(e) => setSettings({...settings, enableOrdering: e.target.checked})} />
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                    </label>
+                  </label>
+                  <p className="text-xs text-slate-500 mt-2">Permette ai clienti di aggiungere piatti al carrello e inviare un ordine direttamente dal menu digitale.</p>
+                  
+                  {settings.enableOrdering && (
+                    <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-bold text-slate-700">Pagamenti con Stripe</span>
+                        {settings.stripeAccountId ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Attivo
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold">
+                            Non configurato
+                          </span>
+                        )}
+                      </div>
+                      
+                      {settings.stripeAccountId ? (
+                         <div className="flex items-center justify-between gap-4">
+                           <p className="text-xs text-slate-500">I pagamenti dal menu verranno accreditati automaticamente sul tuo conto bancario.</p>
+                           <button onClick={handleConnectStripe} disabled={isConnectingStripe} className="text-xs font-bold text-indigo-600 hover:text-indigo-800 whitespace-nowrap">Gestisci Conto</button>
+                         </div>
+                      ) : (
+                        <div>
+                           <p className="text-xs text-slate-500 mb-3">Necessario per ricevere fondi da Apple Pay, Google Pay e Carte.</p>
+                           <button 
+                             onClick={handleConnectStripe} 
+                             disabled={isConnectingStripe}
+                             className="w-full bg-[#635BFF] hover:bg-[#5851df] text-white font-bold py-2.5 rounded-lg text-sm transition-all shadow-md shadow-[#635BFF]/20 flex items-center justify-center gap-2"
+                           >
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                             {isConnectingStripe ? 'Reindirizzamento...' : 'Collega Conto per ricevere Pagamenti'}
+                           </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
               </div>
             </div>
           </div>
@@ -360,7 +597,7 @@ function AdminDashboardContent() {
               {/* Elegant */}
               <div 
                 onClick={() => setSettings({...settings, template: 'elegant', palette: 'default'})}
-                className={`relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${(!settings.template || settings.template === 'elegant') ? 'border-indigo-500 shadow-lg scale-[1.02] z-10' : 'border-slate-100 hover:border-indigo-200 opacity-70 hover:opacity-100'}`}
+                className={`isolate relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${(!settings.template || settings.template === 'elegant') ? 'border-indigo-500 shadow-lg scale-[1.02] z-10' : 'border-slate-100 hover:border-indigo-200 opacity-70 hover:opacity-100'}`}
               >
                  <div className="absolute inset-0 bg-[#0a0a0b] -z-10"></div>
                  <div className="w-10 h-10 mb-auto mt-4 rounded-full border border-[#c9a66b] flex items-center justify-center">
@@ -374,7 +611,7 @@ function AdminDashboardContent() {
               {/* Modern */}
               <div 
                 onClick={() => setSettings({...settings, template: 'modern', palette: 'default'})}
-                className={`relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'modern' ? 'border-zinc-900 shadow-lg scale-[1.02] z-10' : 'border-slate-100 hover:border-zinc-300 opacity-70 hover:opacity-100'}`}
+                className={`isolate relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'modern' ? 'border-zinc-900 shadow-lg scale-[1.02] z-10' : 'border-slate-100 hover:border-zinc-300 opacity-70 hover:opacity-100'}`}
               >
                  <div className="absolute inset-0 bg-white -z-10"></div>
                  <div className="absolute inset-0 border-[10px] border-zinc-100/50 -z-10"></div>
@@ -389,7 +626,7 @@ function AdminDashboardContent() {
               {/* Rustic */}
               <div 
                 onClick={() => setSettings({...settings, template: 'rustic', palette: 'default'})}
-                className={`relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'rustic' ? 'border-[#d97757] shadow-lg scale-[1.02] z-10' : 'border-slate-100 hover:border-[#e8dbce] opacity-70 hover:opacity-100'}`}
+                className={`isolate relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'rustic' ? 'border-[#d97757] shadow-lg scale-[1.02] z-10' : 'border-slate-100 hover:border-[#e8dbce] opacity-70 hover:opacity-100'}`}
               >
                  <div className="absolute inset-0 bg-[#fdfbf7] -z-10"></div>
                  <div className="absolute top-[-20%] right-[-20%] w-32 h-32 bg-[#e8dbce] rounded-full blur-xl -z-10"></div>
@@ -401,25 +638,10 @@ function AdminDashboardContent() {
                  {settings.template === 'rustic' && <div className="absolute top-3 right-3 w-6 h-6 bg-[#d97757] rounded-full flex items-center justify-center text-white"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
               </div>
 
-              {/* Vibrant */}
-              <div 
-                onClick={() => setSettings({...settings, template: 'vibrant', palette: 'default'})}
-                className={`relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'vibrant' ? 'border-slate-900 shadow-[6px_6px_0px_#fde047] scale-[1.02] -translate-y-1 z-10' : 'border-slate-100 hover:border-slate-300 opacity-70 hover:opacity-100'}`}
-              >
-                 <span className="absolute top-2 right-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">Premium</span>
-                 <div className="absolute inset-0 bg-pink-50 -z-10"></div>
-                 <div className="absolute bottom-[-10%] left-[-10%] w-24 h-24 bg-yellow-400 rounded-full -z-10"></div>
-                 <div className="w-12 h-10 mb-auto mt-4 bg-blue-600 rounded-xl transform -rotate-6 flex items-center justify-center shadow-sm border border-blue-700">
-                    <span className="text-white font-sans font-black text-lg">V</span>
-                 </div>
-                 <h4 className="text-slate-900 font-sans font-black tracking-tighter text-sm uppercase mb-1">Vibrant</h4>
-                 <div className="h-1.5 w-6 bg-slate-900 rounded-full"></div>
-                 {settings.template === 'vibrant' && <div className="absolute top-3 right-3 w-6 h-6 bg-slate-900 rounded-full flex items-center justify-center text-white"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
-              </div>
               {/* Cinematic (Premium) */}
               <div 
                 onClick={() => setSettings({...settings, template: 'cinematic', palette: 'default'})}
-                className={`relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'cinematic' ? 'border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.3)] scale-[1.02] z-10' : 'border-slate-100 hover:border-amber-300 opacity-70 hover:opacity-100'}`}
+                className={`isolate relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'cinematic' ? 'border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.3)] scale-[1.02] z-10' : 'border-slate-100 hover:border-amber-300 opacity-70 hover:opacity-100'}`}
               >
                  <div className="absolute inset-0 bg-slate-950 -z-10"></div>
                  <div className="absolute top-[-20%] right-[-20%] w-32 h-32 bg-amber-500/20 rounded-full blur-xl -z-10 animate-pulse"></div>
@@ -431,10 +653,26 @@ function AdminDashboardContent() {
                  {settings.template === 'cinematic' && <div className="absolute top-3 left-3 w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center text-white"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
               </div>
 
+              {/* Vibrant */}
+              <div 
+                onClick={() => setSettings({...settings, template: 'vibrant', palette: 'default'})}
+                className={`isolate relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'vibrant' ? 'border-slate-900 shadow-[6px_6px_0px_#fde047] scale-[1.02] -translate-y-1 z-10' : 'border-slate-100 hover:border-slate-300 opacity-70 hover:opacity-100'}`}
+              >
+                 <span className="absolute top-2 right-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">Premium</span>
+                 <div className="absolute inset-0 bg-pink-50 -z-10"></div>
+                 <div className="absolute bottom-[-10%] left-[-10%] w-24 h-24 bg-yellow-400 rounded-full -z-10"></div>
+                 <div className="w-12 h-10 mb-auto mt-4 bg-blue-600 rounded-xl transform -rotate-6 flex items-center justify-center shadow-sm border border-blue-700">
+                    <span className="text-white font-sans font-black text-lg">V</span>
+                 </div>
+                 <h4 className="text-slate-900 font-sans font-black tracking-tighter text-sm uppercase mb-1">Vibrant</h4>
+                 <div className="h-1.5 w-6 bg-slate-900 rounded-full"></div>
+                 {settings.template === 'vibrant' && <div className="absolute top-3 right-3 w-6 h-6 bg-slate-900 rounded-full flex items-center justify-center text-white"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
+              </div>
+
               {/* Luxury (Premium) */}
               <div 
                 onClick={() => setSettings({...settings, template: 'luxury', palette: 'default'})}
-                className={`relative cursor-pointer rounded-2xl border-[3px] transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'luxury' ? 'border-stone-800 shadow-2xl scale-[1.02] z-10' : 'border-slate-200 hover:border-stone-400 opacity-70 hover:opacity-100'}`}
+                className={`isolate relative cursor-pointer rounded-2xl border-[3px] transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'luxury' ? 'border-stone-800 shadow-2xl scale-[1.02] z-10' : 'border-slate-200 hover:border-stone-400 opacity-70 hover:opacity-100'}`}
               >
                  <span className="absolute top-2 right-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">Premium</span>
                  <div className="absolute inset-0 bg-stone-100 -z-10"></div>
@@ -622,6 +860,22 @@ function AdminDashboardContent() {
                       </button>
                     )}
                   </div>
+                  {/* Bottone Migliora Foto (sotto la thumbnail) */}
+                  {item.image && (
+                    <button
+                      onClick={() => enhanceImage(item.id)}
+                      disabled={enhancingItemId === item.id}
+                      className="mt-1.5 flex items-center gap-1 px-2 py-1 bg-violet-50 hover:bg-violet-100 text-violet-600 text-[9px] font-bold rounded-lg border border-violet-200 transition-all disabled:opacity-50 w-16 justify-center"
+                      title="Migliora automaticamente luminosita, contrasto e saturazione"
+                    >
+                      {enhancingItemId === item.id ? (
+                        <svg className="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>
+                      )}
+                      {enhancingItemId === item.id ? '...' : 'Migliora'}
+                    </button>
+                  )}
                   <input type="file" accept="image/*" id={`upload-image-${item.id}`} className="hidden" onChange={(e) => handleItemImageUpload(e, item.id)} />
 
                   <div className="flex-1 space-y-2 w-full">
@@ -646,6 +900,43 @@ function AdminDashboardContent() {
                       className="text-sm text-slate-500 px-1 font-medium w-full bg-transparent border-b border-transparent hover:border-slate-300 focus:border-teal-500 focus:bg-white rounded outline-none transition-colors"
                       placeholder="Descrizione opzionale.."
                     />
+                    {/* Bottone Genera Copy IA */}
+                    <div className="flex items-center gap-2 mt-1">
+                      <button
+                        onClick={() => generateCopy(item.id)}
+                        disabled={generatingCopyId === item.id}
+                        className="flex items-center gap-1 px-2.5 py-1 bg-violet-50 hover:bg-violet-100 text-violet-600 text-[10px] font-bold rounded-lg border border-violet-200 transition-all disabled:opacity-50"
+                      >
+                        {generatingCopyId === item.id ? (
+                          <svg className="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v8l4-2"/><path d="M12 10l-4-2"/><circle cx="12" cy="18" r="4"/></svg>
+                        )}
+                        {generatingCopyId === item.id ? 'Generando...' : (item.description ? 'Migliora copy IA' : 'Genera copy IA')}
+                      </button>
+                      <span className="text-[9px] bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm">Premium</span>
+                    </div>
+                    {/* TAG DIETETICI (Premium) */}
+                    <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                       <span className="text-[9px] bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm mr-1">Premium</span>
+                       {DIETARY_OPTIONS.map(opt => {
+                          const tags = item.dietaryTags || [];
+                          const isActive = tags.includes(opt.id);
+                          return (
+                            <button
+                              key={opt.id}
+                              type="button"
+                              onClick={() => {
+                                const newTags = isActive ? tags.filter(t => t !== opt.id) : [...tags, opt.id];
+                                setItems(items.map(i => i.id === item.id ? { ...i, dietaryTags: newTags } : i));
+                              }}
+                              className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold transition-all border ${isActive ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-slate-50 text-slate-400 border-slate-100 hover:border-slate-300'}`}
+                            >
+                              <span>{opt.icon}</span> {opt.label}
+                            </button>
+                          );
+                       })}
+                    </div>
                   </div>
                   
                   <div className="flex items-center gap-4 w-full md:w-auto shrink-0 justify-between md:justify-end border-t md:border-none pt-4 md:pt-0 border-slate-100">
@@ -726,6 +1017,28 @@ function AdminDashboardContent() {
                 <div className="md:col-span-1">
                   <label className="text-xs font-bold text-slate-500 block mb-1">PREZZO ($)</label>
                   <input type="number" step="0.50" value={newItem.price} onChange={e => setNewItem({...newItem, price: e.target.value})} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-white text-sm font-bold focus:ring-2 focus:ring-teal-500 outline-none" placeholder="0.00" />
+                </div>
+                <div className="md:col-span-5">
+                  <label className="text-xs font-bold text-slate-500 block mb-1">TAG DIETETICI <span className="text-[9px] bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm ml-1">Premium</span></label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {DIETARY_OPTIONS.map(opt => {
+                       const isActive = (newItem.dietaryTags || []).includes(opt.id);
+                       return (
+                         <button
+                           key={opt.id}
+                           type="button"
+                           onClick={() => {
+                             const curr = newItem.dietaryTags || [];
+                             const newTags = isActive ? curr.filter(t => t !== opt.id) : [...curr, opt.id];
+                             setNewItem({...newItem, dietaryTags: newTags});
+                           }}
+                           className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border ${isActive ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-slate-50 text-slate-400 border-slate-100 hover:border-slate-300'}`}
+                         >
+                           <span>{opt.icon}</span> {opt.label}
+                         </button>
+                       );
+                    })}
+                  </div>
                 </div>
                 <div className="md:col-span-1">
                   <button onClick={handleAddProduct} className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-xl text-sm transition-colors shadow-sm">
@@ -872,25 +1185,63 @@ function AdminDashboardContent() {
 
       {/* LIVE PREVIEW MODAL POPUP */}
       {showPreview && (
-        <div className="fixed inset-0 z-[200] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 sm:p-10 animate-in fade-in duration-300">
-           <div className="bg-slate-950 w-full max-w-[375px] h-[812px] max-h-[85vh] mx-auto rounded-[3rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden relative border-[12px] border-slate-800 animate-in zoom-in-95 duration-300 transform translate-x-0 translate-y-0">
-              <div className="h-7 border-b border-slate-800 flex items-center justify-between px-5 shrink-0 z-50 bg-slate-950">
-                 <div className="flex items-center gap-2">
-                    <span className="flex h-1.5 w-1.5 relative"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span></span>
-                    <span className="text-white font-bold text-[8px] tracking-widest uppercase">Anteprima Live</span>
-                 </div>
-                 <button onClick={() => setShowPreview(false)} className="text-slate-500 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-1 rounded-lg flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                 </button>
-              </div>
-              <div className="flex-1 overflow-y-auto overflow-x-hidden relative w-full bg-slate-50 iphone-scrollbar">
-                 <MenuRenderer 
-                    menu={items} 
-                    settings={settings} 
-                    restaurantId={null} 
-                 />
-              </div>
-           </div>
+        <div className="fixed inset-0 z-[200] bg-slate-900/80 backdrop-blur-md flex flex-col items-center p-2 sm:p-4 animate-in fade-in duration-300">
+          
+          {/* DEVICE SELECTOR - sempre visibile in alto */}
+          <div className="flex bg-slate-800 p-1.5 rounded-2xl my-3 shadow-xl border border-slate-700/50 backdrop-blur-md z-10 shrink-0">
+            <button 
+               onClick={() => setPreviewDevice('iphone')} 
+               className={`px-3 sm:px-5 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all ${previewDevice === 'iphone' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+            >
+              iPhone 14 Pro
+            </button>
+            <button 
+               onClick={() => setPreviewDevice('s8')} 
+               className={`px-3 sm:px-5 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all ${previewDevice === 's8' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+            >
+              Galaxy S8+
+            </button>
+            <button 
+               onClick={() => setPreviewDevice('ipad')} 
+               className={`px-3 sm:px-5 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all ${previewDevice === 'ipad' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+            >
+              iPad Mini
+            </button>
+          </div>
+
+          {/* TELEFONO SIMULATO */}
+          <div 
+             className="relative bg-slate-950 rounded-[3rem] shadow-[0_0_80px_rgba(0,0,0,0.6)] flex flex-col overflow-hidden border-[12px] border-slate-800 transition-all duration-500 origin-top shrink-0"
+             style={{
+                width: previewDevice === 'ipad' ? 768 : previewDevice === 'iphone' ? 393 : 360,
+                height: previewDevice === 'ipad' ? 1024 : previewDevice === 'iphone' ? 852 : 740,
+                transform: `scale(${previewScale})`
+             }}
+          >
+             <div className="h-7 border-b border-slate-800 flex items-center justify-between px-5 shrink-0 z-50 bg-slate-950">
+                <div className="flex items-center gap-2">
+                   <span className="flex h-1.5 w-1.5 relative"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span></span>
+                   <span className="text-slate-300 font-bold text-[8px] tracking-widest uppercase truncate">{previewDevice === 'ipad' ? 'iPad Mini' : previewDevice === 'iphone' ? 'iPhone 14 Pro' : 'Galaxy S8+'}</span>
+                </div>
+                <div className="w-16 h-4 bg-slate-900 rounded-b-xl absolute top-0 left-1/2 -translate-x-1/2 hidden sm:block"></div>
+                <button onClick={() => setShowPreview(false)} className="text-slate-500 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-1 rounded-lg flex items-center gap-1 md:hidden">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+             </div>
+             <div className="flex-1 relative w-full bg-slate-50">
+                <iframe 
+                   ref={iframeRef}
+                   src="/preview"
+                   className="w-full h-full border-0 absolute inset-0 bg-slate-50 transition-opacity duration-300"
+                   title="Live Preview Simulator"
+                />
+             </div>
+          </div>
+          
+          {/* BOTTONE CHIUDI X SCREEN GRANDE */}
+          <button onClick={() => setShowPreview(false)} className="hidden md:flex absolute top-6 right-6 text-slate-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-3 rounded-full items-center gap-1 shadow-lg border border-white/10 backdrop-blur-sm z-50">
+             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
         </div>
       )}
 

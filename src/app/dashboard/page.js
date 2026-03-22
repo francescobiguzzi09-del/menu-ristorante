@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import AnalyticsPanel from '@/components/AnalyticsPanel';
+import ReviewsPanel from '@/components/ReviewsPanel';
+import OrdersPanel from '@/components/OrdersPanel';
 
 export default function DashboardPage() {
   const [menus, setMenus] = useState([]);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('menus'); // 'menus' | 'analytics'
+  const [activeTab, setActiveTab] = useState('menus'); // 'menus' | 'analytics' | 'reviews' | 'orders'
   const router = useRouter();
 
   useEffect(() => {
@@ -129,10 +131,28 @@ export default function DashboardPage() {
             Analytics <span className="text-[9px] bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm">Premium</span>
             {activeTab === 'analytics' && <span className="absolute bottom-0 left-0 w-full h-[3px] bg-indigo-600 rounded-t-full"></span>}
           </button>
+          <button 
+            onClick={() => setActiveTab('reviews')} 
+            className={`pb-4 font-bold text-sm px-2 transition-colors relative flex items-center gap-1.5 ${activeTab === 'reviews' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            Recensioni <span className="text-[9px] bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm">Premium</span>
+            {activeTab === 'reviews' && <span className="absolute bottom-0 left-0 w-full h-[3px] bg-indigo-600 rounded-t-full"></span>}
+          </button>
+          <button 
+            onClick={() => setActiveTab('orders')} 
+            className={`pb-4 font-bold text-sm px-2 transition-colors relative flex items-center gap-1.5 ${activeTab === 'orders' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            Ordini <span className="text-[9px] bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm">Premium</span>
+            {activeTab === 'orders' && <span className="absolute bottom-0 left-0 w-full h-[3px] bg-indigo-600 rounded-t-full"></span>}
+          </button>
         </div>
 
         {activeTab === 'analytics' ? (
           <AnalyticsPanel menus={menus} />
+        ) : activeTab === 'reviews' ? (
+          <ReviewsPanel menus={menus} />
+        ) : activeTab === 'orders' ? (
+          <OrdersPanel menus={menus} />
         ) : (
           <>
             {/* STATS */}

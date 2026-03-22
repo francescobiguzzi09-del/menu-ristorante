@@ -33,23 +33,19 @@ export default function AnalyticsPanel({ menus }) {
     fetchAnalytics();
   }, [selectedRestId]);
 
-  // Deriviamo i dati dal menu selezionato per incrociare i nomi dei piatti
   const targetMenuData = useMemo(() => {
     return menus.find(m => m.restaurant_id === selectedRestId)?.data || null;
   }, [selectedRestId, menus]);
 
-  // Estrazione Analytics Reali dalla Tabella Dedicata
   const analytics = analyticsData || {
     views: 0,
     time_spent_total: 0,
     time_spent_count: 0,
-    item_clicks: {},
-    search_queries: {}
+    item_clicks: {}
   };
 
   const visits = analytics.views || 0;
 
-  // Tempo medio in secondi convertito in mm:ss
   const avgTimeSeconds = analytics.time_spent_count > 0 
       ? Math.round((analytics.time_spent_total || 0) / analytics.time_spent_count) 
       : 0;
@@ -57,7 +53,6 @@ export default function AnalyticsPanel({ menus }) {
   const avgSecs = (avgTimeSeconds % 60).toString().padStart(2, '0');
   const formattedAvgTime = `${avgMins}:${avgSecs}`;
 
-  // Calcolo piatti più popolari VERO incrociando col JSON del menu
   const topItems = useMemo(() => {
     if (!targetMenuData || !targetMenuData.menu) return [];
     
@@ -78,22 +73,8 @@ export default function AnalyticsPanel({ menus }) {
     }));
   }, [targetMenuData, analytics.item_clicks]);
 
-  // Calcolo Ricerche più frequenti VERE
-  const topCategories = useMemo(() => {
-     let searchQueriesObj = analytics.search_queries;
-     if (typeof searchQueriesObj !== 'object' || searchQueriesObj === null) searchQueriesObj = {};
-
-     return Object.entries(searchQueriesObj)
-       .map(([cat, count]) => ({ cat, val: count }))
-       .sort((a,b) => b.val - a.val)
-       .slice(0, 4);
-  }, [analytics.search_queries]);
-
-  // Grafico settimanale: distribuiamo le visite totali fittiziamente sui 7 giorni
-  // per mantenere l'effetto "riempimento". In prod si usa un tracking per giorno.
   const chartData = useMemo(() => {
      if (visits === 0) return [0,0,0,0,0,0,0];
-     // Distribuzione visuale basata sul totale visite (adattativo 0-100%)
      const base = [10, 40, 20, 60, 30, 80, 100];
      return base.map(v => Math.max(5, Math.floor((v / 100) * Math.min(visits, 100))));
   }, [visits]);
@@ -101,7 +82,7 @@ export default function AnalyticsPanel({ menus }) {
   if (menus.length === 0) {
     return (
       <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center text-slate-500 shadow-sm animate-in fade-in">
-        Non hai ancora creato alcun menù. Crea il tuo primo menù per sbloccare le Statistiche Avanzate.
+        Non hai ancora creato alcun menu. Crea il tuo primo menu per sbloccare le Statistiche Avanzate.
       </div>
     );
   }
@@ -162,12 +143,12 @@ export default function AnalyticsPanel({ menus }) {
          <div className="bg-slate-900 rounded-[24px] border border-slate-800 p-6 shadow-xl relative overflow-hidden group text-white">
             <div className="absolute right-0 bottom-0 w-32 h-32 bg-amber-500/20 blur-2xl rounded-full"></div>
             <p className="text-xs font-bold text-indigo-300 uppercase tracking-widest flex items-center gap-2 mb-2">
-               <span className="text-base">⭐</span> Piatto o Categoria Top
+               <span className="text-base">&#11088;</span> Piatto o Categoria Top
             </p>
             <h3 className="text-2xl font-black text-white leading-tight truncate">
                {topItems.length > 0 && topItems[0].clicks > 0 ? topItems[0].name : 'N/A'}
             </h3>
-            <p className="text-slate-400 text-xs mt-2 truncate">Il più cliccato dai tuoi clienti ultimamente.</p>
+            <p className="text-slate-400 text-xs mt-2 truncate">Il piatto cliccato di piu dai tuoi clienti.</p>
          </div>
       </div>
 
@@ -178,7 +159,7 @@ export default function AnalyticsPanel({ menus }) {
          <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
             <h3 className="text-base font-black text-slate-900 mb-6 flex items-center gap-2 border-b border-slate-100 pb-4">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-rose-500"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-              Piatti Più Cliccati
+              Piatti Piu Cliccati
             </h3>
             <div className="space-y-5">
                {topItems.map((item, index) => (
@@ -190,7 +171,7 @@ export default function AnalyticsPanel({ menus }) {
                          </span>
                          <span className="text-sm font-bold text-slate-800 truncate max-w-[150px] sm:max-w-xs">{item.name}</span>
                       </div>
-                      <span className="text-xs font-bold text-slate-400">{item.score}% popolarità</span>
+                      <span className="text-xs font-bold text-slate-400">{item.score}% popolarita</span>
                    </div>
                    <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
                       <div 
@@ -204,10 +185,10 @@ export default function AnalyticsPanel({ menus }) {
             </div>
          </div>
 
-         {/* VISUALIZZAZIONI ANDAMENTO E CATEGORIE */}
+         {/* VISUALIZZAZIONI ANDAMENTO */}
          <div className="space-y-6 flex flex-col">
             
-            {/* Grafico Barre Finto (Andamento visite) */}
+            {/* Grafico Barre (Andamento visite) */}
             <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm flex-1">
                <h3 className="text-base font-black text-slate-900 mb-6 border-b border-slate-100 pb-4">Visite (Ultimi 7 Giorni)</h3>
                <div className="flex items-end justify-between h-32 gap-2 mt-4">
@@ -222,19 +203,6 @@ export default function AnalyticsPanel({ menus }) {
                        </span>
                     </div>
                   ))}
-               </div>
-            </div>
-
-            {/* Micro panel: Categorie */}
-            <div className="bg-gradient-to-r from-teal-500 to-emerald-500 rounded-3xl p-6 shadow-xl text-white">
-               <h4 className="text-sm font-black mb-4 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Categorie più cercate</h4>
-               <div className="flex flex-wrap gap-2">
-                 {topCategories.map((c, i) => (
-                   <span key={i} className="bg-white/20 border border-white/30 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-bold shadow-sm">
-                     {c.cat} <span className="text-emerald-100 ml-1">({c.val})</span>
-                   </span>
-                 ))}
-                 {topCategories.length === 0 && <span className="text-sm">Nessun dato</span>}
                </div>
             </div>
 

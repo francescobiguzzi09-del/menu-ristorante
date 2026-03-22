@@ -34,7 +34,7 @@ export default function VibrantMenu({ menuByCategory, settings, onItemClick }) {
       <header className="pt-24 pb-12 px-6 text-center max-w-4xl mx-auto">
         <div className="inline-block relative">
           <div className={`absolute inset-0 ${theme.headerDrop} translate-x-3 translate-y-3 rounded-3xl -z-10`}></div>
-          <h1 className={`text-5xl md:text-7xl font-black ${theme.headerBg} text-white px-8 py-6 rounded-3xl tracking-tighter shadow-lg transform -rotate-2 border-4 border-slate-900`}>
+          <h1 className={`text-4xl md:text-5xl lg:text-7xl font-black ${theme.headerBg} text-white px-6 py-4 md:px-8 md:py-6 rounded-3xl tracking-tighter shadow-lg transform -rotate-2 border-4 border-slate-900 whitespace-nowrap`}>
             {restaurantName}
           </h1>
         </div>
@@ -61,7 +61,7 @@ export default function VibrantMenu({ menuByCategory, settings, onItemClick }) {
             <section key={category} className="animate-in slide-in-from-bottom-12 duration-500">
               {/* INTESTAZIONE CATEGORIA */}
               <div className="mb-10 flex items-center gap-4">
-                <h2 className={`text-3xl md:text-5xl font-black text-slate-900 uppercase tracking-tighter px-6 py-3 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0px_#0f172a] ${accentObj}`}>
+                <h2 className={`text-3xl md:text-5xl font-black text-slate-900 uppercase tracking-tighter px-6 py-3 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0px_#0f172a] ${accentObj} whitespace-nowrap`}>
                   {category}
                 </h2>
                 <div className="flex-1 h-2 bg-slate-200 rounded-full"></div>
