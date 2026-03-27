@@ -1,4 +1,5 @@
 import "./globals.css";
+import ThemeProvider from '@/components/ThemeProvider';
 
 export const metadata = {
   title: "SmartMenu AI",
@@ -7,9 +8,11 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="it">
+    <html lang="it" suppressHydrationWarning>
       <body>
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
