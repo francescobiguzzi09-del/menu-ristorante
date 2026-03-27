@@ -187,46 +187,47 @@ export default function MenuRenderer({ menu, settings, restaurantId }) {
   return (
     <div className="relative">
        {/* BOTTONE FILTRI FLOATING */}
-       <div className="fixed top-6 left-6 z-40 animate-in fade-in slide-in-from-top-4 duration-500">
-          <button 
-            onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl shadow-lg backdrop-blur-xl border transition-all ${activeFilters.length > 0 ? 'bg-teal-500/90 text-white border-teal-400/50' : 'bg-white/90 text-slate-700 border-white/50 hover:bg-white'}`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-            <span className="text-sm font-bold">Filtri</span>
-            <span className="text-[8px] bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black px-1 py-0.5 rounded uppercase tracking-widest shadow-sm">Pro</span>
-            {activeFilters.length > 0 && (
-              <span className="w-5 h-5 bg-white text-teal-600 text-[10px] font-black rounded-full flex items-center justify-center">{activeFilters.length}</span>
-            )}
-          </button>
-
-          {/* Pannello filtri espanso */}
-          {showFilters && (
-            <div className="absolute top-12 left-0 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-100 p-3 flex flex-col gap-1.5 animate-in fade-in slide-in-from-top-2 duration-200 min-w-[220px]">
-              {DIETARY_FILTERS.map(filter => (
-                <button 
-                  key={filter.id}
-                  onClick={() => toggleFilter(filter.id)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left ${activeFilters.includes(filter.id) ? 'bg-teal-50 text-teal-700 border border-teal-200' : 'text-slate-600 hover:bg-slate-50 border border-transparent'}`}
-                >
-                  <span className="text-base">{filter.icon}</span>
-                  <span className="text-sm font-bold flex-1">{filter.label}</span>
-                  {activeFilters.includes(filter.id) && (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-teal-500"><polyline points="20 6 9 17 4 12"/></svg>
-                  )}
-                </button>
-              ))}
+       {menu && menu.some(item => item.dietaryTags && item.dietaryTags.length > 0) && (
+         <div className="fixed top-6 left-6 z-40 animate-in fade-in slide-in-from-top-4 duration-500">
+            <button 
+              onClick={() => setShowFilters(!showFilters)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl shadow-lg backdrop-blur-xl border transition-all ${activeFilters.length > 0 ? 'bg-teal-500/90 text-white border-teal-400/50' : 'bg-white/90 text-slate-700 border-white/50 hover:bg-white'}`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+              <span className="text-sm font-bold">Filtri</span>
               {activeFilters.length > 0 && (
-                <button 
-                  onClick={() => setActiveFilters([])}
-                  className="mt-1 text-xs font-bold text-rose-500 hover:text-rose-600 text-center py-2 hover:bg-rose-50 rounded-xl transition-colors"
-                >
-                  Rimuovi tutti i filtri
-                </button>
+                <span className="w-5 h-5 bg-white text-teal-600 text-[10px] font-black rounded-full flex items-center justify-center">{activeFilters.length}</span>
               )}
-            </div>
-          )}
-       </div>
+            </button>
+
+            {/* Pannello filtri espanso */}
+            {showFilters && (
+              <div className="absolute top-12 left-0 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-100 p-3 flex flex-col gap-1.5 animate-in fade-in slide-in-from-top-2 duration-200 min-w-[220px]">
+                {DIETARY_FILTERS.map(filter => (
+                  <button 
+                    key={filter.id}
+                    onClick={() => toggleFilter(filter.id)}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left ${activeFilters.includes(filter.id) ? 'bg-teal-50 text-teal-700 border border-teal-200' : 'text-slate-600 hover:bg-slate-50 border border-transparent'}`}
+                  >
+                    <span className="text-base">{filter.icon}</span>
+                    <span className="text-sm font-bold flex-1">{filter.label}</span>
+                    {activeFilters.includes(filter.id) && (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-teal-500"><polyline points="20 6 9 17 4 12"/></svg>
+                    )}
+                  </button>
+                ))}
+                {activeFilters.length > 0 && (
+                  <button 
+                    onClick={() => setActiveFilters([])}
+                    className="mt-1 text-xs font-bold text-rose-500 hover:text-rose-600 text-center py-2 hover:bg-rose-50 rounded-xl transition-colors"
+                  >
+                    Rimuovi tutti i filtri
+                  </button>
+                )}
+              </div>
+            )}
+         </div>
+       )}
 
        {/* SELETTORE LINGUA COMPATTO */}
        {settings?.languages && settings.languages.length > 0 && (

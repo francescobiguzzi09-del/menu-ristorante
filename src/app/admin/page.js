@@ -163,6 +163,24 @@ function AdminDashboardContent() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user || null);
+      if (session?.user) {
+        supabase.from('profiles').select('status, suspended_until').eq('id', session.user.id).single().then(({data: profile}) => {
+          if (profile) {
+            if (profile.status === 'banned') {
+              router.push('/blocked');
+              return;
+            }
+            if (profile.status === 'suspended') {
+               if (new Date() < new Date(profile.suspended_until)) {
+                 router.push('/blocked');
+                 return;
+               } else {
+                 supabase.from('profiles').update({ status: 'active', suspended_until: null }).eq('id', session.user.id);
+               }
+            }
+          }
+        });
+      }
     });
 
     if (!urlId) {
@@ -327,10 +345,10 @@ function AdminDashboardContent() {
     }
   };
 
-  const processSaveMenu = async (overrideItems = null, overrideSettings = null) => {
+  const processSaveMenu = async (overrideItems = null, overrideSettings = null, silent = false) => {
     if (!restaurantId) return;
-    setIsSaving(true);
-    setShowGuestWarning(false);
+    if (!silent) setIsSaving(true);
+    if (!silent) setShowGuestWarning(false);
     try {
       const res = await fetch('/api/menu', {
         method: 'POST',
@@ -346,11 +364,12 @@ function AdminDashboardContent() {
       });
       const resData = await res.json();
       if (!resData.success) throw new Error(resData.error);
-      setShowSuccessModal(true);
+      if (!silent) setShowSuccessModal(true);
     } catch (err) {
-      alert('❌ Errore durante il salvataggio: ' + err.message);
+      if (!silent) alert('❌ Errore durante il salvataggio: ' + err.message);
+      else console.error('Silent save error:', err);
     } finally {
-      setIsSaving(false);
+      if (!silent) setIsSaving(false);
     }
   };
 
@@ -928,7 +947,9 @@ function AdminDashboardContent() {
                               type="button"
                               onClick={() => {
                                 const newTags = isActive ? tags.filter(t => t !== opt.id) : [...tags, opt.id];
-                                setItems(items.map(i => i.id === item.id ? { ...i, dietaryTags: newTags } : i));
+                                const updatedItems = items.map(i => i.id === item.id ? { ...i, dietaryTags: newTags } : i);
+                                setItems(updatedItems);
+                                processSaveMenu(updatedItems, null, true);
                               }}
                               className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold transition-all border ${isActive ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-slate-50 text-slate-400 border-slate-100 hover:border-slate-300'}`}
                             >

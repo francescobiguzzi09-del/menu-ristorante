@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import AnalyticsPanel from '@/components/AnalyticsPanel';
 import ReviewsPanel from '@/components/ReviewsPanel';
 import OrdersPanel from '@/components/OrdersPanel';
+import Footer from '@/components/Footer';
 
 export default function DashboardPage() {
   const [menus, setMenus] = useState([]);
@@ -23,6 +24,23 @@ export default function DashboardPage() {
       }
       setUser(session.user);
       
+      const { data: profile } = await supabase.from('profiles').select('status, suspended_until').eq('id', session.user.id).single();
+      if (profile) {
+        if (profile.status === 'banned') {
+          router.push('/blocked');
+          return;
+        }
+        if (profile.status === 'suspended') {
+          if (new Date() < new Date(profile.suspended_until)) {
+            router.push('/blocked');
+            return;
+          } else {
+            // Restore automatically if suspension time has passed
+            await supabase.from('profiles').update({ status: 'active', suspended_until: null }).eq('id', session.user.id);
+          }
+        }
+      }
+
       // Fetch user's menus
       const { data, error } = await supabase
         .from('menus')
@@ -82,9 +100,20 @@ export default function DashboardPage() {
             </div>
             <h1 className="text-xl font-bold tracking-tight text-slate-900">I Miei Ristoranti</h1>
           </div>
-          <button onClick={handleLogout} className="text-sm font-bold text-slate-500 hover:text-rose-500 transition-colors px-3 py-2 rounded-lg hover:bg-rose-50">
-            Esci
-          </button>
+          <div className="flex items-center gap-4">
+            {user?.email === 'francesco.biguzzi09@gmail.com' && (
+              <button 
+                onClick={() => router.push('/superadmin')}
+                className="text-xs font-black bg-rose-100 text-rose-700 hover:bg-rose-200 px-3 py-1.5 rounded-lg border border-rose-200 transition-colors uppercase tracking-widest flex items-center gap-1.5"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Admin Pannello
+              </button>
+            )}
+            <button onClick={handleLogout} className="text-sm font-bold text-slate-500 hover:text-rose-500 transition-colors px-3 py-2 rounded-lg hover:bg-rose-50">
+              Esci
+            </button>
+          </div>
         </div>
       </header>
 
@@ -161,7 +190,7 @@ export default function DashboardPage() {
              <div className="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/><path d="M12 3v6"/></svg>
              </div>
-             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Ristoranti Attivi</p>
+             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Menù Attivi</p>
              <p className="text-3xl font-black text-slate-800 tracking-tight">{menus.length}</p>
            </div>
            
@@ -242,6 +271,7 @@ export default function DashboardPage() {
         </>
         )}
       </main>
+      <Footer />
     </div>
   );
 }
