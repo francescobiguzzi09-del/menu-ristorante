@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useToast } from '@/components/Toast';
 
 export default function SuperAdminDashboard() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -15,6 +16,7 @@ export default function SuperAdminDashboard() {
   const [isScanning, setIsScanning] = useState(false);
   const [scanResults, setScanResults] = useState([]);
   const router = useRouter();
+  const toast = useToast();
 
   // Modal State for Suspension
   const [suspendModal, setSuspendModal] = useState({ isOpen: false, userId: null, days: 1 });
@@ -49,7 +51,7 @@ export default function SuperAdminDashboard() {
       setUsers(users.map(u => u.id === userId ? { ...u, status: newStatus, suspended_until: suspendedUntil } : u));
       if (suspendModal.isOpen) setSuspendModal({ isOpen: false, userId: null, days: 1 });
     } catch (err) {
-      alert("Errore durante l'aggiornamento dello status");
+      toast.error("Errore durante l'aggiornamento dello status", 'Errore');
     }
   };
 
@@ -58,7 +60,7 @@ export default function SuperAdminDashboard() {
       await supabase.from('profiles').update({ is_premium: !currentPremium }).eq('id', userId);
       setUsers(users.map(u => u.id === userId ? { ...u, is_premium: !currentPremium } : u));
     } catch (err) {
-      alert("Errore durante l'aggiornamento del Premium");
+      toast.error("Errore durante l'aggiornamento del Premium", 'Errore');
     }
   };
 
@@ -78,13 +80,13 @@ export default function SuperAdminDashboard() {
         if (data.report && data.report.length > 0) {
           setTab('scans');
         } else {
-          alert("Scansione completata. Nessuna violazione rilevata!");
+          toast.success('Scansione completata. Nessuna violazione rilevata!', 'Scansione IA');
         }
       } else {
-        alert("Errore: " + data.error);
+        toast.error('Errore: ' + data.error, 'Scansione IA');
       }
     } catch (err) {
-      alert("Errore di rete durante la scansione");
+      toast.error('Errore di rete durante la scansione', 'Errore');
     } finally {
       setIsScanning(false);
     }

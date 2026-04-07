@@ -1,5 +1,6 @@
 import "./globals.css";
 import ThemeProvider from '@/components/ThemeProvider';
+import ToastProvider from '@/components/Toast';
 
 export const metadata = {
   title: "SmartMenu AI",
@@ -11,7 +12,9 @@ export default function RootLayout({ children }) {
     <html lang="it" suppressHydrationWarning>
       <body>
         <ThemeProvider>
-          {children}
+          <ToastProvider>
+            {children}
+          </ToastProvider>
         </ThemeProvider>
       </body>
     </html>

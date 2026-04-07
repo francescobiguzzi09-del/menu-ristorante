@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/Toast';
 
 export default function BlockedPage() {
   const [profile, setProfile] = useState(null);
@@ -11,6 +12,7 @@ export default function BlockedPage() {
   const [appealSent, setAppealSent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const toast = useToast();
 
   useEffect(() => {
     const checkStatus = async () => {
@@ -44,7 +46,7 @@ export default function BlockedPage() {
       });
       setAppealSent(true);
     } catch (err) {
-      alert("❌ Errore durante l'invio del reclamo.");
+      toast.error("Errore durante l'invio del reclamo.", 'Errore');
     } finally {
       setIsSubmitting(false);
     }

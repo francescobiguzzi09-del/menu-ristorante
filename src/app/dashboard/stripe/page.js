@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Footer from '@/components/Footer';
+import { useToast } from '@/components/Toast';
 
 export default function StripeSettingsPage() {
   const [user, setUser] = useState(null);
@@ -13,6 +14,7 @@ export default function StripeSettingsPage() {
   const [stripeAccountId, setStripeAccountId] = useState(null);
   const [connectedMenuName, setConnectedMenuName] = useState(null);
   const router = useRouter();
+  const toast = useToast();
 
   useEffect(() => {
     const checkUser = async () => {
@@ -44,7 +46,7 @@ export default function StripeSettingsPage() {
   }, [router]);
 
   const handleConnectStripe = async () => {
-    alert("Per collegare Stripe, vai nella pagina di modifica del tuo menù e attiva la 'Funzione Ordina'. Da lì potrai collegare il tuo conto bancario tramite Stripe Connect.");
+    toast.info("Per collegare Stripe, vai nella pagina di modifica del tuo menù e attiva la 'Funzione Ordina'. Da lì potrai collegare il tuo conto bancario.", 'Come collegare Stripe');
   };
 
   const handleManageStripe = () => {
@@ -55,7 +57,7 @@ export default function StripeSettingsPage() {
   if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-400">Caricamento...</div>;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-sans pb-20 flex flex-col transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-sans flex flex-col transition-colors duration-300">
       <main className="max-w-4xl mx-auto px-6 py-10 flex-1 w-full">
         
         {/* BACK BUTTON */}
@@ -71,77 +73,32 @@ export default function StripeSettingsPage() {
         </div>
 
         {/* STATUS CARD */}
-        <div className="bg-white dark:bg-slate-900 rounded-[32px] p-8 sm:p-10 border border-slate-200 dark:border-slate-800 shadow-xl shadow-indigo-900/5 dark:shadow-black/20 mb-8 relative overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-[32px] p-8 sm:p-10 border border-rose-200 dark:border-rose-900/50 shadow-xl shadow-rose-900/5 dark:shadow-black/20 mb-8 relative overflow-hidden">
           {/* Overlay pattern for aesthetics */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 dark:bg-indigo-500/10 rounded-full blur-3xl opacity-50 -mr-20 -mt-20"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-rose-50 dark:bg-rose-500/10 rounded-full blur-3xl opacity-50 -mr-20 -mt-20"></div>
           
           <div className="relative z-10">
             <div className="flex items-center gap-4 mb-8">
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner ${stripeStatus === 'not_connected' ? 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700' : 'bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/40'}`}>
-                {stripeStatus === 'not_connected' ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                )}
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner bg-rose-100 dark:bg-rose-500/20 border border-rose-200 dark:border-rose-500/40">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#e11d48" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Stato Account</h3>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Funzionalità Sospesa Temporaneamente</h3>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className={`w-2.5 h-2.5 rounded-full ${stripeStatus === 'not_connected' ? 'bg-amber-400' : 'bg-emerald-500 animate-pulse'}`}></span>
-                  <span className={`text-sm font-bold uppercase tracking-wider ${stripeStatus === 'not_connected' ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-700 dark:text-emerald-400'}`}>
-                    {stripeStatus === 'not_connected' ? 'Non Connesso' : 'Attivo e Verificato'}
+                  <span className="text-sm font-bold uppercase tracking-wider text-rose-700 dark:text-rose-400">
+                    Integrazione Pagamenti in Manutenzione
                   </span>
                 </div>
               </div>
             </div>
 
-            {stripeStatus === 'active' && (
-              <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-2xl p-6 mb-8 max-w-2xl">
-                <h4 className="font-bold text-emerald-800 dark:text-emerald-300 mb-2 flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                  Conto collegato con successo!
-                </h4>
-                <div className="space-y-2 text-sm text-emerald-700 dark:text-emerald-300/80">
-                  <p><span className="font-bold">Menù:</span> {connectedMenuName}</p>
-                  <p><span className="font-bold">Account ID:</span> <code className="bg-emerald-100 dark:bg-emerald-500/20 px-2 py-0.5 rounded text-xs font-mono">{stripeAccountId}</code></p>
-                  <p className="pt-1 text-emerald-600 dark:text-emerald-400">I pagamenti dal menu verranno accreditati automaticamente sul tuo conto bancario.</p>
-                </div>
-              </div>
-            )}
-
-            {stripeStatus === 'not_connected' && (
-              <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 mb-8 max-w-2xl">
-                <h4 className="font-bold text-slate-800 dark:text-slate-200 mb-2">Come funziona?</h4>
-                <ol className="list-decimal list-inside text-sm text-slate-600 dark:text-slate-400 space-y-2">
-                  <li>Vai nella pagina di modifica del tuo menù.</li>
-                  <li>Attiva la <strong>"Funzione Ordina"</strong> nella sezione Setup Ristorante.</li>
-                  <li>Clicca su <strong>"Collega Conto per ricevere Pagamenti"</strong> e segui la procedura guidata di Stripe.</li>
-                  <li>Torna qui per verificare che lo stato sia <strong className="text-emerald-600">"Attivo"</strong>.</li>
-                </ol>
-              </div>
-            )}
-
-            <div>
-              {stripeStatus === 'active' ? (
-                <button 
-                  onClick={handleManageStripe}
-                  className="bg-[#635BFF] hover:bg-[#4E44D6] text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-[#635BFF]/30 transition-all flex items-center gap-3"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                  Gestisci Conto Stripe
-                </button>
-              ) : (
-                <button 
-                  onClick={handleConnectStripe}
-                  className="bg-[#635BFF] hover:bg-[#4E44D6] text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-[#635BFF]/30 transition-all flex items-center gap-3"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-                  Come Collegare Stripe
-                </button>
-              )}
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-4 flex items-center gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                Gestito tramite connessione bancaria criptata e sicura di Stripe.
+            <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 mb-8 max-w-2xl">
+              <h4 className="font-bold text-slate-800 dark:text-slate-200 mb-2">Perché i pagamenti sono disabilitati?</h4>
+              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+                Stiamo ultimando un aggiornamento importante al nostro partner di pagamento (Stripe) per rispettare le nuove normative vigenti. L'integrazione che ti permetterà di ricevere i pagamenti direttamente dal menù è momentaneamente sospesa.
+              </p>
+              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-bold">
+                 Questa funzione tornerà presto disponibile. Nel frattempo, puoi usare gratis tutte le altre straordinarie funzionalità premium (Analytics, Multilingua, Template, etc.).
               </p>
             </div>
           </div>

@@ -5,10 +5,12 @@ import QRCode from 'react-qr-code';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import MenuRenderer from '@/components/MenuRenderer';
+import { useToast } from '@/components/Toast';
 
 function AdminDashboardContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const toast = useToast();
   const urlId = searchParams.get('id');
   
   const [restaurantId, setRestaurantId] = useState(urlId || '');
@@ -83,7 +85,7 @@ function AdminDashboardContent() {
       setItems(items.map(i => i.id === itemId ? { ...i, image: enhancedUrl } : i));
     } catch (err) {
       console.error('Errore enhancement:', err);
-      alert('Errore nel miglioramento immagine.');
+      toast.error('Errore nel miglioramento immagine.', 'Errore');
     } finally {
       setEnhancingItemId(null);
     }
@@ -108,11 +110,11 @@ function AdminDashboardContent() {
       if (data.success) {
         setItems(items.map(i => i.id === itemId ? { ...i, description: data.description } : i));
       } else {
-        alert(data.error || 'Errore generazione copy');
+        toast.error(data.error || 'Errore generazione copy', 'Errore IA');
       }
     } catch (err) {
       console.error(err);
-      alert('Errore di connessione al server IA.');
+      toast.error('Errore di connessione al server IA.', 'Errore');
     } finally {
       setGeneratingCopyId(null);
     }
@@ -123,7 +125,7 @@ function AdminDashboardContent() {
   const handleItemImageUpload = async (e, id) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
-    if (file.size > 500 * 1024) return alert("L'immagine deve essere più piccola di 500KB.");
+    if (file.size > 500 * 1024) { toast.warning("L'immagine deve essere più piccola di 500KB.", 'File troppo grande'); return; }
     const reader = new FileReader();
     reader.onloadend = () => setItems(items.map(item => item.id === id ? { ...item, image: reader.result } : item));
     reader.readAsDataURL(file);
@@ -133,7 +135,7 @@ function AdminDashboardContent() {
   const handleNewItemImageUpload = async (e) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
-    if (file.size > 500 * 1024) return alert("L'immagine deve essere più piccola di 500KB.");
+    if (file.size > 500 * 1024) { toast.warning("L'immagine deve essere più piccola di 500KB.", 'File troppo grande'); return; }
     const reader = new FileReader();
     reader.onloadend = () => setNewItem({ ...newItem, image: reader.result });
     reader.readAsDataURL(file);
@@ -151,10 +153,10 @@ function AdminDashboardContent() {
       if (data.success && data.url) {
         window.location.href = data.url;
       } else {
-        alert(data.error || "Impossibile avviare il collegamento con Stripe.");
+        toast.error(data.error || 'Impossibile avviare il collegamento con Stripe.', 'Errore Stripe');
       }
     } catch (err) {
-      alert("Errore di connessione a Stripe.");
+      toast.error('Errore di connessione a Stripe.', 'Errore');
     } finally {
       setIsConnectingStripe(false);
     }
@@ -213,7 +215,7 @@ function AdminDashboardContent() {
     if (stripeAccountParam) {
       setSettings(prev => ({ ...prev, stripeAccountId: stripeAccountParam }));
       router.replace(`/admin?id=${restaurantId}`);
-      setTimeout(() => alert('Conto Stripe collegato con successo! Ricordati di Salvare le modifiche al menu.'), 500);
+      setTimeout(() => toast.success('Conto Stripe collegato con successo! Ricordati di Salvare le modifiche al menu.', 'Stripe'), 500);
     }
   }, [searchParams, restaurantId, router]);
 
@@ -292,10 +294,10 @@ function AdminDashboardContent() {
       if (data.success && data.data) {
         setItems(prev => [...prev, ...data.data]);
       } else {
-        alert(data.error || "Errore durante l'analisi IA dell'immagine.");
+        toast.error(data.error || "Errore durante l'analisi IA dell'immagine.", 'Errore IA');
       }
     } catch (err) {
-      alert("Errore di connessione al server IA.");
+      toast.error('Errore di connessione al server IA.', 'Errore');
       console.error(err);
     } finally {
       setIsAiLoading(false);
@@ -304,14 +306,15 @@ function AdminDashboardContent() {
   };
 
   const handleTranslate = async () => {
-    if (items.length === 0) return alert("Nessun piatto da tradurre!");
+    if (items.length === 0) { toast.warning('Nessun piatto da tradurre!', 'Attenzione'); return; }
     
     // Hash check to save AI costs
     const currentContentHash = JSON.stringify(items.map(i => ({ n: i.name, d: i.description })));
     const hasTranslations = items.some(i => i.translations && Object.keys(i.translations).length > 0);
     
     if (hasTranslations && currentContentHash === lastTranslatedContent.current) {
-      return alert("Il menu è già stato tradotto e non ci sono modifiche ai testi dall'ultima traduzione!");
+      toast.info("Il menu è già stato tradotto e non ci sono modifiche ai testi dall'ultima traduzione!", 'Già tradotto');
+      return;
     }
 
     setIsTranslating(true);
@@ -339,7 +342,7 @@ function AdminDashboardContent() {
       setTranslateSuccess(true);
       setTimeout(() => setTranslateSuccess(false), 6000);
     } catch (err) {
-      alert("Errore traduzione: " + err.message);
+      toast.error('Errore traduzione: ' + err.message, 'Errore');
     } finally {
       setIsTranslating(false);
     }
@@ -366,7 +369,7 @@ function AdminDashboardContent() {
       if (!resData.success) throw new Error(resData.error);
       if (!silent) setShowSuccessModal(true);
     } catch (err) {
-      if (!silent) alert('❌ Errore durante il salvataggio: ' + err.message);
+      if (!silent) toast.error('Errore durante il salvataggio: ' + err.message, 'Errore');
       else console.error('Silent save error:', err);
     } finally {
       if (!silent) setIsSaving(false);
@@ -387,7 +390,7 @@ function AdminDashboardContent() {
   const handleSettingsChange = (e) => setSettings({ ...settings, [e.target.name]: e.target.value });
 
   const handleAddProduct = () => {
-    if (!newItem.name || !newItem.price) return alert("Inserisci quantomeno un nome e un prezzo.");
+    if (!newItem.name || !newItem.price) { toast.warning('Inserisci quantomeno un nome e un prezzo.', 'Dati mancanti'); return; }
     const product = {
       id: 'manual-' + Date.now(),
       name: newItem.name,
@@ -427,7 +430,7 @@ function AdminDashboardContent() {
       
       {/* HEADER PREMIUM */}
       <header className="bg-slate-900/95 backdrop-blur-md border-b border-white/10 sticky top-0 z-40 shadow-2xl shadow-indigo-900/20">
-        <div className="max-w-5xl mx-auto px-6 h-[72px] flex justify-between items-center">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-[72px] flex justify-between items-center">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 via-purple-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
@@ -457,7 +460,7 @@ function AdminDashboardContent() {
 
       {/* GUEST BANNER */}
       {!user && (
-        <div className="max-w-4xl mx-auto mt-6 px-6 relative z-10">
+        <div className="max-w-4xl mx-auto mt-6 px-4 sm:px-6 relative z-10">
           <div className="bg-gradient-to-r from-amber-100 to-orange-50 border border-amber-200 px-5 py-3 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left shadow-sm">
             <div className="flex items-center gap-3 text-amber-900 text-xs sm:text-sm font-medium">
               <svg className="shrink-0 text-amber-600" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -470,7 +473,7 @@ function AdminDashboardContent() {
         </div>
       )}
 
-      <main className="max-w-5xl mx-auto px-6 py-10 space-y-8">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-8">
         
         {/* IMPOSTAZIONI RISTORANTE E CONDIVISIONE */}
         <section>
@@ -478,7 +481,7 @@ function AdminDashboardContent() {
              <div className="h-6 w-1 bg-amber-500 rounded-full"></div>
              <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest">Setup Ristorante</h2>
           </div>
-          <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
+          <div className="bg-white rounded-3xl border border-slate-200 p-5 sm:p-8 shadow-sm">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="flex flex-col h-full">
                 <label className="text-sm font-bold text-slate-700 block mb-2">Nome Ristorante</label>
@@ -492,7 +495,12 @@ function AdminDashboardContent() {
               </div>
               <div className="flex flex-col h-full">
                 <label className="text-sm font-bold text-slate-700 block mb-1">Sito Personalizzato (Opzionale)</label>
-                <p className="text-xs text-slate-500 mb-3">Inserisci qui il tuo sito se vuoi che il QR Code vi indirizzi direttamente.</p>
+                <p className="text-xs text-slate-500 mb-3">
+                  Inserisci qui il tuo sito se vuoi che il QR Code vi indirizzi direttamente. 
+                  <a href="/api-docs" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-bold text-amber-600 hover:text-amber-700 hover:underline ml-1">
+                    Docs API <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                  </a>
+                </p>
                 <input 
                   type="text" 
                   name="customUrl"
@@ -508,7 +516,7 @@ function AdminDashboardContent() {
                     <label className="text-sm font-bold text-slate-700 block mb-1">Prezzo Coperto (Opzionale)</label>
                     <p className="text-xs text-slate-500 mb-3">Se indicato, apparirà in fondo al tuo menù digitale come costo del servizio.</p>
                     <div className="relative mt-auto">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">{settings.currency || "€"}</span>
                       <input 
                         type="number" 
                         step="0.50"
@@ -522,7 +530,7 @@ function AdminDashboardContent() {
                   </div>
                   <div className="w-full md:w-1/2 md:border-l border-slate-100 md:pl-8 flex flex-col h-full">
                     <label className="text-sm font-bold text-slate-700 flex items-center justify-between gap-2 mb-1">
-                      <span>White-Label <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded uppercase tracking-wider ml-2">Premium</span></span>
+                      <span>White-Label <span className="text-[9px] bg-emerald-500 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm ml-2">Gratis in Beta</span></span>
                       <label className="relative inline-flex items-center cursor-pointer shrink-0">
                         <input type="checkbox" className="sr-only peer" checked={settings.whiteLabel || false} onChange={(e) => setSettings({...settings, whiteLabel: e.target.checked})} />
                         <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
@@ -532,67 +540,65 @@ function AdminDashboardContent() {
                   </div>
                 </div>
 
-                {/* Link TripAdvisor / Recensioni */}
-                <div className="border-t border-slate-100 pt-6 mt-6">
-                  <label className="text-sm font-bold text-slate-700 flex items-center gap-2 mb-2">
-                    Link Recensioni TripAdvisor
-                    <span className="text-[9px] bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm">Premium</span>
-                  </label>
-                  <p className="text-xs text-slate-500 mb-3">Inserisci il link alla pagina TripAdvisor del tuo ristorante. I clienti potranno lasciare una recensione direttamente dal menu e verranno invitati a recensire anche su TripAdvisor.</p>
-                  <input
-                    type="url"
-                    name="tripadvisorUrl"
-                    value={settings.tripadvisorUrl || ''}
-                    onChange={handleSettingsChange}
-                    className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white text-sm font-medium focus:ring-2 focus:ring-amber-500 outline-none transition-all"
-                    placeholder="https://www.tripadvisor.it/Restaurant_Review-..."
-                  />
+                <div className="border-t border-slate-100 pt-6 mt-6 flex flex-col md:flex-row gap-8 items-start justify-between">
+                  {/* VALUTA */}
+                  <div className="w-full md:w-1/3 flex flex-col h-full">
+                    <label className="text-sm font-bold text-slate-700 block mb-1">Valuta</label>
+                    <p className="text-xs text-slate-500 mb-3">Scegli la valuta per i prezzi.</p>
+                    <div className="relative mt-auto">
+                      <select
+                        name="currency"
+                        value={settings.currency || "€"}
+                        onChange={handleSettingsChange}
+                        className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 hover:bg-slate-100 focus:bg-white text-md font-bold focus:ring-2 focus:ring-amber-500 outline-none transition-all cursor-pointer appearance-none"
+                      >
+                        <option value="€">EUR (€)</option>
+                        <option value="$">USD ($)</option>
+                        <option value="£">GBP (£)</option>
+                        <option value="CHF">CHF</option>
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* TRIPADVISOR */}
+                  <div className="w-full md:w-2/3 md:border-l border-slate-100 md:pl-8 flex flex-col h-full">
+                    <label className="text-sm font-bold text-slate-700 flex items-center gap-2 mb-2">
+                      Link Recensioni TripAdvisor
+                      <span className="text-[9px] bg-emerald-500 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm">Gratis in Beta</span>
+                    </label>
+                    <p className="text-xs text-slate-500 mb-3">Inserisci il link alla pagina TripAdvisor. I clienti potranno lasciare una recensione direttamente.</p>
+                    <input
+                      type="url"
+                      name="tripadvisorUrl"
+                      value={settings.tripadvisorUrl || ''}
+                      onChange={handleSettingsChange}
+                      className="w-full mt-auto px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white text-sm font-medium focus:ring-2 focus:ring-amber-500 outline-none transition-all"
+                      placeholder="https://www.tripadvisor.it/Restaurant_Review-..."
+                    />
+                  </div>
                 </div>
 
                 {/* Ordina dal Menu */}
-                <div className="border-t border-slate-100 pt-6 mt-6">
+                <div className="border-t border-slate-100 pt-6 mt-6 opacity-75">
                   <label className="text-sm font-bold text-slate-700 flex items-center justify-between gap-2 mb-1">
-                    <span>Funzione Ordina <span className="text-[9px] bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm ml-2">Premium</span></span>
-                    <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                      <input type="checkbox" className="sr-only peer" checked={settings.enableOrdering || false} onChange={(e) => setSettings({...settings, enableOrdering: e.target.checked})} />
+                    <span>Funzione Ordina <span className="text-[9px] bg-slate-500 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm ml-2">In Manutenzione</span></span>
+                    <label className="relative inline-flex items-center cursor-pointer shrink-0 opacity-50">
+                      <input type="checkbox" disabled className="sr-only peer" checked={settings.enableOrdering || false} onChange={(e) => setSettings({...settings, enableOrdering: e.target.checked})} />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
                     </label>
                   </label>
-                  <p className="text-xs text-slate-500 mt-2">Permette ai clienti di aggiungere piatti al carrello e inviare un ordine direttamente dal menu digitale.</p>
+                  <p className="text-xs text-slate-500 mt-2">Permette ai clienti di aggiungere piatti al carrello. <strong>Attualmente sospesa per integrazione nuovo sistema pagamenti.</strong></p>
                   
                   {settings.enableOrdering && (
                     <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-bold text-slate-700">Pagamenti con Stripe</span>
-                        {settings.stripeAccountId ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Attivo
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold">
-                            Non configurato
-                          </span>
-                        )}
-                      </div>
-                      
-                      {settings.stripeAccountId ? (
-                         <div className="flex items-center justify-between gap-4">
-                           <p className="text-xs text-slate-500">I pagamenti dal menu verranno accreditati automaticamente sul tuo conto bancario.</p>
-                           <button onClick={handleConnectStripe} disabled={isConnectingStripe} className="text-xs font-bold text-indigo-600 hover:text-indigo-800 whitespace-nowrap">Gestisci Conto</button>
-                         </div>
-                      ) : (
-                        <div>
-                           <p className="text-xs text-slate-500 mb-3">Necessario per ricevere fondi da Apple Pay, Google Pay e Carte.</p>
-                           <button 
-                             onClick={handleConnectStripe} 
-                             disabled={isConnectingStripe}
-                             className="w-full bg-[#635BFF] hover:bg-[#5851df] text-white font-bold py-2.5 rounded-lg text-sm transition-all shadow-md shadow-[#635BFF]/20 flex items-center justify-center gap-2"
-                           >
-                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                             {isConnectingStripe ? 'Reindirizzamento...' : 'Collega Conto per ricevere Pagamenti'}
-                           </button>
-                        </div>
-                      )}
+                      <p className="text-sm font-bold text-rose-600 mb-2">Integrazione Pagamenti in Corso</p>
+                      <p className="text-xs text-slate-600">
+                        Per garantirti la massima sicurezza e rispettare le nuove normative fiscali, l'integrazione per incassare 
+                        soldi direttamente dai clienti tramite carta o Apple Pay è temporaneamente sospesa in attesa di sblocco.
+                      </p>
                     </div>
                   )}
                 </div>
@@ -608,7 +614,7 @@ function AdminDashboardContent() {
              <div className="h-6 w-1 bg-pink-500 rounded-full"></div>
              <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest">Design Menù</h2>
           </div>
-          <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
+          <div className="bg-white rounded-3xl border border-slate-200 p-5 sm:p-8 shadow-sm">
             <h3 className="text-xl font-bold text-slate-900 mb-6 tracking-tight">Qual è l'atmosfera del tuo locale?</h3>
             
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6">
@@ -677,7 +683,7 @@ function AdminDashboardContent() {
                 onClick={() => setSettings({...settings, template: 'vibrant', palette: 'default'})}
                 className={`isolate relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'vibrant' ? 'border-slate-900 shadow-[6px_6px_0px_#fde047] scale-[1.02] -translate-y-1 z-10' : 'border-slate-100 hover:border-slate-300 opacity-70 hover:opacity-100'}`}
               >
-                 <span className="absolute top-2 right-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">Premium</span>
+                 <span className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">Gratis in Beta</span>
                  <div className="absolute inset-0 bg-pink-50 -z-10"></div>
                  <div className="absolute bottom-[-10%] left-[-10%] w-24 h-24 bg-yellow-400 rounded-full -z-10"></div>
                  <div className="w-12 h-10 mb-auto mt-4 bg-blue-600 rounded-xl transform -rotate-6 flex items-center justify-center shadow-sm border border-blue-700">
@@ -693,7 +699,7 @@ function AdminDashboardContent() {
                 onClick={() => setSettings({...settings, template: 'luxury', palette: 'default'})}
                 className={`isolate relative cursor-pointer rounded-2xl border-[3px] transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'luxury' ? 'border-stone-800 shadow-2xl scale-[1.02] z-10' : 'border-slate-200 hover:border-stone-400 opacity-70 hover:opacity-100'}`}
               >
-                 <span className="absolute top-2 right-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">Premium</span>
+                 <span className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">Gratis in Beta</span>
                  <div className="absolute inset-0 bg-stone-100 -z-10"></div>
                  <div className="absolute top-0 inset-x-0 h-1/2 bg-gradient-to-b from-stone-200 to-transparent -z-10"></div>
                  <div className="w-10 h-14 mb-auto mt-2 border border-stone-800 flex items-center justify-center bg-transparent">
@@ -768,11 +774,11 @@ function AdminDashboardContent() {
         <section>
           <div className="flex items-center gap-2 mb-4">
              <div className="h-6 w-1 bg-fuchsia-500 rounded-full"></div>
-             <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest">Traduzioni IA (Premium)</h2>
+             <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest">Traduzioni IA (Gratis in Beta)</h2>
           </div>
-          <div className="bg-gradient-to-br from-fuchsia-50 to-purple-50 rounded-3xl border border-fuchsia-100 p-8 shadow-sm">
+          <div className="bg-gradient-to-br from-fuchsia-50 to-purple-50 rounded-3xl border border-fuchsia-100 p-5 sm:p-8 shadow-sm">
             <div className="text-center max-w-xl mx-auto">
-              <div className="inline-block bg-fuchsia-500 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-md shadow-fuchsia-500/20">Esclusiva Plus</div>
+              <div className="inline-block bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 shadow-md shadow-emerald-500/20">Esclusiva Sbloccata</div>
               <h3 className="text-2xl font-bold text-slate-900 mb-2">Multilingua Automatico</h3>
               <p className="text-slate-600 mb-6 text-sm leading-relaxed">
                 Rendi il tuo menù internazionale. Usa l'Intelligenza Artificiale per tradurre istantaneamente tutti i piatti (titoli, descrizioni e categorie) in Inglese, Tedesco, Francese e Spagnolo.
@@ -818,7 +824,7 @@ function AdminDashboardContent() {
              <div className="h-6 w-1 bg-indigo-500 rounded-full"></div>
              <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest">Importazione</h2>
           </div>
-          <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
+          <div className="bg-white rounded-3xl border border-slate-200 p-5 sm:p-8 shadow-sm">
             <div className="text-center max-w-xl mx-auto">
               <h3 className="text-2xl font-bold text-slate-900 mb-2">Da immagine a Menù Digitale</h3>
               <p className="text-slate-500 mb-8 text-sm leading-relaxed">
@@ -933,11 +939,11 @@ function AdminDashboardContent() {
                         )}
                         {generatingCopyId === item.id ? 'Generando...' : (item.description ? 'Migliora copy IA' : 'Genera copy IA')}
                       </button>
-                      <span className="text-[9px] bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm">Premium</span>
+                      <span className="text-[9px] bg-emerald-500 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm">Beta Free</span>
                     </div>
                     {/* TAG DIETETICI (Premium) */}
                     <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                       <span className="text-[9px] bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm mr-1">Premium</span>
+                       <span className="text-[9px] bg-emerald-500 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm mr-1">Beta Free</span>
                        {DIETARY_OPTIONS.map(opt => {
                           const tags = item.dietaryTags || [];
                           const isActive = tags.includes(opt.id);
@@ -962,7 +968,7 @@ function AdminDashboardContent() {
                   
                   <div className="flex items-center gap-4 w-full md:w-auto shrink-0 justify-between md:justify-end border-t md:border-none pt-4 md:pt-0 border-slate-100">
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">{settings.currency || "€"}</span>
                       <input 
                         type="number"
                         step="0.50"
@@ -1036,11 +1042,11 @@ function AdminDashboardContent() {
                   <input type="text" value={newItem.description || ''} onChange={e => setNewItem({...newItem, description: e.target.value})} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-white text-sm font-medium focus:ring-2 focus:ring-teal-500 outline-none" placeholder="Opzionale.." />
                 </div>
                 <div className="md:col-span-1">
-                  <label className="text-xs font-bold text-slate-500 block mb-1">PREZZO ($)</label>
+                  <label className="text-xs font-bold text-slate-500 block mb-1">PREZZO ({settings.currency || "€"})</label>
                   <input type="number" step="0.50" value={newItem.price} onChange={e => setNewItem({...newItem, price: e.target.value})} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-white text-sm font-bold focus:ring-2 focus:ring-teal-500 outline-none" placeholder="0.00" />
                 </div>
                 <div className="md:col-span-5">
-                  <label className="text-xs font-bold text-slate-500 block mb-1">TAG DIETETICI <span className="text-[9px] bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm ml-1">Premium</span></label>
+                  <label className="text-xs font-bold text-slate-500 block mb-1">TAG DIETETICI <span className="text-[9px] bg-emerald-500 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm ml-1">Beta Free</span></label>
                   <div className="flex flex-wrap gap-1.5">
                     {DIETARY_OPTIONS.map(opt => {
                        const isActive = (newItem.dietaryTags || []).includes(opt.id);

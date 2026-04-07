@@ -1,10 +1,12 @@
 "use client";
 import { useState, useEffect } from 'react';
+import { useToast } from '@/components/Toast';
 
 export default function OrdersPanel({ menus }) {
   const [selectedRestId, setSelectedRestId] = useState(menus.length > 0 ? menus[0].restaurant_id : '');
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     if (!selectedRestId) return;
@@ -41,10 +43,10 @@ export default function OrdersPanel({ menus }) {
       if (data.success) {
         setOrders(prev => prev.filter(o => o.id !== orderId));
       } else {
-        alert("Errore: " + data.error);
+        toast.error('Errore: ' + data.error, 'Errore');
       }
     } catch (err) {
-      alert("Errore di connessione");
+      toast.error('Errore di connessione', 'Errore');
     }
   };
 

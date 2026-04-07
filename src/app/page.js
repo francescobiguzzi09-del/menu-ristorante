@@ -45,6 +45,15 @@ export default function SaaSLanding() {
             <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl mx-auto mb-8 flex items-center justify-center shadow-lg shadow-indigo-500/20 transform hover:scale-105 transition-transform duration-300">
                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
             </div>
+            
+            <div className="bg-emerald-50 text-emerald-800 border border-emerald-200/60 shadow-sm text-sm font-black py-2.5 px-6 rounded-full inline-flex items-center justify-center gap-2.5 mb-8 animate-in fade-in slide-in-from-bottom-2">
+              <span className="relative flex h-2.5 w-2.5 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+              </span>
+              Lancio Beta: Iscriviti ora e ottieni tutte le funzioni Premium Gratis!
+            </div>
+
             <h1 className="text-5xl font-black text-slate-900 tracking-tight mb-6">SmartMenu AI</h1>
             <p className="text-xl text-slate-500 mb-10 font-medium leading-relaxed max-w-xl mx-auto">
               La piattaforma definitiva per creare, gestire e condividere il menù del tuo ristorante ovunque, in 2 minuti grazie all'intelligenza artificiale.
