@@ -119,11 +119,17 @@ export default function DashboardPage() {
       {/* HEADER */}
       <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 shadow-sm transition-colors duration-300">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-            </div>
-            <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white truncate max-w-[150px] sm:max-w-none">I Miei Ristoranti</h1>
+          <div className="flex items-center gap-4 sm:gap-6">
+            <a href="/" className="flex items-center gap-2 group cursor-pointer hover:opacity-80 transition-opacity">
+              <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              </div>
+              <span className="font-black text-xl tracking-tight text-slate-900 dark:text-white hidden sm:block">
+                SmartMenu <span className="text-indigo-600 dark:text-indigo-400">AI</span>
+              </span>
+            </a>
+            <div className="h-6 w-[1px] bg-slate-200 dark:bg-slate-700 hidden sm:block"></div>
+            <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-800 dark:text-slate-200 truncate max-w-[120px] sm:max-w-none">I Miei Ristoranti</h1>
           </div>
           <div className="flex items-center gap-4">
             {user?.email === 'francesco.biguzzi09@gmail.com' && (

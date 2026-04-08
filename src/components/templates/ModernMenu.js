@@ -20,7 +20,7 @@ export default function ModernMenu({ menuByCategory, settings, onItemClick }) {
         <h1 className={`text-4xl md:text-5xl font-black ${theme.text} tracking-tight leading-none mb-4 sm:mb-0 uppercase`}>
           {restaurantName}
         </h1>
-        <p className="text-zinc-500 font-bold tracking-widest text-xs uppercase">Est. 2024</p>
+        <p className="text-zinc-500 font-bold tracking-widest text-xs uppercase">{settings?.customHeader || "Est. 2024"}</p>
       </header>
 
       {/* MENU LIST */}
@@ -85,7 +85,9 @@ export default function ModernMenu({ menuByCategory, settings, onItemClick }) {
 
       {/* FOOTER */}
       <footer className="max-w-3xl mx-auto px-6 mt-20 pt-8 border-t border-zinc-200 text-center flex flex-col items-center opacity-80 gap-6">
-        <p className="text-xs font-bold uppercase tracking-widest text-zinc-400">&copy; {new Date().getFullYear()} {restaurantName.substring(0,20)}</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-zinc-400">
+          {settings?.customFooter || `© ${new Date().getFullYear()} ${restaurantName.substring(0,20)}`}
+        </p>
         <GlobalFooter settings={settings} theme="light" />
       </footer>
     </div>

@@ -581,6 +581,42 @@ function AdminDashboardContent() {
                   </div>
                 </div>
 
+                {/* TESTI PERSONALIZZATI (BETA) */}
+                <div className="border-t border-slate-100 pt-6 mt-6 flex flex-col gap-6">
+                  <div className="flex flex-col">
+                    <label className="text-sm font-bold text-slate-700 flex items-center gap-2 mb-2">
+                       Testi Personalizzati Template
+                       <span className="text-[9px] bg-emerald-500 text-white font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm">Gratis in Beta</span>
+                    </label>
+                    <p className="text-xs text-slate-500 mb-4">Sostituisci i testi pre-impostati che appaiono in base al template (come gli slogan in alto o i saluti finali). Lascia vuoto per usare il testo predefinito.</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="flex flex-col">
+                        <label className="text-xs font-bold text-slate-600 mb-1">Frase in Alto (Sottotitolo/Slogan)</label>
+                        <input
+                          type="text"
+                          name="customHeader"
+                          value={settings.customHeader || ''}
+                          onChange={handleSettingsChange}
+                          className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white text-sm font-medium focus:ring-2 focus:ring-amber-500 outline-none transition-all placeholder-slate-300"
+                          placeholder="es. Dal 1956, Healthy & Organic..."
+                        />
+                      </div>
+                      <div className="flex flex-col">
+                        <label className="text-xs font-bold text-slate-600 mb-1">Frase in Basso (Ringraziamenti/Saluti)</label>
+                        <input
+                          type="text"
+                          name="customFooter"
+                          value={settings.customFooter || ''}
+                          onChange={handleSettingsChange}
+                          className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white text-sm font-medium focus:ring-2 focus:ring-amber-500 outline-none transition-all placeholder-slate-300"
+                          placeholder="es. Buon Appetito, Fatto con Amore..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Ordina dal Menu */}
                 <div className="border-t border-slate-100 pt-6 mt-6 opacity-75">
                   <label className="text-sm font-bold text-slate-700 flex items-center justify-between gap-2 mb-1">
@@ -617,7 +653,7 @@ function AdminDashboardContent() {
           <div className="bg-white rounded-3xl border border-slate-200 p-5 sm:p-8 shadow-sm">
             <h3 className="text-xl font-bold text-slate-900 mb-6 tracking-tight">Qual è l'atmosfera del tuo locale?</h3>
             
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
               
               {/* Elegant */}
               <div 
@@ -710,6 +746,49 @@ function AdminDashboardContent() {
                  {settings.template === 'luxury' && <div className="absolute top-3 left-3 w-6 h-6 bg-stone-800 rounded-full flex items-center justify-center text-white"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
               </div>
 
+              {/* Sushi (New Dark) */}
+              <div 
+                onClick={() => setSettings({...settings, template: 'sushi', palette: 'default'})}
+                className={`isolate relative cursor-pointer rounded-2xl border-[3px] transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 bg-[#020617] ${settings.template === 'sushi' ? 'border-emerald-500 shadow-2xl scale-[1.02] z-10' : 'border-slate-800 hover:border-emerald-900 opacity-70 hover:opacity-100'}`}
+              >
+                 <span className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">New</span>
+                 <div className="w-10 h-10 mb-auto mt-4 rounded-full border border-emerald-500/30 flex items-center justify-center bg-slate-900 shadow-inner overflow-hidden">
+                    <span className="text-emerald-500 font-mono font-black text-lg">S</span>
+                 </div>
+                 <h4 className="text-white font-mono tracking-widest text-sm uppercase mb-1 drop-shadow-md">Sushi</h4>
+                 <div className="h-[2px] w-6 bg-emerald-500/50"></div>
+                 {settings.template === 'sushi' && <div className="absolute top-3 left-3 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-white"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
+              </div>
+
+              {/* Taverna (New Vintage) */}
+              <div 
+                onClick={() => setSettings({...settings, template: 'taverna', palette: 'default'})}
+                className={`isolate relative cursor-pointer rounded-2xl border-[3px] transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 bg-[#0a0a0b] ${settings.template === 'taverna' ? 'border-[#c9a66b] shadow-2xl scale-[1.02] z-10' : 'border-[#1a1a1c] hover:border-[#332e29] opacity-70 hover:opacity-100'}`}
+              >
+                 <span className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">New</span>
+                 <div className="w-10 h-10 mb-auto mt-4 rounded-full flex items-center justify-center bg-transparent border-t border-b border-[#c9a66b]">
+                    <span className="text-[#c9a66b] font-serif font-light text-xl">T</span>
+                 </div>
+                 <h4 className="text-white font-serif tracking-[0.2em] text-xs uppercase mb-1 drop-shadow-md z-10">Taverna</h4>
+                 <div className="h-[1px] w-6 bg-[#c9a66b] opacity-50"></div>
+                 {settings.template === 'taverna' && <div className="absolute top-3 left-3 w-6 h-6 bg-[#c9a66b] rounded-full flex items-center justify-center text-[#0a0a0b]"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
+                 <div className="absolute inset-0 bg-gradient-to-t from-[#c9a66b]/10 to-transparent pointer-events-none"></div>
+              </div>
+
+              {/* Brunch (New Clean) */}
+              <div 
+                onClick={() => setSettings({...settings, template: 'brunch', palette: 'default'})}
+                className={`isolate relative cursor-pointer rounded-3xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 bg-[#f8f9fa] ${settings.template === 'brunch' ? 'border-emerald-600 shadow-[0_10px_30px_rgba(5,150,105,0.2)] scale-[1.02] z-10' : 'border-slate-100 hover:border-emerald-200 opacity-70 hover:opacity-100'}`}
+              >
+                 <span className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">New</span>
+                 <div className="w-16 h-8 mb-auto mt-6 rounded-full bg-white shadow-sm flex items-center justify-center border border-slate-50">
+                    <span className="text-slate-900 font-sans font-black text-sm uppercase tracking-wider">B</span>
+                 </div>
+                 <h4 className="text-slate-800 font-sans font-black tracking-widest text-sm uppercase mb-1">Brunch</h4>
+                 <div className="h-1 w-6 rounded-full bg-emerald-600"></div>
+                 {settings.template === 'brunch' && <div className="absolute top-3 left-3 w-6 h-6 bg-emerald-600 rounded-full flex items-center justify-center text-white shadow-sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>}
+              </div>
+
             </div>
 
             {/* PALETTE SCELTA - DYNAMIC COMPONENT */}
@@ -748,6 +827,21 @@ function AdminDashboardContent() {
                        { id: 'default', name: 'Indigo', hex: '#4f46e5' },
                        { id: 'neon', name: 'Neon', hex: '#a3e635' },
                        { id: 'sunset', name: 'Sunset', hex: '#f43f5e' }
+                     ],
+                     sushi: [
+                       { id: 'default', name: 'Emerald', hex: '#10b981' },
+                       { id: 'ruby', name: 'Ruby', hex: '#e11d48' },
+                       { id: 'gold', name: 'Gold', hex: '#fbbf24' }
+                     ],
+                     taverna: [
+                       { id: 'default', name: 'Gold', hex: '#c9a66b' },
+                       { id: 'silver', name: 'Silver', hex: '#94a3b8' },
+                       { id: 'copper', name: 'Copper', hex: '#b45309' }
+                     ],
+                     brunch: [
+                       { id: 'default', name: 'Emerald', hex: '#059669' },
+                       { id: 'rose', name: 'Rose', hex: '#e11d48' },
+                       { id: 'ocean', name: 'Ocean', hex: '#0284c7' }
                      ]
                    };
                    const activePalettes = palettes[currTemplate] || palettes.elegant;

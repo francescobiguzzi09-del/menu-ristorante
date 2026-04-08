@@ -28,7 +28,7 @@ export default function CinematicMenu({ menuByCategory, settings, onItemClick })
         <header className="mb-20 text-center animate-in fade-in slide-in-from-bottom-8 duration-1000">
            <h1 className={`text-4xl md:text-6xl font-black uppercase tracking-[0.2em] text-white mb-6 drop-shadow-2xl`}>{restaurantName}</h1>
            <div className={`h-[1px] w-24 mx-auto ${theme.glow} ${theme.border} border-t mb-6`}></div>
-           <p className="text-slate-400 text-sm tracking-widest uppercase font-light">Experience the Taste</p>
+           <p className="text-slate-400 text-sm tracking-widest uppercase font-light">{settings?.customHeader || "Experience the Taste"}</p>
         </header>
 
         {/* MENU ITEMS */}
@@ -77,8 +77,12 @@ export default function CinematicMenu({ menuByCategory, settings, onItemClick })
           </div>
         )}
       </main>
-
-      <GlobalFooter settings={settings} theme="dark" />
+      <div className="mt-24 text-center">
+        {settings?.customFooter && (
+          <p className="text-slate-500 text-[10px] tracking-widest uppercase mb-6 block">{settings.customFooter}</p>
+        )}
+        <GlobalFooter settings={settings} theme="dark" />
+      </div>
     </div>
   );
 }

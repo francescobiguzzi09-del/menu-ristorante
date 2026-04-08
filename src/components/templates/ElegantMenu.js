@@ -23,7 +23,7 @@ export default function ElegantMenu({ menuByCategory, settings, onItemClick }) {
       <header className="relative z-10 pt-24 pb-16 px-6 text-center">
         <h1 className="text-5xl md:text-6xl font-serif text-white mb-2 tracking-wide font-light">{restaurantName}</h1>
         <div className={`h-[1px] w-12 ${theme.bg} mx-auto mt-6 mb-4`}></div>
-        <p className="text-[#a19f9b] uppercase tracking-[0.3em] text-xs font-medium">Fine Dining & Experience</p>
+        <p className="text-[#a19f9b] uppercase tracking-[0.3em] text-xs font-medium">{settings?.customHeader || "Fine Dining & Experience"}</p>
       </header>
 
       {/* MENU LIST */}
@@ -91,7 +91,7 @@ export default function ElegantMenu({ menuByCategory, settings, onItemClick }) {
 
       {/* FOOTER */}
       <footer className="relative z-10 mt-24 text-center pb-8 border-t border-[#1a1815] pt-8">
-        <p className="text-[#555] text-xs tracking-widest uppercase text-center w-full block">Buon Appetito.</p>
+        <p className="text-[#555] text-xs tracking-widest uppercase text-center w-full block">{settings?.customFooter || "Buon Appetito."}</p>
         <GlobalFooter settings={settings} theme="dark" />
       </footer>
     </div>

@@ -6,6 +6,9 @@ import RusticMenu from '@/components/templates/RusticMenu';
 import VibrantMenu from '@/components/templates/VibrantMenu';
 import CinematicMenu from '@/components/templates/CinematicMenu';
 import LuxuryMenu from '@/components/templates/LuxuryMenu';
+import SushiMenu from '@/components/templates/SushiMenu';
+import TavernaMenu from '@/components/templates/TavernaMenu';
+import BrunchMenu from '@/components/templates/BrunchMenu';
 import CheckoutModal from '@/components/CheckoutModal';
 
 const DIETARY_FILTERS = [
@@ -179,6 +182,9 @@ export default function MenuRenderer({ menu, settings, restaurantId }) {
       case 'vibrant': return <VibrantMenu menuByCategory={menuByCategory} settings={settings} onItemClick={handleItemClick} />;
       case 'cinematic': return <CinematicMenu menuByCategory={menuByCategory} settings={settings} onItemClick={handleItemClick} />;
       case 'luxury': return <LuxuryMenu menuByCategory={menuByCategory} settings={settings} onItemClick={handleItemClick} />;
+      case 'sushi': return <SushiMenu menuByCategory={menuByCategory} settings={settings} onItemClick={handleItemClick} />;
+      case 'taverna': return <TavernaMenu menuByCategory={menuByCategory} settings={settings} onItemClick={handleItemClick} />;
+      case 'brunch': return <BrunchMenu menuByCategory={menuByCategory} settings={settings} onItemClick={handleItemClick} />;
       case 'elegant':
       default: return <ElegantMenu menuByCategory={menuByCategory} settings={settings} onItemClick={handleItemClick} />;
     }

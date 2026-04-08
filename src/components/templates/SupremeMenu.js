@@ -25,9 +25,15 @@ export default function SupremeMenu({ menuByCategory, settings, onItemClick }) {
            <div className={`absolute -top-10 -left-10 w-40 h-40 ${theme.primary} rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse`}></div>
            <div className={`absolute top-0 -right-10 w-40 h-40 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse`} style={{ animationDelay: '2s' }}></div>
            
-           <div className={`inline-block border-4 ${isDark ? 'border-zinc-700 bg-zinc-800' : 'border-black bg-white'} px-6 py-4 md:px-8 md:py-6 transform -rotate-2 hover:rotate-0 transition-transform duration-300 ${theme.shadow}`}>
+            <div className={`inline-block border-4 ${isDark ? 'border-zinc-700 bg-zinc-800' : 'border-black bg-white'} px-6 py-4 md:px-8 md:py-6 transform -rotate-2 hover:rotate-0 transition-transform duration-300 ${theme.shadow} mb-8`}>
              <h1 className={`text-3xl md:text-5xl font-black uppercase tracking-tighter ${isDark ? 'text-white' : 'text-black'}`}>{restaurantName}</h1>
            </div>
+           
+           {settings?.customHeader && (
+             <div className={`inline-block mt-4 px-4 py-2 bg-yellow-400 text-black font-black uppercase tracking-widest text-sm border-2 border-black transform rotate-1`}>
+               {settings.customHeader}
+             </div>
+           )}
         </header>
 
         {/* MENU ITEMS */}
@@ -73,8 +79,12 @@ export default function SupremeMenu({ menuByCategory, settings, onItemClick }) {
           </div>
         )}
       </main>
-
-      <GlobalFooter settings={settings} theme={isDark ? 'dark' : 'light'} />
+      <div className="mt-20">
+        {settings?.customFooter && (
+          <div className="text-center mb-10 text-xl font-black uppercase tracking-widest opacity-80">{settings.customFooter}</div>
+        )}
+        <GlobalFooter settings={settings} theme={isDark ? 'dark' : 'light'} />
+      </div>
     </div>
   );
 }

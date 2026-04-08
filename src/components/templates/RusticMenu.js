@@ -23,7 +23,7 @@ export default function RusticMenu({ menuByCategory, settings, onItemClick }) {
         <h1 className="text-4xl md:text-5xl font-bold text-[#2d241c] tracking-tight">{restaurantName}</h1>
         <div className="flex items-center justify-center gap-3">
           <span className="h-px border-t border-dashed border-[#b8a99a] w-12"></span>
-          <p className={`text-[#8c7a6b] italic text-lg ${theme.decoration} decoration-wavy underline-offset-4`}>Cucina Tradizionale</p>
+          <p className={`text-[#8c7a6b] italic text-lg ${theme.decoration} decoration-wavy underline-offset-4`}>{settings?.customHeader || "Cucina Tradizionale"}</p>
           <span className="h-px border-t border-dashed border-[#b8a99a] w-12"></span>
         </div>
       </header>
@@ -94,7 +94,7 @@ export default function RusticMenu({ menuByCategory, settings, onItemClick }) {
 
       {/* FOOTER */}
       <footer className="mt-20 py-10 text-center border-t-8 border-[#f4ebd8] bg-[#fdfbf7] text-[#8c7a6b]">
-         <p className="font-bold tracking-widest uppercase text-xs">Fatto con amore.</p>
+         <p className="font-bold tracking-widest uppercase text-xs mb-4">{settings?.customFooter || "Fatto con amore."}</p>
          <GlobalFooter settings={settings} theme="light" />
       </footer>
     </div>

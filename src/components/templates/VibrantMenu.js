@@ -39,7 +39,7 @@ export default function VibrantMenu({ menuByCategory, settings, onItemClick }) {
           </h1>
         </div>
         <p className={`mt-12 ${theme.badgeText} font-bold tracking-widest uppercase text-sm border-2 ${theme.badgeBorder} inline-block px-6 py-2 rounded-full bg-white shadow-sm`}>
-          Fresh & Tasty
+          {settings?.customHeader || "Fresh & Tasty"}
         </p>
       </header>
 
@@ -108,7 +108,12 @@ export default function VibrantMenu({ menuByCategory, settings, onItemClick }) {
           </div>
         )}
       </main>
-      <GlobalFooter settings={settings} theme="light" />
+      <div className="mt-20">
+        {settings?.customFooter && (
+          <p className="text-center font-black text-slate-800 uppercase tracking-widest bg-white border-2 border-slate-900 inline-block px-4 py-2 rounded-xl mb-8 transform rotate-2">{settings.customFooter}</p>
+        )}
+        <GlobalFooter settings={settings} theme="light" />
+      </div>
     </div>
   );
 }

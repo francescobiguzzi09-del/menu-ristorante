@@ -21,7 +21,7 @@ export default function LuxuryMenu({ menuByCategory, settings, onItemClick }) {
       <main className="max-w-3xl mx-auto px-6 pt-24 relative z-10">
         {/* EDITORIAL HEADER */}
         <header className="mb-24 flex flex-col items-center justify-center text-center">
-           <div className={`text-[10px] uppercase tracking-[0.4em] ${theme.secText} mb-6`}>Gastronomic Experience</div>
+           <div className={`text-[10px] uppercase tracking-[0.4em] ${theme.secText} mb-6`}>{settings?.customHeader || "Gastronomic Experience"}</div>
            <h1 className={`text-5xl md:text-7xl font-medium tracking-tighter uppercase ${theme.text}`}>{restaurantName}</h1>
            <div className={`h-16 w-px ${theme.border} border-l mt-12 mb-8`}></div>
            <p className={`text-sm italic ${theme.secText} max-w-sm`}>Savour the finest selection of dishes crafted with absolute dedication.</p>
@@ -69,8 +69,12 @@ export default function LuxuryMenu({ menuByCategory, settings, onItemClick }) {
           </div>
         )}
       </main>
-
-      <GlobalFooter settings={settings} theme={paletteId === 'default' ? 'light' : 'dark'} />
+      <div className="mt-20">
+        {settings?.customFooter && (
+          <p className={`text-center ${theme.secText} text-[10px] uppercase tracking-[0.3em] mb-8`}>{settings.customFooter}</p>
+        )}
+        <GlobalFooter settings={settings} theme={paletteId === 'default' ? 'light' : 'dark'} />
+      </div>
     </div>
   );
 }
