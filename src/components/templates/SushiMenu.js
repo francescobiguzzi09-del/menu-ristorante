@@ -1,8 +1,10 @@
 import React from 'react';
 import GlobalFooter from '../GlobalFooter';
+import { ItemBadge, ItemIngredients } from './ItemExtras';
 
-export default function SushiMenu({ menuByCategory, settings, onItemClick }) {
+export default function SushiMenu({ menuByCategory, settings, onItemClick, activeCategory, onCategoryClick, allCategories, activeLang, filteredMenu }) {
   const restaurantName = settings?.restaurantName || "SUSHI CLUB";
+  const currency = settings?.currency || '€';
   const coverCharge = settings?.coverCharge;
 
   const palette = settings?.palette || 'default';
@@ -36,7 +38,9 @@ export default function SushiMenu({ menuByCategory, settings, onItemClick }) {
               </div>
 
               <div className="space-y-6">
-                {items.map((item) => (
+                
+              {items.map((item, index) => (
+
                   <div 
                      key={item.id} 
                      onClick={() => onItemClick && onItemClick(item)}
@@ -50,13 +54,28 @@ export default function SushiMenu({ menuByCategory, settings, onItemClick }) {
                     
                     <div className="flex-1 min-w-0 flex flex-col justify-center">
                       <div className="flex justify-between items-start gap-4 mb-1">
-                         <h3 className={`text-base md:text-lg font-bold text-white group-hover:${activeColor.text} transition-colors truncate`}>{item.name}</h3>
-                         <span className={`text-base md:text-lg font-bold ${activeColor.text} shrink-0`}>€{parseFloat(item.price).toFixed(2)}</span>
+                         <h3 className={`text-base md:text-lg font-bold text-white group-hover:${activeColor.text} transition-colors truncate`}>
+                           <ItemBadge badge={item.badge} dark />
+                           {item.name}
+                         </h3>
+                         {item.variants && item.variants.length > 0 ? (
+                           <div className="flex flex-col items-end gap-0.5 shrink-0">
+                             {item.variants.map((v, vi) => (
+                               <span key={vi} className={`text-sm font-bold ${activeColor.text}`}>
+                                 <span className="text-xs text-slate-500 mr-1">{v.name}</span>{currency}{v.price.toFixed(2)}
+                               </span>
+                             ))}
+                           </div>
+                         ) : (
+                           <span className={`text-base md:text-lg font-bold ${activeColor.text} shrink-0`}>{currency}{parseFloat(item.price).toFixed(2)}</span>
+                         )}
                       </div>
                       <p className="text-xs md:text-sm text-slate-500 font-light leading-relaxed line-clamp-2 md:line-clamp-none">{item.description}</p>
+                      <ItemIngredients ingredients={item.ingredients} dark />
                     </div>
                   </div>
                 ))}
+  
               </div>
             </section>
           ))}
@@ -65,7 +84,7 @@ export default function SushiMenu({ menuByCategory, settings, onItemClick }) {
         {coverCharge && (
           <div className="mt-16 text-center border-t border-slate-800 pt-8">
             <p className="text-slate-500 text-xs tracking-widest uppercase">
-              Coperto / Servizio: <span className="text-white font-bold ml-2">€{parseFloat(coverCharge).toFixed(2)}</span>
+              Coperto / Servizio: <span className="text-white font-bold ml-2">{currency}{parseFloat(coverCharge).toFixed(2)}</span>
             </p>
           </div>
         )}

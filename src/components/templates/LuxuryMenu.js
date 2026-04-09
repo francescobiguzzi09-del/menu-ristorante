@@ -1,17 +1,19 @@
 import React from 'react';
 import GlobalFooter from '../GlobalFooter';
+import { ItemBadge, ItemIngredients } from './ItemExtras';
 
-export default function LuxuryMenu({ menuByCategory, settings, onItemClick }) {
+export default function LuxuryMenu({ menuByCategory, settings, onItemClick, activeCategory, onCategoryClick, allCategories, activeLang, filteredMenu }) {
   const restaurantName = settings?.restaurantName || "L'Essenza";
+  const currency = settings?.currency || '€';
   const paletteId = settings?.palette || 'default';
   
-  // Mappa Luxury 
   const palettes = {
     default: { bg: 'bg-[#f8f8f6]', card: 'bg-[#ffffff]', accent: 'text-[#8b7355]', border: 'border-[#e5e5e0]', text: 'text-[#1a1a1a]', secText: 'text-[#737373]' },
     charcoal: { bg: 'bg-[#111111]', card: 'bg-[#1a1a1a]', accent: 'text-[#c9a66b]', border: 'border-[#333333]', text: 'text-[#f5f5f5]', secText: 'text-[#888888]' },
     emerald: { bg: 'bg-[#06241a]', card: 'bg-[#0a2e22]', accent: 'text-[#e0c294]', border: 'border-[#144333]', text: 'text-[#ecf3ee]', secText: 'text-[#8da59b]' }
   };
   const theme = palettes[paletteId] || palettes.default;
+  const isDark = paletteId === 'charcoal' || paletteId === 'emerald';
 
   return (
     <div className={`min-h-screen ${theme.bg} ${theme.text} font-serif pb-20 relative overflow-x-hidden selection:bg-[#c9a66b] selection:text-white`}>
@@ -37,7 +39,9 @@ export default function LuxuryMenu({ menuByCategory, settings, onItemClick }) {
               </div>
 
               <div className="grid grid-cols-1 gap-16 md:gap-24">
-                {items.map((item) => (
+                
+              {items.map((item, index) => (
+
                   <div 
                      key={item.id} 
                      onClick={() => onItemClick && onItemClick(item)}
@@ -50,12 +54,27 @@ export default function LuxuryMenu({ menuByCategory, settings, onItemClick }) {
                     )}
                     
                     <div className="flex flex-col items-center px-4 w-full">
+                      <div className="mb-2">
+                        <ItemBadge badge={item.badge} dark={isDark} />
+                      </div>
                       <h3 className={`text-xl md:text-2xl font-medium tracking-wide uppercase ${theme.text} mb-3 group-hover:${theme.accent} transition-colors`}>{item.name}</h3>
                       <p className={`text-sm md:text-base italic leading-relaxed ${theme.secText} max-w-md mb-4`}>{item.description}</p>
-                      <span className={`text-lg font-medium tracking-widest ${theme.accent}`}>${parseFloat(item.price).toFixed(2)}</span>
+                      <ItemIngredients ingredients={item.ingredients} dark={isDark} />
+                      {item.variants && item.variants.length > 0 ? (
+                        <div className="flex flex-wrap justify-center gap-4 mt-2">
+                          {item.variants.map((v, vi) => (
+                            <span key={vi} className={`text-base font-medium tracking-widest ${theme.accent}`}>
+                              <span className={`text-xs ${theme.secText} mr-1`}>{v.name}</span>{currency}{v.price.toFixed(2)}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className={`text-lg font-medium tracking-widest ${theme.accent}`}>{currency}{parseFloat(item.price).toFixed(2)}</span>
+                      )}
                     </div>
                   </div>
                 ))}
+  
               </div>
             </section>
           ))}
@@ -65,7 +84,7 @@ export default function LuxuryMenu({ menuByCategory, settings, onItemClick }) {
         {settings?.coverCharge && (
           <div className={`mt-32 max-w-sm mx-auto p-8 flex flex-col items-center text-center border ${theme.border} ${theme.card}`}>
             <p className={`text-xs uppercase tracking-[0.3em] ${theme.secText} mb-2`}>Cover Charge</p>
-            <p className={`text-2xl font-medium ${theme.accent}`}>${parseFloat(settings.coverCharge).toFixed(2)}</p>
+            <p className={`text-2xl font-medium ${theme.accent}`}>{currency}{parseFloat(settings.coverCharge).toFixed(2)}</p>
           </div>
         )}
       </main>

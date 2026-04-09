@@ -1,8 +1,10 @@
 import React from 'react';
 import GlobalFooter from '../GlobalFooter';
+import { ItemBadge, ItemIngredients } from './ItemExtras';
 
-export default function ModernMenu({ menuByCategory, settings, onItemClick }) {
-  const restaurantName = settings?.restaurantName || "Il Nostro Menù";
+export default function ModernMenu({ menuByCategory, settings, onItemClick, activeCategory, onCategoryClick, allCategories, activeLang, filteredMenu }) {
+  const restaurantName = settings?.restaurantName || "Il Nostro Menu";
+  const currency = settings?.currency || '€';
 
   const paletteId = settings?.palette || 'default';
   const palettes = {
@@ -28,7 +30,7 @@ export default function ModernMenu({ menuByCategory, settings, onItemClick }) {
         
         {Object.entries(menuByCategory).length === 0 && (
            <div className="text-center py-16 bg-white border border-zinc-200 shadow-sm rounded-xl">
-             <h2 className="text-lg font-bold text-zinc-800 mb-2">Menù in Aggiornamento</h2>
+             <h2 className="text-lg font-bold text-zinc-800 mb-2">Menu in Aggiornamento</h2>
              <p className="text-sm text-zinc-500">Stiamo lavorando alle nuove proposte.</p>
            </div>
         )}
@@ -44,7 +46,9 @@ export default function ModernMenu({ menuByCategory, settings, onItemClick }) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10 items-start">
-              {items.map(item => (
+              
+              {items.map((item, index) => (
+
                 <div key={item.id} onClick={() => onItemClick && onItemClick(item)} className="group cursor-pointer flex flex-col gap-3 relative hover:opacity-80 transition-opacity">
                   {item.image && (
                     <div className="w-full rounded-xl bg-white overflow-hidden mb-2">
@@ -55,11 +59,22 @@ export default function ModernMenu({ menuByCategory, settings, onItemClick }) {
                   <div className="min-w-0">
                     <div className="flex justify-between items-start gap-4">
                       <h3 className={`text-lg font-bold ${theme.text} leading-tight break-words flex-1 min-w-0`}>
+                        <ItemBadge badge={item.badge} />
                         {item.name}
                       </h3>
-                      <span className={`font-bold ${theme.pillText} ${theme.pillBg} px-2 py-0.5 rounded text-sm shrink-0`}>
-                        ${item.price.toFixed(2)}
-                      </span>
+                      {item.variants && item.variants.length > 0 ? (
+                        <div className="flex flex-col items-end gap-0.5 shrink-0">
+                          {item.variants.map((v, vi) => (
+                            <span key={vi} className={`${theme.pillText} ${theme.pillBg} px-2 py-0.5 rounded text-xs`}>
+                              <span className="font-medium opacity-70">{v.name}</span> {currency}{v.price.toFixed(2)}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className={`font-bold ${theme.pillText} ${theme.pillBg} px-2 py-0.5 rounded text-sm shrink-0`}>
+                          {currency}{item.price.toFixed(2)}
+                        </span>
+                      )}
                     </div>
                     
                     {item.description && (
@@ -67,9 +82,11 @@ export default function ModernMenu({ menuByCategory, settings, onItemClick }) {
                         {item.description}
                       </p>
                     )}
+                    <ItemIngredients ingredients={item.ingredients} />
                   </div>
                 </div>
               ))}
+  
             </div>
           </section>
         ))}
@@ -78,7 +95,7 @@ export default function ModernMenu({ menuByCategory, settings, onItemClick }) {
         {settings?.coverCharge && (
           <div className={`mt-16 ${theme.coverBg} p-6 rounded-xl flex justify-between items-center text-sm font-bold animate-in fade-in duration-700`}>
             <p className="text-zinc-500 uppercase tracking-widest">Servizio / Coperto</p>
-            <p className={`${theme.text}`}>${parseFloat(settings.coverCharge).toFixed(2)}</p>
+            <p className={`${theme.text}`}>{currency}{parseFloat(settings.coverCharge).toFixed(2)}</p>
           </div>
         )}
       </main>

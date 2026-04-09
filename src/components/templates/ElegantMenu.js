@@ -1,8 +1,10 @@
 import React from 'react';
 import GlobalFooter from '../GlobalFooter';
+import { ItemBadge, ItemIngredients, ItemPrice } from './ItemExtras';
 
-export default function ElegantMenu({ menuByCategory, settings, onItemClick }) {
-  const restaurantName = settings?.restaurantName || "Il Nostro Menù";
+export default function ElegantMenu({ menuByCategory, settings, onItemClick, activeCategory, onCategoryClick, allCategories, activeLang, filteredMenu }) {
+  const restaurantName = settings?.restaurantName || "Il Nostro Menu";
+  const currency = settings?.currency || '€';
   
   const paletteId = settings?.palette || 'default';
   const palettes = {
@@ -31,13 +33,42 @@ export default function ElegantMenu({ menuByCategory, settings, onItemClick }) {
         
         {Object.entries(menuByCategory).length === 0 && (
            <div className="text-center py-20 border border-[#222] rounded-3xl bg-[#111112]">
-             <span className="text-4xl inline-block mb-4 opacity-70 filter grayscale">🍽️</span>
-             <h2 className="text-xl font-serif text-white mb-2">Il menù è in preparazione</h2>
+             <span className="text-4xl inline-block mb-4 opacity-70 filter grayscale">&#127869;</span>
+             <h2 className="text-xl font-serif text-white mb-2">Il menu e in preparazione</h2>
              <p className="text-sm text-[#888]">Il nostro Executive Chef sta creando nuove ispirazioni...</p>
            </div>
         )}
 
-        {Object.entries(menuByCategory).map(([category, items]) => (
+        
+        {settings?.blockCategories && !activeCategory ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
+            {allCategories.map(cat => {
+               const originalCat = filteredMenu?.find(i => {
+                  const isTranslating = activeLang !== 'it' && i.translations && i.translations[activeLang];
+                  const c = isTranslating && i.translations[activeLang].category ? i.translations[activeLang].category : i.category;
+                  return c === cat;
+               })?.category;
+               const catMeta = (settings.categoryMetadata || {})[originalCat] || {};
+               return (
+                 <div key={cat} onClick={() => onCategoryClick(cat)} className="relative aspect-video sm:aspect-square rounded-3xl overflow-hidden cursor-pointer group shadow-2xl border border-[#222] bg-[#111]">
+                   {catMeta.image ? (
+                     <img src={catMeta.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-60 group-hover:opacity-100" alt={cat} />
+                   ) : (
+                     <div className="w-full h-full flex items-center justify-center text-[#333] opacity-30">
+                        <span className="text-6xl">&#127869;</span>
+                     </div>
+                   )}
+                   <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0b] via-[#0a0a0b]/40 to-transparent flex flex-col justify-end p-8">
+                     <h3 className={`text-3xl font-serif text-white tracking-wide mb-2 ${theme.text}`}>{cat}</h3>
+                     <p className="text-[#a19f9b] text-sm">Tocca per scoprire i nostri piatti</p>
+                   </div>
+                 </div>
+               );
+            })}
+          </div>
+        ) : (
+          <>
+            {Object.entries(menuByCategory).map(([category, items]) => (
           <section key={category} className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
             {/* INTESTAZIONE CATEGORIA */}
             <div className="flex items-center gap-4 mb-10 w-full justify-center">
@@ -49,7 +80,9 @@ export default function ElegantMenu({ menuByCategory, settings, onItemClick }) {
             </div>
 
             <div className="space-y-12">
-              {items.map(item => (
+              
+              {items.map((item, index) => (
+
                 <div key={item.id} onClick={() => onItemClick && onItemClick(item)} className="group cursor-pointer flex gap-5 sm:gap-6 items-start hover:opacity-80 transition-opacity">
                   {item.image && (
                     <div className="w-20 h-20 md:w-24 md:h-24 shrink-0 rounded-2xl overflow-hidden border border-[#2a2a2a] shadow-lg mt-1 relative bg-[#111]">
@@ -59,12 +92,25 @@ export default function ElegantMenu({ menuByCategory, settings, onItemClick }) {
                   <div className="flex-1 w-full min-w-0">
                     <div className="flex justify-between items-baseline mb-3 gap-4 sm:gap-6">
                       <h3 className={`text-xl md:text-2xl font-serif text-white tracking-wide ${theme.hoverText} transition-colors leading-tight break-words flex-1 min-w-0`}>
+                        <ItemBadge badge={item.badge} dark />
                         {item.name}
                       </h3>
-                      <div className={`border-b border-dotted border-[#444] flex-1 mx-2 mb-1 ${theme.hoverBorder} transition-colors shrink-0`}></div>
-                      <span className={`${theme.text} font-medium text-lg whitespace-nowrap shrink-0`}>
-                        $ {item.price.toFixed(2)}
-                      </span>
+                      {item.variants && item.variants.length > 0 ? (
+                        <div className="flex flex-col items-end gap-0.5 shrink-0">
+                          {item.variants.map((v, vi) => (
+                            <span key={vi} className={`${theme.text} text-sm whitespace-nowrap`}>
+                              <span className="text-[#8e8d89] text-xs mr-1">{v.name}</span> {currency} {v.price.toFixed(2)}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <>
+                          <div className={`border-b border-dotted border-[#444] flex-1 mx-2 mb-1 ${theme.hoverBorder} transition-colors shrink-0`}></div>
+                          <span className={`${theme.text} font-medium text-lg whitespace-nowrap shrink-0`}>
+                            {currency} {item.price.toFixed(2)}
+                          </span>
+                        </>
+                      )}
                     </div>
                     
                     {item.description && (
@@ -72,18 +118,23 @@ export default function ElegantMenu({ menuByCategory, settings, onItemClick }) {
                         {item.description}
                       </p>
                     )}
+                    <ItemIngredients ingredients={item.ingredients} dark />
                   </div>
                 </div>
               ))}
+  
             </div>
           </section>
         ))}
 
+        
+          </>
+        )}
         {/* PREZZO COPERTO */}
         {settings?.coverCharge && (
           <div className="mt-16 text-center border-t border-[#222] pt-8 animate-in fade-in duration-1000">
             <p className="text-[#a19f9b] text-sm uppercase tracking-widest">
-              Coperto / Servizio: <span className={`${theme.text} font-bold ml-2`}>$ {parseFloat(settings.coverCharge).toFixed(2)}</span>
+              Coperto / Servizio: <span className={`${theme.text} font-bold ml-2`}>{currency} {parseFloat(settings.coverCharge).toFixed(2)}</span>
             </p>
           </div>
         )}

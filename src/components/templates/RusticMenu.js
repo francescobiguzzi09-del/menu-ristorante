@@ -1,8 +1,10 @@
 import React from 'react';
 import GlobalFooter from '../GlobalFooter';
+import { ItemBadge, ItemIngredients } from './ItemExtras';
 
-export default function RusticMenu({ menuByCategory, settings, onItemClick }) {
+export default function RusticMenu({ menuByCategory, settings, onItemClick, activeCategory, onCategoryClick, allCategories, activeLang, filteredMenu }) {
   const restaurantName = settings?.restaurantName || "La Nostra Osteria";
+  const currency = settings?.currency || '€';
 
   const paletteId = settings?.palette || 'default';
   const palettes = {
@@ -35,7 +37,7 @@ export default function RusticMenu({ menuByCategory, settings, onItemClick }) {
 
         {Object.entries(menuByCategory).length === 0 && (
            <div className="text-center py-16">
-             <h2 className={`text-2xl font-bold ${theme.text} mb-2 italic`}>Il menù non è ancora pronto</h2>
+             <h2 className={`text-2xl font-bold ${theme.text} mb-2 italic`}>Il menu non e ancora pronto</h2>
              <p className="text-[#8c7a6b]">La pasta sta bollendo, tornate a breve!</p>
            </div>
         )}
@@ -50,7 +52,9 @@ export default function RusticMenu({ menuByCategory, settings, onItemClick }) {
             </div>
 
             <div className="space-y-10">
-              {items.map(item => (
+              
+              {items.map((item, index) => (
+
                 <div key={item.id} onClick={() => onItemClick && onItemClick(item)} className="group cursor-pointer flex flex-col sm:flex-row gap-5 items-start bg-white p-6 rounded-[2rem] shadow-sm border border-[#f0e6d5] hover:shadow-md hover:border-[#e9dac1] transition-all">
                   
                   {item.image && (
@@ -62,22 +66,37 @@ export default function RusticMenu({ menuByCategory, settings, onItemClick }) {
                   <div className="flex-1 w-full text-center sm:text-left mt-2 sm:mt-0 min-w-0">
                     <div className="flex flex-col sm:flex-row justify-between items-center sm:items-baseline gap-2 sm:gap-4 mb-2">
                       <h3 className={`text-xl md:text-2xl font-bold text-[#2d241c] leading-tight ${theme.hoverText} transition-colors break-words flex-1 min-w-0`}>
+                        <ItemBadge badge={item.badge} />
                         {item.name}
                       </h3>
-                      <div className="hidden sm:block border-b-2 border-dotted border-[#e4d4c3] flex-1 translate-y-[-6px]"></div>
-                      <span className="text-xl font-bold text-[#2d241c] shrink-0">
-                        € {item.price.toFixed(2)}
-                      </span>
+                      {item.variants && item.variants.length > 0 ? (
+                        <div className="flex flex-col items-end gap-0.5 shrink-0">
+                          {item.variants.map((v, vi) => (
+                            <span key={vi} className="text-sm font-bold text-[#2d241c]">
+                              <span className="text-xs text-[#8c7a6b] font-medium mr-1">{v.name}</span>{currency} {v.price.toFixed(2)}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <>
+                          <div className="hidden sm:block border-b-2 border-dotted border-[#e4d4c3] flex-1 translate-y-[-6px]"></div>
+                          <span className="text-xl font-bold text-[#2d241c] shrink-0">
+                            {currency} {item.price.toFixed(2)}
+                          </span>
+                        </>
+                      )}
                     </div>
                     
                     {item.description && (
                       <p className="text-[#8c7a6b] leading-relaxed text-[15px] italic break-words">
-                        "{item.description}"
+                        &quot;{item.description}&quot;
                       </p>
                     )}
+                    <ItemIngredients ingredients={item.ingredients} />
                   </div>
                 </div>
               ))}
+  
             </div>
           </section>
         ))}
@@ -86,7 +105,7 @@ export default function RusticMenu({ menuByCategory, settings, onItemClick }) {
         {settings?.coverCharge && (
           <div className="mt-16 text-center pt-8 border-t border-dashed border-[#d2c4b4] animate-in fade-in duration-1000">
             <p className="text-[#8c7a6b] text-lg">
-              Servizio e Coperto: <span className={`font-bold ${theme.text} ml-2`}>€ {parseFloat(settings.coverCharge).toFixed(2)}</span>
+              Servizio e Coperto: <span className={`font-bold ${theme.text} ml-2`}>{currency} {parseFloat(settings.coverCharge).toFixed(2)}</span>
             </p>
           </div>
         )}

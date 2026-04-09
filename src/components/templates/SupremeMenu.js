@@ -1,11 +1,12 @@
 import React from 'react';
 import GlobalFooter from '../GlobalFooter';
+import { ItemBadge, ItemIngredients } from './ItemExtras';
 
-export default function SupremeMenu({ menuByCategory, settings, onItemClick }) {
+export default function SupremeMenu({ menuByCategory, settings, onItemClick, activeCategory, onCategoryClick, allCategories, activeLang, filteredMenu }) {
   const restaurantName = settings?.restaurantName || "Supreme Bites";
+  const currency = settings?.currency || '€';
   const paletteId = settings?.palette || 'default';
   
-  // Mappa Supreme 
   const palettes = {
     default: { bg: 'bg-[#f4f4f5]', card: 'bg-white', primary: 'bg-indigo-600', text: 'text-indigo-600', shadow: 'shadow-[8px_8px_0px_0px_rgba(79,70,229,1)]' },
     neon: { bg: 'bg-zinc-950', card: 'bg-zinc-900', primary: 'bg-lime-400', text: 'text-lime-400', shadow: 'shadow-[8px_8px_0px_0px_rgba(163,230,53,1)]' },
@@ -45,7 +46,9 @@ export default function SupremeMenu({ menuByCategory, settings, onItemClick }) {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                {items.map((item) => (
+                
+              {items.map((item, index) => (
+
                   <div 
                      key={item.id} 
                      onClick={() => onItemClick && onItemClick(item)}
@@ -59,13 +62,28 @@ export default function SupremeMenu({ menuByCategory, settings, onItemClick }) {
                     
                     <div className="flex-1 flex flex-col">
                       <div className="flex justify-between items-start gap-4 mb-3">
-                         <h3 className={`text-xl font-black uppercase leading-tight ${isDark ? 'text-white' : 'text-black'}`}>{item.name}</h3>
-                         <span className={`text-xl font-black ${theme.text} shrink-0`}>${parseFloat(item.price).toFixed(2)}</span>
+                         <h3 className={`text-xl font-black uppercase leading-tight ${isDark ? 'text-white' : 'text-black'}`}>
+                           <ItemBadge badge={item.badge} dark={isDark} />
+                           {item.name}
+                         </h3>
+                         {item.variants && item.variants.length > 0 ? (
+                           <div className="flex flex-col items-end gap-0.5 shrink-0">
+                             {item.variants.map((v, vi) => (
+                               <span key={vi} className={`text-sm font-black ${theme.text}`}>
+                                 <span className={`text-xs font-medium ${isDark ? 'text-slate-500' : 'text-slate-400'} mr-0.5`}>{v.name}</span>{currency}{v.price.toFixed(2)}
+                               </span>
+                             ))}
+                           </div>
+                         ) : (
+                           <span className={`text-xl font-black ${theme.text} shrink-0`}>{currency}{parseFloat(item.price).toFixed(2)}</span>
+                         )}
                       </div>
                       <p className={`text-sm font-medium leading-relaxed mt-auto ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{item.description}</p>
+                      <ItemIngredients ingredients={item.ingredients} dark={isDark} />
                     </div>
                   </div>
                 ))}
+  
               </div>
             </section>
           ))}
@@ -75,7 +93,7 @@ export default function SupremeMenu({ menuByCategory, settings, onItemClick }) {
         {settings?.coverCharge && (
           <div className={`mt-32 border-4 ${isDark ? 'border-zinc-700 bg-zinc-800' : 'border-black bg-white'} px-8 py-6 flex justify-between items-center text-lg font-black uppercase shadow-[8px_8px_0px_0px_rgba(0,0,0,0.1)]`}>
             <p className={isDark ? 'text-white' : 'text-black'}>Cover Charge</p>
-            <p className={theme.text}>${parseFloat(settings.coverCharge).toFixed(2)}</p>
+            <p className={theme.text}>{currency}{parseFloat(settings.coverCharge).toFixed(2)}</p>
           </div>
         )}
       </main>

@@ -19,9 +19,20 @@ const DIETARY_FILTERS = [
   { id: 'nutFree', label: 'Senza Frutta a Guscio', icon: '🥜' },
 ];
 
-export default function MenuRenderer({ menu, settings, restaurantId }) {
+export default function MenuRenderer({ menu, settings, restaurantId, printMode }) {
   const [activeLang, setActiveLang] = useState('it');
   const [selectedItem, setSelectedItem] = useState(null);
+  const [activeCategory, setActiveCategory] = useState(null);
+
+  // Auto-print effect
+  useEffect(() => {
+    if (printMode) {
+      setTimeout(() => {
+        window.print();
+      }, 1000); // 1s ritardo per caricamento immagini
+    }
+  }, [printMode]);
+
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilters, setActiveFilters] = useState([]);
@@ -149,6 +160,10 @@ export default function MenuRenderer({ menu, settings, restaurantId }) {
         ? item.translations[activeLang].description 
         : item.description;
 
+    if (settings?.blockCategories && activeCategory && localizedCategory !== activeCategory) {
+      return acc;
+    }
+
     if (!acc[localizedCategory]) {
       acc[localizedCategory] = [];
     }
@@ -176,22 +191,55 @@ export default function MenuRenderer({ menu, settings, restaurantId }) {
   };
 
   const renderTemplate = () => {
-    switch (templateStyle) {
-      case 'modern': return <ModernMenu menuByCategory={menuByCategory} settings={settings} onItemClick={handleItemClick} />;
-      case 'rustic': return <RusticMenu menuByCategory={menuByCategory} settings={settings} onItemClick={handleItemClick} />;
-      case 'vibrant': return <VibrantMenu menuByCategory={menuByCategory} settings={settings} onItemClick={handleItemClick} />;
-      case 'cinematic': return <CinematicMenu menuByCategory={menuByCategory} settings={settings} onItemClick={handleItemClick} />;
-      case 'luxury': return <LuxuryMenu menuByCategory={menuByCategory} settings={settings} onItemClick={handleItemClick} />;
-      case 'sushi': return <SushiMenu menuByCategory={menuByCategory} settings={settings} onItemClick={handleItemClick} />;
-      case 'taverna': return <TavernaMenu menuByCategory={menuByCategory} settings={settings} onItemClick={handleItemClick} />;
-      case 'brunch': return <BrunchMenu menuByCategory={menuByCategory} settings={settings} onItemClick={handleItemClick} />;
-      case 'elegant':
-      default: return <ElegantMenu menuByCategory={menuByCategory} settings={settings} onItemClick={handleItemClick} />;
-    }
+    const allCategories = [...new Set(filteredMenu.map(i => {
+      const isTranslating = activeLang !== 'it' && i.translations && i.translations[activeLang];
+      return isTranslating && i.translations[activeLang].category ? i.translations[activeLang].category : i.category;
+  }).filter(Boolean))];
+  
+  if (settings?.blockCategories && !activeCategory) {
+      // Allow template to handle block rendering via props
+      // Non usciamo più con un early return! Renderizziamo TemplateComponent
+  }
+  
+  const TemplateComponent = (() => {
+      const onItemClick = null;
+      const commonProps = { 
+        menuByCategory, settings, onItemClick, 
+        activeCategory, onCategoryClick: setActiveCategory, allCategories, 
+        activeLang, filteredMenu 
+      };
+      switch (templateStyle) {
+        case 'modern': return <ModernMenu {...commonProps} />;
+        case 'rustic': return <RusticMenu {...commonProps} />;
+        case 'vibrant': return <VibrantMenu {...commonProps} />;
+        case 'cinematic': return <CinematicMenu {...commonProps} />;
+        case 'luxury': return <LuxuryMenu {...commonProps} />;
+        case 'sushi': return <SushiMenu {...commonProps} />;
+        case 'taverna': return <TavernaMenu {...commonProps} />;
+        case 'brunch': return <BrunchMenu {...commonProps} />;
+        case 'elegant':
+        default: return <ElegantMenu {...commonProps} />;
+      }
+    })();
+
+    return (
+      <div className="relative">
+        {settings?.blockCategories && activeCategory && (
+          <button 
+            onClick={() => setActiveCategory(null)}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-6 py-3.5 rounded-full shadow-2xl font-bold flex items-center gap-2 drop-shadow-xl hover:-translate-y-1 hover:shadow-black/30 transition-all border border-slate-700"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            Torna alle categorie
+          </button>
+        )}
+        {TemplateComponent}
+      </div>
+    );
   };
 
   return (
-    <div className="relative">
+    <div className="relative" style={settings?.fontFamily ? { fontFamily: `var(--font-${settings.fontFamily})` } : {}}>
        {/* BOTTONE FILTRI FLOATING */}
        {menu && menu.some(item => item.dietaryTags && item.dietaryTags.length > 0) && (
          <div className="fixed top-6 left-6 z-40 animate-in fade-in slide-in-from-top-4 duration-500">
@@ -286,12 +334,36 @@ export default function MenuRenderer({ menu, settings, restaurantId }) {
               <div className="p-6 md:p-8 overflow-y-auto">
                  <div className="flex justify-between items-start gap-4 mb-4 overflow-hidden">
                      <div className="flex-1 min-w-0">
+                        {selectedItem.badge && (
+                          <span className={`inline-block px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider rounded-md mb-2 mr-2 ${selectedItem.badge === 'new' ? 'bg-emerald-100 text-emerald-700' : selectedItem.badge === 'bestseller' ? 'bg-amber-100 text-amber-700' : selectedItem.badge === 'chef' ? 'bg-indigo-100 text-indigo-700' : 'bg-rose-100 text-rose-700'}`}>
+                            {selectedItem.badge === 'new' ? 'Novita' : selectedItem.badge === 'bestseller' ? 'Best Seller' : selectedItem.badge === 'chef' ? 'Consigliato' : 'Piccante'}
+                          </span>
+                        )}
                         <span className="inline-block px-3 py-1 bg-slate-100 text-slate-600 font-bold text-xs rounded-lg uppercase tracking-wider mb-3">{selectedItem.category}</span>
                         <h3 className="text-2xl font-black text-slate-900 leading-tight break-words" style={{overflowWrap: 'anywhere'}}>{selectedItem.name}</h3>
                      </div>
-                     <span className="text-2xl font-black text-indigo-600 shrink-0">${selectedItem.price.toFixed(2)}</span>
+                     {selectedItem.variants && selectedItem.variants.length > 0 ? (
+                       <div className="flex flex-col items-end gap-1 shrink-0">
+                         {selectedItem.variants.map((v, vi) => (
+                           <div key={vi} className="text-right">
+                             <span className="text-xs text-slate-400 font-medium">{v.name}</span>
+                             <span className="text-lg font-black text-indigo-600 ml-2">{settings?.currency || '€'}{v.price.toFixed(2)}</span>
+                           </div>
+                         ))}
+                       </div>
+                     ) : (
+                       <span className="text-2xl font-black text-indigo-600 shrink-0">{settings?.currency || '€'}{selectedItem.price.toFixed(2)}</span>
+                     )}
                   </div>
                  <p className="text-slate-500 leading-relaxed text-sm">{selectedItem.description || 'Nessuna descrizione.'}</p>
+                 
+                 {/* Ingredienti */}
+                 {selectedItem.ingredients && (
+                   <div className="mt-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Ingredienti</p>
+                     <p className="text-xs text-slate-600 leading-relaxed">{selectedItem.ingredients}</p>
+                   </div>
+                 )}
                  
                  {/* Badge Dietetici */}
                  {selectedItem.dietaryTags && selectedItem.dietaryTags.length > 0 && (
@@ -307,6 +379,47 @@ export default function MenuRenderer({ menu, settings, restaurantId }) {
                      })}
                    </div>
                  )}
+
+                 {/* UPSELLING: Prodotti suggeriti */}
+                 {selectedItem.suggestedItems && selectedItem.suggestedItems.length > 0 && (
+                   <div className="mt-8 border-t border-slate-100 pt-6">
+                     <p className="text-sm font-black text-slate-800 mb-3 flex items-center gap-2">
+                        <span className="text-amber-500 text-lg">💡</span> Ti consigliamo anche:
+                     </p>
+                     <div className="flex overflow-x-auto gap-3 pb-2 scrollbar-hide snap-x">
+                        {selectedItem.suggestedItems.map(suggestedId => {
+                          const suggestedItem = menu.find(i => i.id === suggestedId);
+                          if (!suggestedItem) return null;
+                          return (
+                            <div 
+                              key={suggestedId}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedItem(suggestedItem);
+                              }}
+                              className="snap-start shrink-0 w-[140px] border border-slate-200 rounded-2xl overflow-hidden cursor-pointer hover:border-amber-400 hover:shadow-md transition-all group"
+                            >
+                              {suggestedItem.image ? (
+                                <div className="h-20 bg-slate-100 w-full overflow-hidden">
+                                  <img src={suggestedItem.image} alt={suggestedItem.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                </div>
+                              ) : (
+                                <div className="h-20 bg-slate-100 w-full flex items-center justify-center text-slate-300">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/><path d="M12 3v6"/></svg>
+                                </div>
+                              )}
+                              <div className="p-2.5">
+                                <h4 className="text-xs font-bold text-slate-800 line-clamp-1 group-hover:text-amber-600 transition-colors">{suggestedItem.name}</h4>
+                                <span className="text-xs font-black text-amber-500 mt-1 block">
+                                   {settings?.currency || '€'}{suggestedItem.variants?.length ? suggestedItem.variants[0].price.toFixed(2) + '+' : parseFloat(suggestedItem.price).toFixed(2)}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                     </div>
+                   </div>
+                 )}
                  
                  {/* Bottone Aggiungi all'Ordine (Premium) */}
                  {settings?.enableOrdering && (
@@ -315,7 +428,7 @@ export default function MenuRenderer({ menu, settings, restaurantId }) {
                      className="w-full mt-6 bg-slate-900 hover:bg-black text-white font-black py-4 rounded-2xl transition-all shadow-xl hover:shadow-2xl flex items-center justify-center gap-2"
                    >
                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                     Aggiungi all'ordine - ${selectedItem.price.toFixed(2)}
+                     Aggiungi all'ordine - {settings?.currency || '€'}{selectedItem.price.toFixed(2)}
                    </button>
                  )}
               </div>

@@ -1,8 +1,10 @@
 import React from 'react';
 import GlobalFooter from '../GlobalFooter';
+import { ItemBadge, ItemIngredients } from './ItemExtras';
 
-export default function VibrantMenu({ menuByCategory, settings, onItemClick }) {
-  const restaurantName = settings?.restaurantName || "Super Menù";
+export default function VibrantMenu({ menuByCategory, settings, onItemClick, activeCategory, onCategoryClick, allCategories, activeLang, filteredMenu }) {
+  const restaurantName = settings?.restaurantName || "Super Menu";
+  const currency = settings?.currency || '€';
 
   const paletteId = settings?.palette || 'default';
   const palettes = {
@@ -68,7 +70,9 @@ export default function VibrantMenu({ menuByCategory, settings, onItemClick }) {
               </div>
 
               <div className="grid grid-cols-1 gap-8 items-start">
-                {items.map(item => (
+                
+              {items.map((item, index) => (
+
                   <div key={item.id} onClick={() => onItemClick && onItemClick(item)} className={`group cursor-pointer bg-white border-4 border-slate-900 rounded-3xl p-6 shadow-[8px_8px_0px_#e2e8f0] ${theme.hoverShadow} hover:-translate-y-2 hover:-translate-x-2 transition-all flex flex-col`}>
                     
                     {item.image && (
@@ -80,11 +84,22 @@ export default function VibrantMenu({ menuByCategory, settings, onItemClick }) {
                     <div className="flex-1 flex flex-col min-w-0">
                       <div className="flex justify-between items-start gap-4 mb-3">
                         <h3 className="text-2xl font-black text-slate-900 leading-tight break-words flex-1 min-w-0">
+                          <ItemBadge badge={item.badge} />
                           {item.name}
                         </h3>
-                        <span className={`text-xl font-black bg-slate-900 ${theme.priceText} px-3 py-1.5 rounded-xl border-2 border-slate-900 shrink-0 transform rotate-3`}>
-                          ${item.price.toFixed(2)}
-                        </span>
+                        {item.variants && item.variants.length > 0 ? (
+                          <div className="flex flex-col items-end gap-1 shrink-0">
+                            {item.variants.map((v, vi) => (
+                              <span key={vi} className={`text-sm font-black bg-slate-900 ${theme.priceText} px-2 py-0.5 rounded-lg border-2 border-slate-900`}>
+                                <span className="text-xs font-medium opacity-70 mr-1">{v.name}</span>{currency}{v.price.toFixed(2)}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className={`text-xl font-black bg-slate-900 ${theme.priceText} px-3 py-1.5 rounded-xl border-2 border-slate-900 shrink-0 transform rotate-3`}>
+                            {currency}{item.price.toFixed(2)}
+                          </span>
+                        )}
                       </div>
                       
                       {item.description && (
@@ -92,9 +107,11 @@ export default function VibrantMenu({ menuByCategory, settings, onItemClick }) {
                           {item.description}
                         </p>
                       )}
+                      <ItemIngredients ingredients={item.ingredients} />
                     </div>
                   </div>
                 ))}
+  
               </div>
             </section>
           );
@@ -104,7 +121,7 @@ export default function VibrantMenu({ menuByCategory, settings, onItemClick }) {
         {settings?.coverCharge && (
           <div className={`mt-20 ${theme.coverBg} border-4 border-slate-900 shadow-[8px_8px_0px_#0f172a] p-6 rounded-3xl flex flex-col md:flex-row justify-center items-center gap-4 text-center transform -rotate-1 hover:rotate-0 transition-transform`}>
             <p className="text-slate-900 font-black uppercase text-xl">Coperto / Extra Charge</p>
-            <p className="bg-white text-slate-900 px-4 py-2 rounded-xl text-xl font-black border-2 border-slate-900">${parseFloat(settings.coverCharge).toFixed(2)}</p>
+            <p className="bg-white text-slate-900 px-4 py-2 rounded-xl text-xl font-black border-2 border-slate-900">{currency}{parseFloat(settings.coverCharge).toFixed(2)}</p>
           </div>
         )}
       </main>

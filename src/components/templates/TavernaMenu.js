@@ -1,8 +1,10 @@
 import React from 'react';
 import GlobalFooter from '../GlobalFooter';
+import { ItemBadge, ItemIngredients } from './ItemExtras';
 
-export default function TavernaMenu({ menuByCategory, settings, onItemClick }) {
+export default function TavernaMenu({ menuByCategory, settings, onItemClick, activeCategory, onCategoryClick, allCategories, activeLang, filteredMenu }) {
   const restaurantName = settings?.restaurantName || "La Taverna";
+  const currency = settings?.currency || '€';
   const coverCharge = settings?.coverCharge;
   
   const palette = settings?.palette || 'default';
@@ -38,24 +40,43 @@ export default function TavernaMenu({ menuByCategory, settings, onItemClick }) {
               </div>
 
               <div className="space-y-6">
-                {items.map((item) => (
+                
+              {items.map((item, index) => (
+
                   <div 
                      key={item.id} 
                      onClick={() => onItemClick && onItemClick(item)}
                      className="group cursor-pointer flex flex-col hover:opacity-80 transition-opacity"
                   >
                     <div className="flex justify-between items-baseline mb-2">
-                       <h3 className="font-bold text-white text-lg tracking-wide">{item.name}</h3>
-                       <span className="border-b border-dotted border-[#444] flex-1 mx-4"></span>
-                       <span className={`font-bold ${activeColor.text} text-lg`}>€{parseFloat(item.price).toFixed(2)}</span>
+                       <h3 className="font-bold text-white text-lg tracking-wide">
+                         <ItemBadge badge={item.badge} dark />
+                         {item.name}
+                       </h3>
+                       {item.variants && item.variants.length > 0 ? (
+                         <div className="flex items-center gap-3 shrink-0 ml-4">
+                           {item.variants.map((v, vi) => (
+                             <span key={vi} className={`font-bold ${activeColor.text} text-sm`}>
+                               <span className="text-xs text-[#8e8d89] mr-0.5">{v.name}</span> {currency}{v.price.toFixed(2)}
+                             </span>
+                           ))}
+                         </div>
+                       ) : (
+                         <>
+                           <span className="border-b border-dotted border-[#444] flex-1 mx-4"></span>
+                           <span className={`font-bold ${activeColor.text} text-lg`}>{currency}{parseFloat(item.price).toFixed(2)}</span>
+                         </>
+                       )}
                     </div>
                     {item.description && (
                        <p className="text-sm md:text-base text-[#8e8d89] font-sans font-light leading-relaxed max-w-[90%]">
                          {item.description}
                        </p>
                     )}
+                    <ItemIngredients ingredients={item.ingredients} dark />
                   </div>
                 ))}
+  
               </div>
             </section>
           ))}
@@ -64,7 +85,7 @@ export default function TavernaMenu({ menuByCategory, settings, onItemClick }) {
         {coverCharge && (
           <div className="mt-20 text-center pt-8">
             <p className="text-[#a19f9b] text-xs font-sans tracking-widest uppercase">
-              Coperto / Servizio: <span className={`${activeColor.text} font-bold ml-2`}>€{parseFloat(coverCharge).toFixed(2)}</span>
+              Coperto / Servizio: <span className={`${activeColor.text} font-bold ml-2`}>{currency}{parseFloat(coverCharge).toFixed(2)}</span>
             </p>
           </div>
         )}

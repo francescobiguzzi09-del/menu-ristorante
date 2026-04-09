@@ -1,11 +1,12 @@
 import React from 'react';
 import GlobalFooter from '../GlobalFooter';
+import { ItemBadge, ItemIngredients } from './ItemExtras';
 
-export default function CinematicMenu({ menuByCategory, settings, onItemClick }) {
+export default function CinematicMenu({ menuByCategory, settings, onItemClick, activeCategory, onCategoryClick, allCategories, activeLang, filteredMenu }) {
   const restaurantName = settings?.restaurantName || "Lounge & Bar";
+  const currency = settings?.currency || '€';
   const paletteId = settings?.palette || 'default';
   
-  // Mappa colori Cinematic
   const palettes = {
     default: { bg: 'from-slate-950 to-slate-900', glow: 'bg-amber-500/20', accent: 'text-amber-400', border: 'border-amber-500/30' },
     sapphire: { bg: 'from-slate-950 to-slate-900', glow: 'bg-blue-500/20', accent: 'text-blue-400', border: 'border-blue-500/30' },
@@ -41,7 +42,9 @@ export default function CinematicMenu({ menuByCategory, settings, onItemClick })
               </div>
 
               <div className="grid grid-cols-1 gap-6">
-                {items.map((item) => (
+                
+              {items.map((item, index) => (
+
                   <div 
                      key={item.id} 
                      onClick={() => onItemClick && onItemClick(item)}
@@ -57,13 +60,28 @@ export default function CinematicMenu({ menuByCategory, settings, onItemClick })
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start gap-4 mb-2">
-                         <h3 className="text-lg md:text-xl font-bold text-white group-hover:text-white transition-colors truncate">{item.name}</h3>
-                         <span className={`text-lg md:text-xl font-light tracking-wider ${theme.accent} shrink-0`}>${parseFloat(item.price).toFixed(2)}</span>
+                         <h3 className="text-lg md:text-xl font-bold text-white group-hover:text-white transition-colors truncate">
+                           <ItemBadge badge={item.badge} dark />
+                           {item.name}
+                         </h3>
+                         {item.variants && item.variants.length > 0 ? (
+                           <div className="flex flex-col items-end gap-0.5 shrink-0">
+                             {item.variants.map((v, vi) => (
+                               <span key={vi} className={`text-sm tracking-wider ${theme.accent}`}>
+                                 <span className="text-xs text-slate-500 mr-1">{v.name}</span>{currency}{v.price.toFixed(2)}
+                               </span>
+                             ))}
+                           </div>
+                         ) : (
+                           <span className={`text-lg md:text-xl font-light tracking-wider ${theme.accent} shrink-0`}>{currency}{parseFloat(item.price).toFixed(2)}</span>
+                         )}
                       </div>
                       <p className="text-sm text-slate-400 font-light leading-relaxed line-clamp-2">{item.description}</p>
+                      <ItemIngredients ingredients={item.ingredients} dark />
                     </div>
                   </div>
                 ))}
+  
               </div>
             </section>
           ))}
@@ -73,7 +91,7 @@ export default function CinematicMenu({ menuByCategory, settings, onItemClick })
         {settings?.coverCharge && (
           <div className={`mt-24 bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-2xl flex justify-between items-center text-sm font-light animate-in fade-in duration-1000`}>
             <p className="text-slate-400 uppercase tracking-widest">Service Charge</p>
-            <p className={`font-bold ${theme.accent}`}>${parseFloat(settings.coverCharge).toFixed(2)}</p>
+            <p className={`font-bold ${theme.accent}`}>{currency}{parseFloat(settings.coverCharge).toFixed(2)}</p>
           </div>
         )}
       </main>

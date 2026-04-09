@@ -1,8 +1,10 @@
 import React from 'react';
 import GlobalFooter from '../GlobalFooter';
+import { ItemBadge, ItemIngredients } from './ItemExtras';
 
-export default function BrunchMenu({ menuByCategory, settings, onItemClick }) {
-  const restaurantName = settings?.restaurantName || "Brunch Café";
+export default function BrunchMenu({ menuByCategory, settings, onItemClick, activeCategory, onCategoryClick, allCategories, activeLang, filteredMenu }) {
+  const restaurantName = settings?.restaurantName || "Brunch Cafe";
+  const currency = settings?.currency || '€';
   const coverCharge = settings?.coverCharge;
 
   const palette = settings?.palette || 'default';
@@ -30,7 +32,9 @@ export default function BrunchMenu({ menuByCategory, settings, onItemClick }) {
               </div>
 
               <div className="grid grid-cols-1 gap-4">
-                {items.map((item) => (
+                
+              {items.map((item, index) => (
+
                   <div 
                      key={item.id} 
                      onClick={() => onItemClick && onItemClick(item)}
@@ -43,16 +47,31 @@ export default function BrunchMenu({ menuByCategory, settings, onItemClick }) {
                     )}
                     
                     <div className="flex-1 min-w-0 pr-4">
-                       <h3 className="font-bold text-slate-800 text-lg mb-1 truncate">{item.name}</h3>
+                       <h3 className="font-bold text-slate-800 text-lg mb-1 truncate">
+                         <ItemBadge badge={item.badge} />
+                         {item.name}
+                       </h3>
                        {item.description && (
                          <p className="text-sm text-slate-500 line-clamp-2 leading-snug">{item.description}</p>
                        )}
+                       <ItemIngredients ingredients={item.ingredients} />
                     </div>
-                    <div className={`font-black ${activeColor.text} text-xl shrink-0`}>
-                       €{parseFloat(item.price).toFixed(2)}
-                    </div>
+                    {item.variants && item.variants.length > 0 ? (
+                      <div className="flex flex-col items-end gap-0.5 shrink-0">
+                        {item.variants.map((v, vi) => (
+                          <span key={vi} className={`font-black ${activeColor.text} text-sm`}>
+                            <span className="text-xs text-slate-400 font-medium mr-0.5">{v.name}</span>{currency}{v.price.toFixed(2)}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className={`font-black ${activeColor.text} text-xl shrink-0`}>
+                         {currency}{parseFloat(item.price).toFixed(2)}
+                      </div>
+                    )}
                   </div>
                 ))}
+  
               </div>
             </section>
           ))}
@@ -61,7 +80,7 @@ export default function BrunchMenu({ menuByCategory, settings, onItemClick }) {
         {coverCharge && (
           <div className="mt-16 bg-white p-6 rounded-[2rem] shadow-sm border border-slate-50 flex justify-between items-center text-sm">
             <span className="text-slate-500 uppercase tracking-widest font-bold">Servizio</span>
-            <span className={`font-black ${activeColor.text} text-lg`}>€{parseFloat(coverCharge).toFixed(2)}</span>
+            <span className={`font-black ${activeColor.text} text-lg`}>{currency}{parseFloat(coverCharge).toFixed(2)}</span>
           </div>
         )}
       </main>

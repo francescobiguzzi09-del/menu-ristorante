@@ -84,8 +84,7 @@ export default function DashboardPage() {
   };
 
   const createNewMenu = () => {
-    const newId = 'menu-' + Math.random().toString(36).substr(2, 9);
-    router.push(`/admin?id=${newId}`);
+    router.push(`/onboarding`);
   };
 
   const deleteMenu = (e, id) => {

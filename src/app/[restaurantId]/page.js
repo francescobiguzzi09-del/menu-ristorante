@@ -17,21 +17,23 @@ async function getRestaurantData(restaurantId) {
 
 export default async function RestaurantMenu(props) {
   const params = await props.params;
+  const searchParams = await props.searchParams;
   const restaurantId = params.restaurantId;
+  const isPrint = searchParams?.print === 'true';
   const data = await getRestaurantData(restaurantId);
 
   // Fallback se il ristorante non esiste o non ha pubblicato nulla
   if (!data || !data.menu) {
     return (
       <div className="min-h-screen bg-[#0a0a0b] flex flex-col items-center justify-center p-6 text-center">
-        <span className="text-4xl mb-4 grayscale opacity-50">🧭</span>
-        <h1 className="text-2xl font-serif text-[#e0dfdc]">Menù Non Trovato</h1>
-        <p className="text-[#a19f9b] mt-2">Sembra che questo ristorante non esista o non abbia ancora pubblicato il menù.</p>
+        <span className="text-4xl mb-4 grayscale opacity-50">&#128715;</span>
+        <h1 className="text-2xl font-serif text-[#e0dfdc]">Menu Non Trovato</h1>
+        <p className="text-[#a19f9b] mt-2">Sembra che questo ristorante non esista o non abbia ancora pubblicato il menu.</p>
       </div>
     );
   }
 
   const { menu, settings } = data;
 
-  return <MenuRenderer menu={menu} settings={settings} restaurantId={restaurantId} />;
+  return <MenuRenderer menu={menu} settings={settings} restaurantId={restaurantId} printMode={isPrint} />;
 }
