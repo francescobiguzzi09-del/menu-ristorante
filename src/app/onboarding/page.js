@@ -21,6 +21,7 @@ export default function OnboardingWizard() {
   const [aiItems, setAiItems] = useState([]);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [template, setTemplate] = useState('modern');
+  const [createdMenuId, setCreatedMenuId] = useState(null);
   
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef(null);
@@ -118,10 +119,11 @@ export default function OnboardingWizard() {
       if (!resData.success) throw new Error(resData.error);
       
       // 4. Redirect with Magic!
+      setCreatedMenuId(newId);
       setStep(4);
       setTimeout(() => {
         router.push(`/admin?id=${newId}`);
-      }, 3000);
+      }, 7000);
 
     } catch (err) {
       toast.error('Errore durante la creazione del menù: ' + err.message, 'Errore');
@@ -302,9 +304,18 @@ export default function OnboardingWizard() {
         {step === 4 && (
           <div key="step4" className={`flex flex-col flex-1 items-center justify-center text-center ${animationIn}`}>
             
-             <div className="w-32 h-32 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center mb-8 shadow-[0_0_100px_rgba(52,211,153,0.5)] animate-bounce">
-               <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
+             <div className="w-64 sm:w-96 mb-8 animate-in zoom-in duration-700 mx-auto">
+               <video 
+                 src="/success-video.webm" 
+                 autoPlay 
+                 muted 
+                 playsInline
+                 onEnded={() => {
+                   if (createdMenuId) router.push(`/admin?id=${createdMenuId}`);
+                 }}
+                 className="w-full h-auto pointer-events-none"
+               />
+             </div>
             <h1 className="text-5xl font-black mb-4 tracking-tight drop-shadow-lg text-white">Il Tuo Menù è Pronto!</h1>
             <p className="text-xl text-emerald-200 mb-8 font-medium">Preparati alla perfezione. Reindirizzamento al Cruscotto in corso...</p>
             <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>

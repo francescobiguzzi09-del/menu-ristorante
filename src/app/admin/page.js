@@ -36,6 +36,8 @@ function AdminDashboardContent() {
   const [showPreview, setShowPreview] = useState(false);
   const [previewDevice, setPreviewDevice] = useState('s8');
   const [previewScale, setPreviewScale] = useState(1);
+  const [showPdfWarning, setShowPdfWarning] = useState(false);
+  const [userHasCustomFont, setUserHasCustomFont] = useState(false);
 
   const fileInputRef = useRef(null);
   const desktopIframeRef = useRef(null);
@@ -420,6 +422,20 @@ function AdminDashboardContent() {
   const handleNameChange = (id, newName) => setItems(items.map(item => item.id === id ? { ...item, name: newName } : item));
   const handleSettingsChange = (e) => setSettings({ ...settings, [e.target.name]: e.target.value });
 
+  const handleTemplateChange = (templateName) => {
+    const defaultFonts = {
+      elegant: 'playfair', modern: 'inter', rustic: 'outfit',
+      cinematic: 'space', vibrant: 'quicksand', luxury: 'playfair',
+      sushi: 'space', taverna: 'playfair', brunch: 'outfit'
+    };
+    const newSettings = { ...settings, template: templateName, palette: 'default' };
+    if (!userHasCustomFont) {
+      newSettings.fontFamily = defaultFonts[templateName] || 'inter';
+    }
+    setSettings(newSettings);
+    setUserHasCustomFont(false);
+  };
+
   const handleAddProduct = () => {
     if (!newItem.name || !newItem.price) { toast.warning('Inserisci quantomeno un nome e un prezzo.', 'Dati mancanti'); return; }
     const product = {
@@ -465,8 +481,8 @@ function AdminDashboardContent() {
       {/* ----------- COLONNA 1: SIDEBAR NAVIGAZIONE ----------- */}
       <aside className="w-[80px] sm:w-[240px] bg-slate-950 flex flex-col items-center sm:items-stretch py-6 border-r border-slate-800 z-20 shrink-0">
         <div className="px-0 sm:px-6 mb-8 flex items-center justify-center sm:justify-start gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 via-purple-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
+            <img src="/sm-logo.png" alt="Smart Menu Logo" className="w-full h-full object-contain scale-[2.5]" />
           </div>
           <div className="hidden sm:flex flex-col">
             <h1 className="text-lg font-black tracking-tight text-white leading-tight truncate">SmartMenu AI</h1>
@@ -1112,7 +1128,7 @@ function AdminDashboardContent() {
 
                     {/* Elegant */}
                     <div
-                      onClick={() => setSettings({ ...settings, template: 'elegant', palette: 'default' })}
+                      onClick={() => handleTemplateChange('')}
                       className={`isolate relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${(!settings.template || settings.template === 'elegant') ? 'border-indigo-500 shadow-lg scale-[1.02] z-10' : 'border-slate-100 hover:border-indigo-200 opacity-70 hover:opacity-100'}`}
                     >
                       <div className="absolute inset-0 bg-[#0a0a0b] -z-10"></div>
@@ -1126,7 +1142,7 @@ function AdminDashboardContent() {
 
                     {/* Modern */}
                     <div
-                      onClick={() => setSettings({ ...settings, template: 'modern', palette: 'default' })}
+                      onClick={() => handleTemplateChange('')}
                       className={`isolate relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'modern' ? 'border-zinc-900 shadow-lg scale-[1.02] z-10' : 'border-slate-100 hover:border-zinc-300 opacity-70 hover:opacity-100'}`}
                     >
                       <div className="absolute inset-0 bg-white -z-10"></div>
@@ -1141,7 +1157,7 @@ function AdminDashboardContent() {
 
                     {/* Rustic */}
                     <div
-                      onClick={() => setSettings({ ...settings, template: 'rustic', palette: 'default' })}
+                      onClick={() => handleTemplateChange('')}
                       className={`isolate relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'rustic' ? 'border-[#d97757] shadow-lg scale-[1.02] z-10' : 'border-slate-100 hover:border-[#e8dbce] opacity-70 hover:opacity-100'}`}
                     >
                       <div className="absolute inset-0 bg-[#fdfbf7] -z-10"></div>
@@ -1156,7 +1172,7 @@ function AdminDashboardContent() {
 
                     {/* Cinematic (Premium) */}
                     <div
-                      onClick={() => setSettings({ ...settings, template: 'cinematic', palette: 'default' })}
+                      onClick={() => handleTemplateChange('')}
                       className={`isolate relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'cinematic' ? 'border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.3)] scale-[1.02] z-10' : 'border-slate-100 hover:border-amber-300 opacity-70 hover:opacity-100'}`}
                     >
                       <div className="absolute inset-0 bg-slate-950 -z-10"></div>
@@ -1171,7 +1187,7 @@ function AdminDashboardContent() {
 
                     {/* Vibrant */}
                     <div
-                      onClick={() => setSettings({ ...settings, template: 'vibrant', palette: 'default' })}
+                      onClick={() => handleTemplateChange('')}
                       className={`isolate relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'vibrant' ? 'border-slate-900 shadow-[6px_6px_0px_#fde047] scale-[1.02] -translate-y-1 z-10' : 'border-slate-100 hover:border-slate-300 opacity-70 hover:opacity-100'}`}
                     >
                       <span className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">Gratis in Beta</span>
@@ -1187,7 +1203,7 @@ function AdminDashboardContent() {
 
                     {/* Luxury (Premium) */}
                     <div
-                      onClick={() => setSettings({ ...settings, template: 'luxury', palette: 'default' })}
+                      onClick={() => handleTemplateChange('')}
                       className={`isolate relative cursor-pointer rounded-2xl border-[3px] transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'luxury' ? 'border-stone-800 shadow-2xl scale-[1.02] z-10' : 'border-slate-200 hover:border-stone-400 opacity-70 hover:opacity-100'}`}
                     >
                       <span className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">Gratis in Beta</span>
@@ -1203,7 +1219,7 @@ function AdminDashboardContent() {
 
                     {/* Sushi (New Dark) */}
                     <div
-                      onClick={() => setSettings({ ...settings, template: 'sushi', palette: 'default' })}
+                      onClick={() => handleTemplateChange('')}
                       className={`isolate relative cursor-pointer rounded-2xl border-[3px] transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 bg-[#020617] ${settings.template === 'sushi' ? 'border-emerald-500 shadow-2xl scale-[1.02] z-10' : 'border-slate-800 hover:border-emerald-900 opacity-70 hover:opacity-100'}`}
                     >
                       <span className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">New</span>
@@ -1217,7 +1233,7 @@ function AdminDashboardContent() {
 
                     {/* Taverna (New Vintage) */}
                     <div
-                      onClick={() => setSettings({ ...settings, template: 'taverna', palette: 'default' })}
+                      onClick={() => handleTemplateChange('')}
                       className={`isolate relative cursor-pointer rounded-2xl border-[3px] transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 bg-[#0a0a0b] ${settings.template === 'taverna' ? 'border-[#c9a66b] shadow-2xl scale-[1.02] z-10' : 'border-[#1a1a1c] hover:border-[#332e29] opacity-70 hover:opacity-100'}`}
                     >
                       <span className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">New</span>
@@ -1232,7 +1248,7 @@ function AdminDashboardContent() {
 
                     {/* Brunch (New Clean) */}
                     <div
-                      onClick={() => setSettings({ ...settings, template: 'brunch', palette: 'default' })}
+                      onClick={() => handleTemplateChange('')}
                       className={`isolate relative cursor-pointer rounded-3xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 bg-[#f8f9fa] ${settings.template === 'brunch' ? 'border-emerald-600 shadow-[0_10px_30px_rgba(5,150,105,0.2)] scale-[1.02] z-10' : 'border-slate-100 hover:border-emerald-200 opacity-70 hover:opacity-100'}`}
                     >
                       <span className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">New</span>
@@ -1413,7 +1429,7 @@ function AdminDashboardContent() {
                     return (
                       <button
                         key={f.id}
-                        onClick={() => setSettings({ ...settings, fontFamily: f.id })}
+                        onClick={() => { setSettings({ ...settings, fontFamily: f.id }); setUserHasCustomFont(true); }}
                         className={`flex flex-col items-start gap-2 p-4 rounded-xl border-2 transition-all text-left ${isActive ? 'border-amber-500 bg-amber-50 shadow-md scale-105' : 'border-slate-200 hover:border-slate-300'}`}
                         style={{ fontFamily: `var(--font-${f.id})` }}
                       >
@@ -1650,9 +1666,13 @@ function AdminDashboardContent() {
                         Anteprima Live
                       </button>
                       <button
-                        onClick={() => {
-                          const printUrl = `/${restaurantId}?print=true`;
-                          window.open(printUrl, '_blank');
+                        onClick={async () => {
+                          if (settings.blockCategories) {
+                            setShowPdfWarning(true);
+                          } else {
+                            await processSaveMenu(null, null, true);
+                            window.open(`/${restaurantId}?print=true`, '_blank');
+                          }
                         }}
                         className="bg-white border-2 border-amber-200 hover:border-amber-300 hover:bg-amber-50 text-amber-700 font-bold py-4 px-6 rounded-2xl transition-all shadow-sm flex items-center justify-center gap-3 flex-1"
                       >
@@ -1799,6 +1819,42 @@ function AdminDashboardContent() {
                 className="w-full bg-white border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600 font-bold py-3.5 px-4 rounded-xl transition-all text-sm"
               >
                 Continua e Genera (Senza salvare)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* PDF WARNING MODAL POPUP */}
+      {showPdfWarning && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl relative animate-in zoom-in-95 duration-300 flex flex-col items-center text-center border border-slate-100">
+
+            <button
+              onClick={() => setShowPdfWarning(false)}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+            </button>
+
+            <div className="w-16 h-16 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mb-5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+            </div>
+
+            <h3 className="text-2xl font-black tracking-tight text-slate-900 mb-2">Attenzione</h3>
+            <p className="text-slate-500 mb-8 text-sm leading-relaxed">
+              La Navigazione a Blocchi è attiva. Per l'esportazione in PDF il menu verrà mostrato in formato lineare. Vuoi continuare comunque?
+            </p>
+
+            <div className="space-y-3 w-full">
+              <button
+                onClick={async () => {
+                  setShowPdfWarning(false);
+                  await processSaveMenu(null, null, true);
+                  window.open(`/${restaurantId}?print=true`, '_blank');
+                }}
+                className="w-full bg-amber-500 hover:bg-amber-600 text-white font-black uppercase tracking-wider py-4 px-4 rounded-xl transition-all shadow-lg shadow-amber-500/20 text-sm"
+              >
+                Continua comunque
               </button>
             </div>
           </div>

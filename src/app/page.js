@@ -71,8 +71,8 @@ export default function SaaSLanding() {
         
         <div className="flex items-center gap-10 xl:gap-14">
           <Link href="/" className="flex items-center gap-2 group hover:opacity-90 transition-opacity">
-            <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/30">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
+              <img src="/sm-logo.png" alt="Smart Menu Logo" className="w-full h-full object-contain scale-[2.5]" />
             </div>
             <span className="font-black text-xl tracking-tight text-white hidden sm:block">
               SmartMenu <span className="text-indigo-400">AI</span>
@@ -146,103 +146,18 @@ export default function SaaSLanding() {
 
             </div>
 
-            {/* Right Column (Phones Mockup) */}
-            <div className="w-full lg:w-[55%] mt-20 lg:mt-10 relative lg:h-[600px] h-[500px] flex items-center justify-center pointer-events-none">
-               
-               <div className="relative w-full max-w-[800px] h-full flex items-center justify-center lg:absolute lg:right-[-10%] xl:right-[-20%] lg:top-1/2 lg:-translate-y-1/2 overflow-visible">
+            {/* Right Column (Hero Image) */}
+            <div className="w-full lg:w-[55%] mt-16 lg:mt-0 relative flex items-center justify-center">
+               <div className="relative lg:absolute lg:right-[-5%] xl:right-[-15%] lg:top-1/2 lg:-translate-y-1/2">
+                 {/* Glow effect behind image */}
+                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-teal-500/15 blur-[60px] scale-90 rounded-full pointer-events-none"></div>
                  
-                 {/* Phone 1: Rotated Back (Cinematic Menu) */}
-                 <div className="absolute transform -rotate-12 -translate-x-[4.5rem] sm:-translate-x-44 translate-y-8 sm:translate-y-12 opacity-95 hover:opacity-100 hover:rotate-0 hover:z-30 transition-all duration-500 pointer-events-auto">
-                   <PhoneMockup className="sm:scale-95 scale-[0.80] origin-center shadow-2xl shadow-black/40" bgClass="bg-slate-950">
-                      <div className="min-h-fit h-full p-4 font-sans text-slate-200">
-                         {/* Cinematic Header */}
-                         <div className="text-center font-black text-2xl uppercase tracking-[0.2em] mt-8 mb-5 text-white drop-shadow-xl">LOUNGE VIP</div>
-                         <div className="h-[1px] w-12 mx-auto bg-amber-500/30 mb-6"></div>
-                         
-                         {/* Cinematic Items */}
-                         <div className="space-y-4 pb-10">
-                           {[1,2,3,4].map(idx => (
-                             <div key={idx} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-3 flex items-center gap-3">
-                               <div className="w-12 h-12 shrink-0 rounded-lg bg-black border border-white/5"></div>
-                               <div className="flex-1 min-w-0">
-                                 <div className="flex justify-between items-start gap-2 mb-1">
-                                   <div className="text-white font-bold text-[13px] truncate">Martini Gold</div>
-                                   <div className="text-amber-400 font-bold text-[13px]">€14</div>
-                                 </div>
-                                 <div className="text-[10px] text-slate-400 leading-tight">Gin, Vermouth, Foglia d'oro</div>
-                               </div>
-                             </div>
-                           ))}
-                         </div>
-                      </div>
-                   </PhoneMockup>
-                 </div>
-
-                 {/* Phone 3: Rotated Forward (Modern Menu) */}
-                 <div className="absolute transform rotate-12 translate-x-[4.5rem] sm:translate-x-40 translate-y-12 sm:translate-y-16 opacity-95 hover:opacity-100 hover:rotate-0 hover:z-30 transition-all duration-500 hidden sm:block pointer-events-auto">
-                   <PhoneMockup className="scale-95 origin-center shadow-2xl shadow-black/40" bgClass="bg-[#f8f9fa]">
-                      <div className="min-h-fit h-full font-sans text-slate-900 pb-10">
-                         {/* Modern Elegant Header */}
-                         <div className="bg-white p-6 shadow-sm border-b border-slate-100 text-center mb-6 rounded-b-[2rem]">
-                            <div className="font-bold text-xl uppercase tracking-wider text-slate-900">Brunch Café</div>
-                            <div className="text-[10px] uppercase tracking-widest text-emerald-600 mt-1 font-bold">Healthy & Organic</div>
-                         </div>
-
-                         {/* Modern Items */}
-                         <div className="px-4 space-y-4">
-                           <div className="font-black text-[11px] text-slate-400 uppercase tracking-widest pl-1 mb-2">Pancakes</div>
-                           {[1,2,3].map(idx => (
-                             <div key={idx} className="bg-white p-4 rounded-2xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-50 flex flex-col justify-center">
-                               <div className="flex justify-between items-center">
-                                 <div>
-                                   <div className="font-bold text-slate-800 text-[13px]">Avocado Toast</div>
-                                   <div className="text-[11px] text-slate-500 mt-0.5">Uovo in camicia, lime</div>
-                                 </div>
-                                 <div className="font-bold text-emerald-600 text-[14px]">€12</div>
-                               </div>
-                             </div>
-                           ))}
-                         </div>
-                      </div>
-                   </PhoneMockup>
-                 </div>
-
-                 {/* Phone 2: Main Center (Elegant Menu - #0a0a0b background) */}
-                 <div className="relative z-20 transform scale-[0.9] sm:scale-100 lg:scale-[1.05] xl:scale-[1.1] hover:scale-[1.1] xl:hover:scale-[1.15] transition-transform duration-500 pointer-events-auto">
-                   <PhoneMockup className="shadow-2xl shadow-black/50 border-black" bgClass="bg-[#0a0a0b]">
-                      
-                      <div className="min-h-fit h-full p-5 pt-12 font-serif text-[#e0dfdc] relative">
-                         {/* Subdued glow */}
-                         <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[40%] rounded-full bg-[#c9a66b] blur-[80px] opacity-10 pointer-events-none"></div>
-
-                         <div className="w-10 h-[1px] bg-[#c9a66b] mx-auto mt-2 mb-4"></div>
-                         <div className="text-center font-light text-3xl text-white mb-2">La Taverna</div>
-                         <div className="text-center text-[9px] text-[#a19f9b] uppercase tracking-[0.3em] mb-4">Dal 1956</div>
-                         <div className="w-10 h-[1px] bg-[#c9a66b] mx-auto mb-8"></div>
-                         
-                         <div className="space-y-6 pb-10">
-                           <div className="flex items-center gap-2 mb-4 justify-center">
-                              <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent to-[#333]"></div>
-                              <span className="text-center text-[12px] text-[#c9a66b] tracking-widest uppercase">I Primi Piatti</span>
-                              <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent to-[#333]"></div>
-                           </div>
-                           
-                           {[1,2,3,4,5].map(idx => (
-                             <div key={idx} className="flex flex-col mb-4 px-1">
-                               <div className="flex justify-between items-baseline mb-1">
-                                 <span className="font-bold text-white text-[13px] tracking-wide">Carbonara</span>
-                                 <span className="border-b border-dotted border-[#444] flex-1 mx-2"></span>
-                                 <span className="font-bold text-[#c9a66b] text-[13px]">€16</span>
-                               </div>
-                               <div className="text-[10px] text-[#8e8d89] font-sans font-light leading-relaxed truncate">Guanciale di Norcia, Pecorino, Pepe Nero</div>
-                             </div>
-                           ))}
-                         </div>
-                      </div>
-
-                   </PhoneMockup>
-                 </div>
-                 
+                 <img 
+                   src="/hero-phones.png" 
+                   alt="SmartMenu AI - Menù digitali su smartphone" 
+                   className="relative z-10 w-[340px] sm:w-[480px] md:w-[550px] lg:w-[600px] xl:w-[680px] h-auto drop-shadow-[0_25px_60px_rgba(0,0,0,0.5)] hover:scale-[1.03] transition-transform duration-700 ease-out"
+                   draggable="false"
+                 />
                </div>
             </div>
 

@@ -19,7 +19,8 @@ const DIETARY_FILTERS = [
   { id: 'nutFree', label: 'Senza Frutta a Guscio', icon: '🥜' },
 ];
 
-export default function MenuRenderer({ menu, settings, restaurantId, printMode }) {
+export default function MenuRenderer({ menu, settings: propSettings, restaurantId, printMode }) {
+  const settings = printMode ? { ...propSettings, blockCategories: false } : propSettings;
   const [activeLang, setActiveLang] = useState('it');
   const [selectedItem, setSelectedItem] = useState(null);
   const [activeCategory, setActiveCategory] = useState(null);
@@ -160,7 +161,7 @@ export default function MenuRenderer({ menu, settings, restaurantId, printMode }
         ? item.translations[activeLang].description 
         : item.description;
 
-    if (settings?.blockCategories && activeCategory && localizedCategory !== activeCategory) {
+    if (settings?.blockCategories && activeCategory && item.category !== activeCategory) {
       return acc;
     }
 
