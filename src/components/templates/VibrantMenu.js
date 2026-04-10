@@ -1,5 +1,6 @@
 import React from 'react';
 import GlobalFooter from '../GlobalFooter';
+import CategoryBlocks from '../CategoryBlocks';
 import { ItemBadge, ItemIngredients } from './ItemExtras';
 
 export default function VibrantMenu({ menuByCategory, settings, onItemClick, activeCategory, onCategoryClick, allCategories, activeLang, filteredMenu }) {
@@ -55,7 +56,19 @@ export default function VibrantMenu({ menuByCategory, settings, onItemClick, act
            </div>
         )}
 
-        {Object.entries(menuByCategory).map(([category, items], index) => {
+
+        {settings?.blockCategories && !activeCategory ? (
+          <CategoryBlocks 
+            settings={settings}
+            activeCategory={activeCategory}
+            onCategoryClick={onCategoryClick}
+            allCategories={allCategories}
+            activeLang={activeLang}
+            filteredMenu={filteredMenu}
+          />
+        ) : (
+          <>
+            {Object.entries(menuByCategory).map(([category, items], index) => {
           const colors = ['bg-yellow-400', 'bg-emerald-400', 'bg-pink-400', 'bg-blue-400'];
           const accentObj = colors[index % colors.length];
           
@@ -116,6 +129,8 @@ export default function VibrantMenu({ menuByCategory, settings, onItemClick, act
             </section>
           );
         })}
+        </>
+        )}
 
         {/* PREZZO COPERTO */}
         {settings?.coverCharge && (

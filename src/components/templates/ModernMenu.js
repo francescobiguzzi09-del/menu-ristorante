@@ -1,5 +1,6 @@
 import React from 'react';
 import GlobalFooter from '../GlobalFooter';
+import CategoryBlocks from '../CategoryBlocks';
 import { ItemBadge, ItemIngredients } from './ItemExtras';
 
 export default function ModernMenu({ menuByCategory, settings, onItemClick, activeCategory, onCategoryClick, allCategories, activeLang, filteredMenu }) {
@@ -35,7 +36,18 @@ export default function ModernMenu({ menuByCategory, settings, onItemClick, acti
            </div>
         )}
 
-        {Object.entries(menuByCategory).map(([category, items]) => (
+        {settings?.blockCategories && !activeCategory ? (
+          <CategoryBlocks 
+            settings={settings}
+            activeCategory={activeCategory}
+            onCategoryClick={onCategoryClick}
+            allCategories={allCategories}
+            activeLang={activeLang}
+            filteredMenu={filteredMenu}
+          />
+        ) : (
+          <div className="space-y-16">
+            {Object.entries(menuByCategory).map(([category, items]) => (
           <section key={category} className="animate-in fade-in duration-700">
             {/* INTESTAZIONE CATEGORIA */}
             <div className="mb-8">
@@ -90,6 +102,8 @@ export default function ModernMenu({ menuByCategory, settings, onItemClick, acti
             </div>
           </section>
         ))}
+        </div>
+        )}
 
         {/* PREZZO COPERTO */}
         {settings?.coverCharge && (

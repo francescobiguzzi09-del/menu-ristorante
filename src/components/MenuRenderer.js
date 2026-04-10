@@ -202,9 +202,8 @@ export default function MenuRenderer({ menu, settings, restaurantId, printMode }
   }
   
   const TemplateComponent = (() => {
-      const onItemClick = null;
       const commonProps = { 
-        menuByCategory, settings, onItemClick, 
+        menuByCategory, settings, onItemClick: handleItemClick, 
         activeCategory, onCategoryClick: setActiveCategory, allCategories, 
         activeLang, filteredMenu 
       };

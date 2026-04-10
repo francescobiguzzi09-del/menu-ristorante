@@ -1,5 +1,6 @@
 import React from 'react';
 import GlobalFooter from '../GlobalFooter';
+import CategoryBlocks from '../CategoryBlocks';
 import { ItemBadge, ItemIngredients } from './ItemExtras';
 
 export default function LuxuryMenu({ menuByCategory, settings, onItemClick, activeCategory, onCategoryClick, allCategories, activeLang, filteredMenu }) {
@@ -30,6 +31,16 @@ export default function LuxuryMenu({ menuByCategory, settings, onItemClick, acti
         </header>
 
         {/* MENU ITEMS (1 PER ROW, MAGAZINE STYLE) */}
+        {settings?.blockCategories && !activeCategory ? (
+          <CategoryBlocks 
+            settings={settings}
+            activeCategory={activeCategory}
+            onCategoryClick={onCategoryClick}
+            allCategories={allCategories}
+            activeLang={activeLang}
+            filteredMenu={filteredMenu}
+          />
+        ) : (
         <div className="space-y-32">
           {Object.entries(menuByCategory).map(([category, items]) => (
             <section key={category}>
@@ -79,6 +90,7 @@ export default function LuxuryMenu({ menuByCategory, settings, onItemClick, acti
             </section>
           ))}
         </div>
+        )}
 
         {/* PREZZO COPERTO */}
         {settings?.coverCharge && (

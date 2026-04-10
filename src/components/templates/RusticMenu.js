@@ -1,5 +1,6 @@
 import React from 'react';
 import GlobalFooter from '../GlobalFooter';
+import CategoryBlocks from '../CategoryBlocks';
 import { ItemBadge, ItemIngredients } from './ItemExtras';
 
 export default function RusticMenu({ menuByCategory, settings, onItemClick, activeCategory, onCategoryClick, allCategories, activeLang, filteredMenu }) {
@@ -42,7 +43,19 @@ export default function RusticMenu({ menuByCategory, settings, onItemClick, acti
            </div>
         )}
 
-        {Object.entries(menuByCategory).map(([category, items]) => (
+
+        {settings?.blockCategories && !activeCategory ? (
+          <CategoryBlocks 
+            settings={settings}
+            activeCategory={activeCategory}
+            onCategoryClick={onCategoryClick}
+            allCategories={allCategories}
+            activeLang={activeLang}
+            filteredMenu={filteredMenu}
+          />
+        ) : (
+          <>
+            {Object.entries(menuByCategory).map(([category, items]) => (
           <section key={category} className="animate-in fade-in duration-1000">
             {/* INTESTAZIONE CATEGORIA */}
             <div className="text-center mb-10">
@@ -100,6 +113,8 @@ export default function RusticMenu({ menuByCategory, settings, onItemClick, acti
             </div>
           </section>
         ))}
+        </>
+        )}
 
         {/* PREZZO COPERTO */}
         {settings?.coverCharge && (

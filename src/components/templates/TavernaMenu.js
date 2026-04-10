@@ -1,5 +1,6 @@
 import React from 'react';
 import GlobalFooter from '../GlobalFooter';
+import CategoryBlocks from '../CategoryBlocks';
 import { ItemBadge, ItemIngredients } from './ItemExtras';
 
 export default function TavernaMenu({ menuByCategory, settings, onItemClick, activeCategory, onCategoryClick, allCategories, activeLang, filteredMenu }) {
@@ -30,7 +31,18 @@ export default function TavernaMenu({ menuByCategory, settings, onItemClick, act
         </header>
 
         <div className="space-y-16">
-          {Object.entries(menuByCategory).map(([category, items], catIndex) => (
+        {settings?.blockCategories && !activeCategory ? (
+          <CategoryBlocks 
+            settings={settings}
+            activeCategory={activeCategory}
+            onCategoryClick={onCategoryClick}
+            allCategories={allCategories}
+            activeLang={activeLang}
+            filteredMenu={filteredMenu}
+          />
+        ) : (
+          <>
+            {Object.entries(menuByCategory).map(([category, items], catIndex) => (
             <section key={category} className="animate-in fade-in slide-in-from-bottom-8" style={{ animationDelay: `${catIndex * 150}ms` }}>
               
               <div className="flex items-center gap-4 mb-8 justify-center">
@@ -80,6 +92,8 @@ export default function TavernaMenu({ menuByCategory, settings, onItemClick, act
               </div>
             </section>
           ))}
+          </>
+        )}
         </div>
 
         {coverCharge && (

@@ -1,5 +1,6 @@
 import React from 'react';
 import GlobalFooter from '../GlobalFooter';
+import CategoryBlocks from '../CategoryBlocks';
 import { ItemBadge, ItemIngredients } from './ItemExtras';
 
 export default function CinematicMenu({ menuByCategory, settings, onItemClick, activeCategory, onCategoryClick, allCategories, activeLang, filteredMenu }) {
@@ -33,6 +34,16 @@ export default function CinematicMenu({ menuByCategory, settings, onItemClick, a
         </header>
 
         {/* MENU ITEMS */}
+        {settings?.blockCategories && !activeCategory ? (
+          <CategoryBlocks 
+            settings={settings}
+            activeCategory={activeCategory}
+            onCategoryClick={onCategoryClick}
+            allCategories={allCategories}
+            activeLang={activeLang}
+            filteredMenu={filteredMenu}
+          />
+        ) : (
         <div className="space-y-24">
           {Object.entries(menuByCategory).map(([category, items], catIndex) => (
             <section key={category} className="animate-in fade-in slide-in-from-bottom-12" style={{ animationDuration: '1.2s', animationDelay: `${catIndex * 150}ms`, animationFillMode: 'both' }}>
@@ -86,6 +97,7 @@ export default function CinematicMenu({ menuByCategory, settings, onItemClick, a
             </section>
           ))}
         </div>
+        )}
 
         {/* PREZZO COPERTO */}
         {settings?.coverCharge && (

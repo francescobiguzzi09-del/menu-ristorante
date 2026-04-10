@@ -1,5 +1,6 @@
 import React from 'react';
 import GlobalFooter from '../GlobalFooter';
+import CategoryBlocks from '../CategoryBlocks';
 import { ItemBadge, ItemIngredients } from './ItemExtras';
 
 export default function BrunchMenu({ menuByCategory, settings, onItemClick, activeCategory, onCategoryClick, allCategories, activeLang, filteredMenu }) {
@@ -24,6 +25,16 @@ export default function BrunchMenu({ menuByCategory, settings, onItemClick, acti
       </header>
 
       <main className="max-w-2xl mx-auto px-5">
+        {settings?.blockCategories && !activeCategory ? (
+          <CategoryBlocks 
+            settings={settings}
+            activeCategory={activeCategory}
+            onCategoryClick={onCategoryClick}
+            allCategories={allCategories}
+            activeLang={activeLang}
+            filteredMenu={filteredMenu}
+          />
+        ) : (
         <div className="space-y-12">
           {Object.entries(menuByCategory).map(([category, items], catIndex) => (
             <section key={category} className="animate-in fade-in slide-in-from-bottom-8" style={{ animationDelay: `${catIndex * 150}ms` }}>
@@ -76,6 +87,7 @@ export default function BrunchMenu({ menuByCategory, settings, onItemClick, acti
             </section>
           ))}
         </div>
+        )}
 
         {coverCharge && (
           <div className="mt-16 bg-white p-6 rounded-[2rem] shadow-sm border border-slate-50 flex justify-between items-center text-sm">

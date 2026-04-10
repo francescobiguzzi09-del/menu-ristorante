@@ -1,5 +1,6 @@
 import React from 'react';
 import GlobalFooter from '../GlobalFooter';
+import CategoryBlocks from '../CategoryBlocks';
 import { ItemBadge, ItemIngredients } from './ItemExtras';
 
 export default function SushiMenu({ menuByCategory, settings, onItemClick, activeCategory, onCategoryClick, allCategories, activeLang, filteredMenu }) {
@@ -31,7 +32,18 @@ export default function SushiMenu({ menuByCategory, settings, onItemClick, activ
         </header>
 
         <div className="space-y-16">
-          {Object.entries(menuByCategory).map(([category, items], catIndex) => (
+        {settings?.blockCategories && !activeCategory ? (
+          <CategoryBlocks 
+            settings={settings}
+            activeCategory={activeCategory}
+            onCategoryClick={onCategoryClick}
+            allCategories={allCategories}
+            activeLang={activeLang}
+            filteredMenu={filteredMenu}
+          />
+        ) : (
+          <>
+            {Object.entries(menuByCategory).map(([category, items], catIndex) => (
             <section key={category} className="animate-in fade-in slide-in-from-bottom-8" style={{ animationDelay: `${catIndex * 150}ms` }}>
               <div className="mb-8">
                 <h2 className="text-xl font-bold uppercase tracking-[0.2em] text-white text-center">{category}</h2>
@@ -79,6 +91,8 @@ export default function SushiMenu({ menuByCategory, settings, onItemClick, activ
               </div>
             </section>
           ))}
+          </>
+        )}
         </div>
 
         {coverCharge && (

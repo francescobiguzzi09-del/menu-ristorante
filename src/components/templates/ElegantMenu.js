@@ -1,5 +1,6 @@
 import React from 'react';
 import GlobalFooter from '../GlobalFooter';
+import CategoryBlocks from '../CategoryBlocks';
 import { ItemBadge, ItemIngredients, ItemPrice } from './ItemExtras';
 
 export default function ElegantMenu({ menuByCategory, settings, onItemClick, activeCategory, onCategoryClick, allCategories, activeLang, filteredMenu }) {
@@ -41,31 +42,14 @@ export default function ElegantMenu({ menuByCategory, settings, onItemClick, act
 
         
         {settings?.blockCategories && !activeCategory ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
-            {allCategories.map(cat => {
-               const originalCat = filteredMenu?.find(i => {
-                  const isTranslating = activeLang !== 'it' && i.translations && i.translations[activeLang];
-                  const c = isTranslating && i.translations[activeLang].category ? i.translations[activeLang].category : i.category;
-                  return c === cat;
-               })?.category;
-               const catMeta = (settings.categoryMetadata || {})[originalCat] || {};
-               return (
-                 <div key={cat} onClick={() => onCategoryClick(cat)} className="relative aspect-video sm:aspect-square rounded-3xl overflow-hidden cursor-pointer group shadow-2xl border border-[#222] bg-[#111]">
-                   {catMeta.image ? (
-                     <img src={catMeta.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-60 group-hover:opacity-100" alt={cat} />
-                   ) : (
-                     <div className="w-full h-full flex items-center justify-center text-[#333] opacity-30">
-                        <span className="text-6xl">&#127869;</span>
-                     </div>
-                   )}
-                   <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0b] via-[#0a0a0b]/40 to-transparent flex flex-col justify-end p-8">
-                     <h3 className={`text-3xl font-serif text-white tracking-wide mb-2 ${theme.text}`}>{cat}</h3>
-                     <p className="text-[#a19f9b] text-sm">Tocca per scoprire i nostri piatti</p>
-                   </div>
-                 </div>
-               );
-            })}
-          </div>
+          <CategoryBlocks 
+            settings={settings}
+            activeCategory={activeCategory}
+            onCategoryClick={onCategoryClick}
+            allCategories={allCategories}
+            activeLang={activeLang}
+            filteredMenu={filteredMenu}
+          />
         ) : (
           <>
             {Object.entries(menuByCategory).map(([category, items]) => (
