@@ -1,86 +1,99 @@
-import Head from 'next/head';
 import Link from 'next/link';
 import Footer from '@/components/Footer';
+import { QrCode } from 'lucide-react';
+
+export const metadata = {
+  title: 'Termini di Servizio — SmartMenu AI',
+  description: 'Termini e condizioni d\'uso della piattaforma SmartMenu AI per la creazione di menù digitali per ristoranti.',
+};
 
 export default function Termini() {
   return (
-    <>
-      <Head>
-        <title>Termini di Servizio - SmartMenu AI</title>
-      </Head>
-      <div className="min-h-screen bg-slate-50 flex flex-col">
-        
-        <header className="bg-slate-900 border-b border-slate-800 py-6 sticky top-0 z-40">
-          <div className="max-w-4xl mx-auto px-6 flex justify-between items-center">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform">
-                <img src="/sm-logo.png" alt="Smart Menu Logo" className="w-full h-full object-contain scale-[2.5]" />
-              </div>
-              <span className="text-xl font-black text-white tracking-tight">SmartMenu</span>
-            </Link>
-            <Link href="/dashboard" className="text-sm font-bold text-slate-300 hover:text-white transition-colors">
-              Torna alla Dashboard
-            </Link>
-          </div>
-        </header>
+    <div style={{ minHeight: '100vh', background: '#F5F0E8', display: 'flex', flexDirection: 'column', fontFamily: "var(--font-inter), 'Inter', sans-serif" }}>
 
-        <main className="flex-1 max-w-4xl mx-auto px-6 py-16 w-full prose prose-slate prose-indigo">
-          <div className="mb-12">
-            <div className="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 font-bold text-xs uppercase tracking-widest rounded-full mb-4">Note Legali</div>
-            <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-4">Termini di Servizio</h1>
-            <p className="text-slate-500">Ultimo aggiornamento: Ottobre 2023</p>
-          </div>
-
-          <div className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-slate-200">
-            <h3>1. Accettazione dei Termini</h3>
-            <p>
-              Utilizzando SmartMenu AI ("il Servizio"), accetti di essere vincolato dai presenti Termini di Servizio. Se non accetti queste condizioni, ti preghiamo di non utilizzare la piattaforma.
-            </p>
-
-            <h3>2. Descrizione del Servizio</h3>
-            <p>
-              SmartMenu AI è una piattaforma che consente ai ristoratori di digitalizzare i propri menù cartacei o scritti su lavagna tramite l'uso dell'Intelligenza Artificiale, generare QR code per l'accesso dei clienti, e opzionalmente ricevere pagamenti digitali.
-            </p>
-
-            <h3>3. Servizi di Terze Parti Utilizzati</h3>
-            <p>
-              Per garantire le funzionalità descritte, SmartMenu AI si appoggia ai seguenti servizi di terze parti:
-            </p>
-            <ul>
-              <li><strong>Stripe:</strong> Utilizzato per l'elaborazione dei pagamenti. Quando configuri gli ordini dal tavolo, i fondi vengono gestiti e processati direttamente tramite Stripe Connect. Sei soggetto ai Termini di Servizio di Stripe.</li>
-              <li><strong>OpenAI / OpenRouter:</strong> Utilizzati per le funzionalità di Intelligenza Artificiale (estrazione testo da immagini, generazione descrizioni e traduzioni multilingua). Le immagini dei tuoi menù e i testi generati vengono inviati a questi provider nel rispetto delle loro politiche di elaborazione dati.</li>
-              <li><strong>Supabase:</strong> Utilizzato per l'infrastruttura di database e l'autenticazione degli utenti.</li>
-            </ul>
-
-            <h3>4. Account, Responsabilità e Uso Consentito</h3>
-            <p>
-              Il ristoratore è responsabile di mantenere la riservatezza delle proprie credenziali di accesso. Sei l'unico responsabile per la veridicità dei prezzi, degli allergeni indicati e delle informazioni sui piatti pubblicate nel tuo menù digitale.
-            </p>
-            <p className="mt-2 font-semibold text-rose-600">
-              È severamente vietato utilizzare SmartMenu AI per pubblicare o condividere contenuti illeciti, offensivi, discriminatori, osceni o in violazione delle leggi vigenti. L'uso della piattaforma per fini illegali o per la diffusione di materiale inappropriato comporterà la sospensione immediata o il ban permanente dell'account.
-            </p>
-
-            <h3>5. Modifiche al Servizio</h3>
-            <p>
-              Ci riserviamo il diritto di modificare o interrompere, temporaneamente o permanentemente, il Servizio (o qualsiasi sua parte) con o senza preavviso. I prezzi dei piani e le funzionalità Premium possono essere soggetti a modifiche.
-            </p>
-
-            <h3>6. Limitazione di Responsabilità</h3>
-            <p>
-              SmartMenu AI fornisce il servizio "così com'è". Non siamo responsabili per mancanze di guadagno derivanti da disservizi temporanei, per inesattezze nelle traduzioni o nelle elaborazioni IA dei menù. Il ristoratore è tenuto a revisionare sempre le generazioni IA prima di pubblicarle definitivamente.
-            </p>
-
-            <div className="mt-12 p-6 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between flex-wrap gap-4">
-              <span className="text-sm font-bold text-slate-600">Hai domande sui Termini?</span>
-              <a href="mailto:support@smartmenu.it" className="text-sm font-bold bg-white border border-slate-200 text-slate-700 hover:text-indigo-600 px-5 py-2.5 rounded-xl shadow-sm transition-all hover:border-indigo-200">
-                Contattaci
-              </a>
+      <header style={{
+        background: '#2D2016', borderBottom: '1px solid rgba(245,240,232,0.08)',
+        padding: '16px 24px', position: 'sticky', top: 0, zIndex: 40,
+      }}>
+        <div style={{ maxWidth: 800, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+            <div style={{ width: 40, height: 40, borderRadius: 12, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <img src="/sm-logo.png" alt="SmartMenu Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', transform: 'scale(2.5)' }} />
             </div>
+            <span style={{ fontFamily: 'var(--font-display), serif', fontSize: 18, fontWeight: 500, color: '#F5F0E8', letterSpacing: -0.3 }}>SmartMenu</span>
+          </Link>
+          <Link href="/dashboard" style={{ fontSize: 13, fontWeight: 500, color: 'rgba(245,240,232,0.6)', textDecoration: 'none' }}>
+            Torna alla Dashboard
+          </Link>
+        </div>
+      </header>
+
+      <main style={{ flex: 1, maxWidth: 800, margin: '0 auto', padding: '64px 24px', width: '100%' }}>
+        <div style={{ marginBottom: 48 }}>
+          <div style={{
+            display: 'inline-block', padding: '4px 12px', background: 'rgba(196,98,45,0.15)',
+            color: '#C4622D', fontWeight: 500, fontSize: 11, textTransform: 'uppercase',
+            letterSpacing: '0.1em', borderRadius: 20, marginBottom: 16,
+          }}>Note Legali</div>
+          <h1 style={{ fontFamily: 'var(--font-display), serif', fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 500, color: '#2D2016', marginBottom: 12 }}>Termini di Servizio</h1>
+          <p style={{ fontSize: 14, color: 'rgba(45,32,22,0.5)' }}>Ultimo aggiornamento: Ottobre 2023</p>
+        </div>
+
+        <div style={{ background: '#fff', borderRadius: 24, padding: '32px 28px', boxShadow: '0 4px 16px rgba(45,32,22,0.04)', border: '1px solid rgba(45,32,22,0.06)', color: '#2C2C2A', fontSize: 14, lineHeight: 1.7 }}>
+          <h3 style={{ fontFamily: 'var(--font-display), serif', fontSize: 18, fontWeight: 500, color: '#2D2016', marginBottom: 8, marginTop: 0 }}>1. Accettazione dei Termini</h3>
+          <p style={{ marginBottom: 24, color: 'rgba(45,32,22,0.65)' }}>
+            Utilizzando SmartMenu AI (&quot;il Servizio&quot;), accetti di essere vincolato dai presenti Termini di Servizio. Se non accetti queste condizioni, ti preghiamo di non utilizzare la piattaforma.
+          </p>
+
+          <h3 style={{ fontFamily: 'var(--font-display), serif', fontSize: 18, fontWeight: 500, color: '#2D2016', marginBottom: 8 }}>2. Descrizione del Servizio</h3>
+          <p style={{ marginBottom: 24, color: 'rgba(45,32,22,0.65)' }}>
+            SmartMenu AI è una piattaforma che consente ai ristoratori di digitalizzare i propri menù cartacei o scritti su lavagna tramite l&apos;uso dell&apos;Intelligenza Artificiale, generare QR code per l&apos;accesso dei clienti, e opzionalmente ricevere pagamenti digitali.
+          </p>
+
+          <h3 style={{ fontFamily: 'var(--font-display), serif', fontSize: 18, fontWeight: 500, color: '#2D2016', marginBottom: 8 }}>3. Servizi di Terze Parti Utilizzati</h3>
+          <p style={{ marginBottom: 8, color: 'rgba(45,32,22,0.65)' }}>Per garantire le funzionalità descritte, SmartMenu AI si appoggia ai seguenti servizi di terze parti:</p>
+          <ul style={{ marginBottom: 24, paddingLeft: 20, color: 'rgba(45,32,22,0.65)' }}>
+            <li style={{ marginBottom: 8 }}><strong style={{ color: '#2D2016' }}>Stripe:</strong> Utilizzato per l&apos;elaborazione dei pagamenti. Quando configuri gli ordini dal tavolo, i fondi vengono gestiti e processati direttamente tramite Stripe Connect.</li>
+            <li style={{ marginBottom: 8 }}><strong style={{ color: '#2D2016' }}>OpenAI / OpenRouter:</strong> Utilizzati per le funzionalità di Intelligenza Artificiale (estrazione testo da immagini, generazione descrizioni e traduzioni multilingua).</li>
+            <li><strong style={{ color: '#2D2016' }}>Supabase:</strong> Utilizzato per l&apos;infrastruttura di database e l&apos;autenticazione degli utenti.</li>
+          </ul>
+
+          <h3 style={{ fontFamily: 'var(--font-display), serif', fontSize: 18, fontWeight: 500, color: '#2D2016', marginBottom: 8 }}>4. Account, Responsabilità e Uso Consentito</h3>
+          <p style={{ marginBottom: 8, color: 'rgba(45,32,22,0.65)' }}>
+            Il ristoratore è responsabile di mantenere la riservatezza delle proprie credenziali di accesso. Sei l&apos;unico responsabile per la veridicità dei prezzi, degli allergeni indicati e delle informazioni sui piatti pubblicati nel tuo menù digitale.
+          </p>
+          <p style={{ marginBottom: 24, fontWeight: 600, color: '#dc2626' }}>
+            È severamente vietato utilizzare SmartMenu AI per pubblicare o condividere contenuti illeciti, offensivi, discriminatori, osceni o in violazione delle leggi vigenti. L&apos;uso della piattaforma per fini illegali comporterà la sospensione immediata o il ban permanente dell&apos;account.
+          </p>
+
+          <h3 style={{ fontFamily: 'var(--font-display), serif', fontSize: 18, fontWeight: 500, color: '#2D2016', marginBottom: 8 }}>5. Modifiche al Servizio</h3>
+          <p style={{ marginBottom: 24, color: 'rgba(45,32,22,0.65)' }}>
+            Ci riserviamo il diritto di modificare o interrompere, temporaneamente o permanentemente, il Servizio (o qualsiasi sua parte) con o senza preavviso.
+          </p>
+
+          <h3 style={{ fontFamily: 'var(--font-display), serif', fontSize: 18, fontWeight: 500, color: '#2D2016', marginBottom: 8 }}>6. Limitazione di Responsabilità</h3>
+          <p style={{ marginBottom: 24, color: 'rgba(45,32,22,0.65)' }}>
+            SmartMenu AI fornisce il servizio &quot;così com&apos;è&quot;. Non siamo responsabili per mancanze di guadagno derivanti da disservizi temporanei, per inesattezze nelle traduzioni o nelle elaborazioni IA dei menù. Il ristoratore è tenuto a revisionare sempre le generazioni IA.
+          </p>
+
+          <div style={{
+            marginTop: 32, padding: 20, background: '#F5F0E8', borderRadius: 16,
+            border: '1px solid rgba(45,32,22,0.06)', display: 'flex', alignItems: 'center',
+            justifyContent: 'space-between', flexWrap: 'wrap', gap: 16,
+          }}>
+            <span style={{ fontSize: 14, fontWeight: 500, color: '#2D2016' }}>Hai domande sui Termini?</span>
+            <a href="mailto:support@smartmenu.it" style={{
+              fontSize: 13, fontWeight: 500, background: '#fff', border: '1px solid rgba(45,32,22,0.1)',
+              color: '#2D2016', padding: '10px 20px', borderRadius: 12, textDecoration: 'none',
+              transition: 'all .2s',
+            }}>
+              Contattaci
+            </a>
           </div>
-        </main>
-        
-        <Footer />
-      </div>
-    </>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
   );
 }

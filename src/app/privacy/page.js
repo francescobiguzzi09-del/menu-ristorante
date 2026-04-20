@@ -1,83 +1,93 @@
-import Head from 'next/head';
 import Link from 'next/link';
 import Footer from '@/components/Footer';
+import { QrCode } from 'lucide-react';
+
+export const metadata = {
+  title: 'Privacy Policy — SmartMenu AI',
+  description: 'Informativa sulla privacy di SmartMenu AI. Scopri come gestiamo e proteggiamo i tuoi dati personali.',
+};
 
 export default function Privacy() {
   return (
-    <>
-      <Head>
-        <title>Privacy Policy - SmartMenu AI</title>
-      </Head>
-      <div className="min-h-screen bg-slate-50 flex flex-col">
-        
-        <header className="bg-slate-900 border-b border-slate-800 py-6 sticky top-0 z-40">
-          <div className="max-w-4xl mx-auto px-6 flex justify-between items-center">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform">
-                <img src="/sm-logo.png" alt="Smart Menu Logo" className="w-full h-full object-contain scale-[2.5]" />
-              </div>
-              <span className="text-xl font-black text-white tracking-tight">SmartMenu</span>
-            </Link>
-            <Link href="/dashboard" className="text-sm font-bold text-slate-300 hover:text-white transition-colors">
-              Torna alla Dashboard
-            </Link>
-          </div>
-        </header>
+    <div style={{ minHeight: '100vh', background: '#F5F0E8', display: 'flex', flexDirection: 'column', fontFamily: "var(--font-inter), 'Inter', sans-serif" }}>
 
-        <main className="flex-1 max-w-4xl mx-auto px-6 py-16 w-full prose prose-slate prose-indigo">
-          <div className="mb-12">
-            <div className="inline-block px-3 py-1 bg-emerald-100 text-emerald-700 font-bold text-xs uppercase tracking-widest rounded-full mb-4">Informativa & Privacy</div>
-            <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-4">Privacy Policy</h1>
-            <p className="text-slate-500">I tuoi dati sono al sicuro con noi.</p>
-          </div>
-
-          <div className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-slate-200">
-            <h3>1. Quali dati raccogliamo</h3>
-            <p>
-              Durante l'uso di SmartMenu AI raccogliamo varie categorie di informazioni fondamentali per offrire il servizio:
-            </p>
-            <ul>
-              <li><strong>Dati di Autenticazione:</strong> Quando ti registri, raccogliamo il tuo indirizzo email in modo da verificare la tua identità e creare la tua area riservata sicura tramite Supabase.</li>
-              <li><strong>Dati del Ristorante (Menù):</strong> Testi, categorie e descrizioni dei tuoi piatti e le impostazioni di branding (nomi e link) necessarie per compilare e visualizzare il menù digitale che andrai a distribuire.</li>
-              <li><strong>Immagini Analizzate:</strong> Le immagini della tua lavagna scattate in tempo reale sono elaborate dai nostri provider per l'estrazione intelligente del testo, e la loro conservazione non avverrà se non richiesto o per la durata necessaria all'estrazione mediante Intelligenza Artificiale (OpenAI/OpenRouter).</li>
-              <li><strong>Dati di Pagamento:</strong> Noi NON ti richiediamo di memorizzare dati di pagamento bancari sui nostri server. Qualsiasi configurazione o accredito derivante dagli ordini digitali avviene all'interno dell'ambiente sicuro e crittografato di <strong>Stripe Connect</strong>.</li>
-            </ul>
-
-            <h3>2. Come e dove usiamo le informazioni</h3>
-            <p>
-              Utilizziamo le tue informazioni esclusivamente al fine di garantire l'operatività del tuo menu e delle dashboard analitiche. Nessun dato raccolto è venduto a soggetti terzi, partner o società di marketing senza il tuo espresso consenso esplicito. Usiamo:
-            </p>
-            <ul>
-               <li>I dati del menu in formato pubblico affinchè i tuoi clienti loggandosi ai tavoli (via QR Code) possano vederlo sul dispositivo.</li>
-               <li>Le statistiche analitizzate aggregate (tracking accessi) sui visualizzatori dei tuoi piatti.</li>
-            </ul>
-
-            <h3>3. Condivisione dei Dati e Terze Parti</h3>
-            <p>
-              SmartMenu AI può inviare temporaneamente testi e metadati ad API fornite da provider leader (OpenAI) per l'aggiunta di descrizioni IA o traduzioni AI generate automaticamente, ma questi sistemi terzi operano strettamente come "Data Processors" (Incaricati Temporanei), e si sono vincolati escludere l'utilizzo di quegli stessi per affinamento dei modelli (Zero Data Retention / Opt-out per API standard).
-            </p>
-
-            <h3>4. Cookie e Tecnologie di Tracciamento</h3>
-            <p>
-              SmartMenu AI utilizza limitatamente i cookie operativi (indispensabili) legati alle sessioni per ricordarsi delle identità e dei token OAuth temporanei del portale (log-in). Nessun pixel o cookie di marketing aggressivo di terzi è attualmente in grado di re-iniettare logiche commerciali nel menu degli utenti per finalità nostre (es. pubblicità invasive).
-            </p>
-
-            <h3>5. Diritti Riguardanti I Propri Dati Personali</h3>
-            <p>
-              Hai il diritto legale (secondo GDPR e direttive equiparate) di cancellare in ogni istante la quasi totalità dei tuoi dati. Semplicemente accedendo all'area amministrativa o eliminando completamente il tuo account personale dal database. 
-            </p>
-
-            <div className="mt-12 p-6 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between flex-wrap gap-4">
-              <span className="text-sm font-bold text-slate-600">Richieste Privacy dedicate?</span>
-              <a href="mailto:privacy@smartmenu.it" className="text-sm font-bold bg-white border border-slate-200 text-slate-700 hover:text-indigo-600 px-5 py-2.5 rounded-xl shadow-sm transition-all hover:border-indigo-200">
-                Contact DPO
-              </a>
+      <header style={{
+        background: '#2D2016', borderBottom: '1px solid rgba(245,240,232,0.08)',
+        padding: '16px 24px', position: 'sticky', top: 0, zIndex: 40,
+      }}>
+        <div style={{ maxWidth: 800, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+            <div style={{ width: 40, height: 40, borderRadius: 12, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <img src="/sm-logo.png" alt="SmartMenu Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', transform: 'scale(2.5)' }} />
             </div>
+            <span style={{ fontFamily: 'var(--font-display), serif', fontSize: 18, fontWeight: 500, color: '#F5F0E8', letterSpacing: -0.3 }}>SmartMenu</span>
+          </Link>
+          <Link href="/dashboard" style={{ fontSize: 13, fontWeight: 500, color: 'rgba(245,240,232,0.6)', textDecoration: 'none' }}>
+            Torna alla Dashboard
+          </Link>
+        </div>
+      </header>
+
+      <main style={{ flex: 1, maxWidth: 800, margin: '0 auto', padding: '64px 24px', width: '100%' }}>
+        <div style={{ marginBottom: 48 }}>
+          <div style={{
+            display: 'inline-block', padding: '4px 12px', background: 'rgba(74,124,89,0.15)',
+            color: '#4A7C59', fontWeight: 500, fontSize: 11, textTransform: 'uppercase',
+            letterSpacing: '0.1em', borderRadius: 20, marginBottom: 16,
+          }}>Informativa &amp; Privacy</div>
+          <h1 style={{ fontFamily: 'var(--font-display), serif', fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 500, color: '#2D2016', marginBottom: 12 }}>Privacy Policy</h1>
+          <p style={{ fontSize: 14, color: 'rgba(45,32,22,0.5)' }}>I tuoi dati sono al sicuro con noi.</p>
+        </div>
+
+        <div style={{ background: '#fff', borderRadius: 24, padding: '32px 28px', boxShadow: '0 4px 16px rgba(45,32,22,0.04)', border: '1px solid rgba(45,32,22,0.06)', color: '#2C2C2A', fontSize: 14, lineHeight: 1.7 }}>
+          <h3 style={{ fontFamily: 'var(--font-display), serif', fontSize: 18, fontWeight: 500, color: '#2D2016', marginBottom: 8, marginTop: 0 }}>1. Quali dati raccogliamo</h3>
+          <p style={{ marginBottom: 8, color: 'rgba(45,32,22,0.65)' }}>Durante l&apos;uso di SmartMenu AI raccogliamo varie categorie di informazioni:</p>
+          <ul style={{ marginBottom: 24, paddingLeft: 20, color: 'rgba(45,32,22,0.65)' }}>
+            <li style={{ marginBottom: 8 }}><strong style={{ color: '#2D2016' }}>Dati di Autenticazione:</strong> Il tuo indirizzo email per verificare la tua identità e creare la tua area riservata tramite Supabase.</li>
+            <li style={{ marginBottom: 8 }}><strong style={{ color: '#2D2016' }}>Dati del Ristorante:</strong> Testi, categorie e descrizioni dei tuoi piatti e le impostazioni di branding necessarie per il menù digitale.</li>
+            <li style={{ marginBottom: 8 }}><strong style={{ color: '#2D2016' }}>Immagini Analizzate:</strong> Le immagini sono elaborate dai provider per l&apos;estrazione del testo e non vengono conservate oltre il necessario.</li>
+            <li><strong style={{ color: '#2D2016' }}>Dati di Pagamento:</strong> NON memorizziamo dati bancari. I pagamenti avvengono nell&apos;ambiente sicuro di <strong>Stripe Connect</strong>.</li>
+          </ul>
+
+          <h3 style={{ fontFamily: 'var(--font-display), serif', fontSize: 18, fontWeight: 500, color: '#2D2016', marginBottom: 8 }}>2. Come e dove usiamo le informazioni</h3>
+          <p style={{ marginBottom: 8, color: 'rgba(45,32,22,0.65)' }}>Utilizziamo le tue informazioni esclusivamente per garantire l&apos;operatività del tuo menù e delle dashboard analitiche. Nessun dato è venduto a terzi.</p>
+          <ul style={{ marginBottom: 24, paddingLeft: 20, color: 'rgba(45,32,22,0.65)' }}>
+            <li style={{ marginBottom: 8 }}>I dati del menù in formato pubblico per i clienti che scansionano il QR Code.</li>
+            <li>Le statistiche aggregate (tracking accessi) sui visualizzatori dei tuoi piatti.</li>
+          </ul>
+
+          <h3 style={{ fontFamily: 'var(--font-display), serif', fontSize: 18, fontWeight: 500, color: '#2D2016', marginBottom: 8 }}>3. Condivisione dei Dati e Terze Parti</h3>
+          <p style={{ marginBottom: 24, color: 'rgba(45,32,22,0.65)' }}>
+            SmartMenu AI può inviare temporaneamente testi e metadati ad API fornite da provider (OpenAI) per traduzioni e descrizioni IA. Questi provider operano come &quot;Data Processors&quot; con Zero Data Retention.
+          </p>
+
+          <h3 style={{ fontFamily: 'var(--font-display), serif', fontSize: 18, fontWeight: 500, color: '#2D2016', marginBottom: 8 }}>4. Cookie e Tecnologie di Tracciamento</h3>
+          <p style={{ marginBottom: 24, color: 'rgba(45,32,22,0.65)' }}>
+            SmartMenu AI utilizza solo cookie operativi indispensabili per le sessioni e i token OAuth. Nessun cookie di marketing di terze parti è utilizzato.
+          </p>
+
+          <h3 style={{ fontFamily: 'var(--font-display), serif', fontSize: 18, fontWeight: 500, color: '#2D2016', marginBottom: 8 }}>5. Diritti Riguardanti I Propri Dati Personali</h3>
+          <p style={{ marginBottom: 24, color: 'rgba(45,32,22,0.65)' }}>
+            Hai il diritto (secondo GDPR) di cancellare in ogni istante i tuoi dati. Puoi farlo accedendo all&apos;area amministrativa o eliminando il tuo account personale.
+          </p>
+
+          <div style={{
+            marginTop: 32, padding: 20, background: '#F5F0E8', borderRadius: 16,
+            border: '1px solid rgba(45,32,22,0.06)', display: 'flex', alignItems: 'center',
+            justifyContent: 'space-between', flexWrap: 'wrap', gap: 16,
+          }}>
+            <span style={{ fontSize: 14, fontWeight: 500, color: '#2D2016' }}>Richieste Privacy dedicate?</span>
+            <a href="mailto:privacy@smartmenu.it" style={{
+              fontSize: 13, fontWeight: 500, background: '#fff', border: '1px solid rgba(45,32,22,0.1)',
+              color: '#2D2016', padding: '10px 20px', borderRadius: 12, textDecoration: 'none',
+            }}>
+              Contact DPO
+            </a>
           </div>
-        </main>
-        
-        <Footer />
-      </div>
-    </>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
   );
 }

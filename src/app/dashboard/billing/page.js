@@ -10,7 +10,7 @@ import { useToast } from '@/components/Toast';
 export default function BillingPage() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPlan, setCurrentPlan] = useState('free'); // 'free' | 'premium'
+  const [currentPlan, setCurrentPlan] = useState('free');
   const router = useRouter();
   const toast = useToast();
 
@@ -22,105 +22,100 @@ export default function BillingPage() {
         return;
       }
       setUser(session.user);
-      
-      // In futuro: caricare il piano reale da Supabase
       setIsLoading(false);
     };
     checkUser();
   }, [router]);
 
-  const handleUpgrade = () => {
-    // Simulazione Checkout Stripe Subscriptions
-    toast.info("In futuro questo bottone ti manderà al checkout Stripe per sottoscrivere l'abbonamento Premium.", 'Prossimamente');
-  };
-
-  if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-400">Caricamento Piani...</div>;
+  if (isLoading) return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F5F0E8', color: 'rgba(45,32,22,0.4)' }}>Caricamento Piani...</div>;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-sans flex flex-col transition-colors duration-300">
-      <main className="max-w-5xl mx-auto px-6 py-10 flex-1 w-full">
+    <div style={{ minHeight: '100vh', background: '#F5F0E8', color: '#2C2C2A', fontFamily: "var(--font-inter), 'Inter', sans-serif", display: 'flex', flexDirection: 'column' }}>
+      <main style={{ maxWidth: 860, margin: '0 auto', padding: '40px 24px', flex: 1, width: '100%' }}>
         
         {/* BACK BUTTON */}
-        <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors mb-8 group">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-1 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
+        <Link href="/dashboard" style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 500,
+          color: 'rgba(45,32,22,0.45)', textDecoration: 'none', marginBottom: 32,
+        }}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           Torna alla Dashboard
         </Link>
         
         {/* HEADER */}
-        <div className="mb-10 text-center">
-          <h1 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-4">Stiamo crescendo: per te è tutto Gratis!</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-base md:text-lg max-w-2xl mx-auto">Siamo in fase di Accesso Beta. Come nostro pioniere, ottieni l'accesso a tutte le funzionalità Premium (e future) in forma completamente gratuita. L'unico limite è la tua immaginazione.</p>
+        <div style={{ marginBottom: 40, textAlign: 'center' }}>
+          <h1 style={{ fontFamily: 'var(--font-display), serif', fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: 500, color: '#2D2016', marginBottom: 12 }}>Stiamo crescendo: per te è tutto Gratis!</h1>
+          <p style={{ fontSize: 15, color: 'rgba(45,32,22,0.5)', maxWidth: 540, margin: '0 auto', lineHeight: 1.6 }}>Siamo in fase di Accesso Beta. Come nostro pioniere, ottieni l&apos;accesso a tutte le funzionalità Premium gratuitamente.</p>
         </div>
 
         {/* BETA ALL-ACCESS CARD */}
-        <div className="max-w-3xl mx-auto mb-16">
-          <div className="bg-slate-900 rounded-[32px] p-8 sm:p-12 border border-indigo-500/30 shadow-2xl shadow-indigo-900/40 relative overflow-hidden flex flex-col">
-             <div className="absolute top-0 left-0 w-64 h-64 bg-indigo-500 rounded-full blur-[100px] opacity-20 -ml-20 -mt-20 pointer-events-none"></div>
-             <div className="absolute bottom-0 right-0 w-64 h-64 bg-fuchsia-500 rounded-full blur-[100px] opacity-20 -mr-20 -mb-20 pointer-events-none"></div>
-             
-             <div className="relative z-10 flex-1 flex flex-col items-center text-center">
-              <span className="bg-gradient-to-r from-emerald-400 to-emerald-500 text-white text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full mb-6 shadow-lg shadow-emerald-500/20">Piano Attivo</span>
+        <div style={{ maxWidth: 640, margin: '0 auto' }}>
+          <div style={{
+            background: '#2D2016', borderRadius: 24, padding: '40px 36px',
+            border: `2px solid rgba(196,98,45,0.3)`, position: 'relative', overflow: 'hidden',
+            textAlign: 'center',
+          }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, width: 200, height: 200, borderRadius: '50%', background: '#C4622D', opacity: 0.08, marginLeft: -60, marginTop: -60, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', bottom: 0, right: 0, width: 200, height: 200, borderRadius: '50%', background: '#E8A84A', opacity: 0.06, marginRight: -60, marginBottom: -60, pointerEvents: 'none' }} />
+            
+            <div style={{ position: 'relative', zIndex: 10 }}>
+              <span style={{
+                display: 'inline-block', background: 'rgba(74,124,89,0.25)', color: '#4A7C59',
+                fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em',
+                padding: '4px 14px', borderRadius: 20, marginBottom: 20,
+              }}>Piano Attivo</span>
               
-              <h3 className="text-3xl md:text-4xl font-black text-white flex items-center justify-center gap-3 mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-amber-400"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <h3 style={{ fontFamily: 'var(--font-display), serif', fontSize: 32, fontWeight: 500, color: '#F5F0E8', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 12 }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#E8A84A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                 Accesso Beta Pioniere
               </h3>
               
-              <div className="flex items-end justify-center gap-2 mb-8">
-                 <span className="text-5xl font-black text-white">€0</span>
-                 <span className="text-indigo-300 font-medium text-lg mb-1 relative"><span className="absolute w-full h-[2px] bg-red-400 top-1/2 -rotate-12"></span>€29/mese</span>
+              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 8, marginBottom: 24 }}>
+                <span style={{ fontFamily: 'var(--font-display), serif', fontSize: 48, fontWeight: 500, color: '#F5F0E8' }}>€0</span>
+                <span style={{ color: 'rgba(245,240,232,0.35)', fontSize: 15, marginBottom: 8, position: 'relative' }}>
+                  <span style={{ position: 'absolute', width: '100%', height: 2, background: '#dc2626', top: '50%', transform: 'rotate(-12deg)' }} />
+                  €29/mese
+                </span>
               </div>
-              <p className="text-indigo-100/90 text-sm md:text-base max-w-lg mx-auto mb-10 leading-relaxed">
-                Tutto sbloccato. Avrai per sempre a disposizione il massimo della tecnologia generativa per creare menù illimitati, 
-                vedere analytics dettagliate, rimuovere il nostro logo e usare l'intelligenza artificiale per traduzioni e copy.
+              
+              <p style={{ fontSize: 14, color: 'rgba(245,240,232,0.5)', maxWidth: 420, margin: '0 auto 28px', lineHeight: 1.6 }}>
+                Tutto sbloccato. Menù illimitati, analytics, traduzioni IA, template premium e molto altro.
               </p>
               
-              <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-4 mb-10 text-sm text-indigo-100 font-medium text-left w-full max-w-xl mx-auto">
-                <li className="flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
-                    <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 24px', marginBottom: 28, maxWidth: 460, margin: '0 auto 28px', textAlign: 'left' }}>
+                {[
+                  'Menù e Piatti Illimitati',
+                  'Dashboard Analytics',
+                  'Temi Luxury e Cinematic',
+                  'Nessun Logo "Powered By"',
+                  'Traduzione Automatica (IA)',
+                ].map(item => (
+                  <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'rgba(245,240,232,0.7)', fontWeight: 500 }}>
+                    <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(74,124,89,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4A7C59" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7" /></svg>
+                    </span>
+                    {item}
+                  </div>
+                ))}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'rgba(245,240,232,0.35)', fontWeight: 500 }}>
+                  <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(245,240,232,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(245,240,232,0.3)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                   </span>
-                  Menù e Piatti Illimitati
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
-                    <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                  </span>
-                  Dashboard Analytics
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
-                    <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                  </span>
-                  Temi Luxury e Cinematic
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
-                    <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                  </span>
-                  Nessun Logo "Powered By"
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
-                    <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                  </span>
-                  Traduzione Automatica (IA)
-                </li>
-                 <li className="flex items-center gap-3 opacity-50">
-                  <span className="w-6 h-6 rounded-full bg-slate-500/20 flex items-center justify-center shrink-0">
-                    <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                  </span>
-                  Ordini via Stripe <span className="text-[10px] ml-1 bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded">In Arrivo</span>
-                </li>
-              </ul>
+                  Ordini via Stripe <span style={{ fontSize: 9, marginLeft: 4, background: 'rgba(232,168,74,0.15)', color: '#E8A84A', padding: '2px 6px', borderRadius: 4 }}>In Arrivo</span>
+                </div>
+              </div>
 
               <button 
                 disabled
-                className="bg-white/10 text-white border border-white/20 font-bold py-4 px-8 rounded-xl cursor-default transition-all shadow-md w-full sm:w-auto"
+                style={{
+                  background: 'rgba(245,240,232,0.08)', color: '#F5F0E8', border: '1px solid rgba(245,240,232,0.12)',
+                  fontWeight: 500, padding: '14px 28px', borderRadius: 12, cursor: 'default',
+                  fontSize: 14, width: '100%', maxWidth: 380,
+                }}
               >
                 Hai già tutto sbloccato! Continua così.
               </button>
-             </div>
+            </div>
           </div>
         </div>
 

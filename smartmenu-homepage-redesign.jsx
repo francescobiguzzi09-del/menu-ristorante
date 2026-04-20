@@ -1,13 +1,31 @@
 "use client";
 
+/**
+ * SmartMenu AI — Homepage Redesign
+ * 
+ * BRAND SYSTEM:
+ * - Palette: Espresso #2D2016 | Terracotta #C4622D | Ambra #E8A84A | Oliva #4A7C59 | Crema #F5F0E8
+ * - Font display: Fraunces (serif) — importare da Google Fonts
+ * - Font body: Geist (già in Next.js) o Inter
+ * - Mood: warm-artisanal, distante dagli slate/indigo SaaS generici
+ * 
+ * ISTRUZIONI:
+ * 1. In layout.js aggiungere:
+ *    import { Fraunces } from 'next/font/google'
+ *    const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-display' })
+ * 2. Sostituire le testimonianze con dati reali di ristoratori
+ * 3. Aggiornare i numeri statistici con dati reali
+ * 4. Collegare i link ai veri anchor/route
+ */
+
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Footer from '@/components/Footer';
-import { ArrowRight, QrCode } from 'lucide-react';
+import { ArrowRight, Check, QrCode, Globe, ShieldCheck, Smartphone } from 'lucide-react';
 
-// ─── Brand colors ─────────────────────────────────────────────────────────────
+// ─── Tema colori brand ────────────────────────────────────────────────────────
 const T = {
   espresso: '#2D2016',
   terracotta: '#C4622D',
@@ -17,7 +35,7 @@ const T = {
   carbone: '#2C2C2A',
 };
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
+// ─── Dati ─────────────────────────────────────────────────────────────────────
 const STATS = [
   { n: '500+', label: 'ristoranti attivi in Italia' },
   { n: '12 s', label: 'tempo medio di scansione QR' },
@@ -65,7 +83,7 @@ const REVIEWS = [
   {
     initials: 'SA',
     name: 'Sara A.',
-    place: "Pizzeria Napul'è — Milano",
+    place: 'Pizzeria Napul\'è — Milano',
     detail: 'Delivery + sala · 60 coperti',
     stars: 5,
     text: '"Ho creato il menù in un pomeriggio. I clienti ordinano dal tavolo senza aspettare il cameriere. Il fatturato da asporto è salito del 20%."',
@@ -103,12 +121,12 @@ const PLAN_PRO = [
 
 const FAQS = [
   {
-    q: "I clienti devono scaricare un'app?",
-    a: "No. SmartMenu genera un link e un QR code. I clienti inquadrano il QR con la fotocamera del telefono e vedono il menù direttamente nel browser — nessuna installazione.",
+    q: 'I clienti devono scaricare un\'app?',
+    a: 'No. SmartMenu genera un link e un QR code. I clienti inquadrano il QR con la fotocamera del telefono e vedono il menù direttamente nel browser — nessuna installazione.',
   },
   {
     q: 'Come funziona la traduzione automatica?',
-    a: "Con un click il menù viene tradotto in 10+ lingue — inglese, spagnolo, francese, tedesco, giapponese e altre. La funzione è inclusa nel piano Pro.",
+    a: 'Con un click il menù viene tradotto in 10+ lingue — inglese, spagnolo, francese, tedesco, giapponese e altre. La funzione è inclusa nel piano Pro.',
   },
   {
     q: 'Posso aggiornare prezzi e piatti in qualsiasi momento?',
@@ -116,11 +134,11 @@ const FAQS = [
   },
   {
     q: 'Come ricevo i pagamenti dagli ordini al tavolo?',
-    a: "Tramite Stripe. Colleghi il tuo account Stripe dalla dashboard e i pagamenti (carta, Apple Pay, Google Pay) arrivano direttamente sul tuo conto.",
+    a: 'Tramite Stripe. Colleghi il tuo account Stripe dalla dashboard e i pagamenti (carta, Apple Pay, Google Pay) arrivano direttamente sul tuo conto.',
   },
 ];
 
-// ─── Components ───────────────────────────────────────────────────────────────
+// ─── Componenti UI ─────────────────────────────────────────────────────────────
 const Stars = ({ n }) => (
   <span style={{ color: T.ambra, fontSize: 13, letterSpacing: 1 }}>
     {'★'.repeat(n)}{'☆'.repeat(5 - n)}
@@ -138,13 +156,13 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div style={{ minHeight: '100vh', background: T.crema, fontFamily: "var(--font-inter), 'Inter', sans-serif", overflowX: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: T.crema, fontFamily: "'Geist', 'Inter', sans-serif", overflowX: 'hidden' }}>
 
       {/* ── NAV ─────────────────────────────────────────────────────────── */}
       <header style={{
         position: 'fixed', top: 0, width: '100%', zIndex: 50,
         background: `${T.espresso}f0`, backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(255,255,255,0.08)',
+        borderBottom: `1px solid rgba(255,255,255,0.08)`,
         padding: '0 24px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
@@ -154,7 +172,7 @@ export default function HomePage() {
           }}>
             <QrCode size={18} color={T.crema} />
           </div>
-          <span style={{ fontFamily: 'var(--font-display), serif', fontSize: 18, fontWeight: 500, color: T.crema, letterSpacing: -0.3 }}>
+          <span style={{ fontFamily: 'var(--font-display, serif)', fontSize: 18, fontWeight: 500, color: T.crema, letterSpacing: -0.3 }}>
             SmartMenu
           </span>
         </Link>
@@ -191,7 +209,7 @@ export default function HomePage() {
           background: T.espresso, minHeight: '95vh', paddingTop: 128,
           paddingBottom: 96, position: 'relative', overflow: 'hidden',
         }}>
-          {/* decorative circles */}
+          {/* texture decorativa */}
           <div style={{ position: 'absolute', top: '-20%', right: '-5%', width: 480, height: 480, borderRadius: '50%', background: T.terracotta, opacity: 0.06, pointerEvents: 'none' }} />
           <div style={{ position: 'absolute', bottom: '5%', left: '-8%', width: 320, height: 320, borderRadius: '50%', background: T.oliva, opacity: 0.08, pointerEvents: 'none' }} />
 
@@ -200,7 +218,7 @@ export default function HomePage() {
             {/* badge */}
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 7,
-              background: 'rgba(196,98,45,0.18)', border: '1px solid rgba(196,98,45,0.35)',
+              background: 'rgba(196,98,45,0.18)', border: `1px solid rgba(196,98,45,0.35)`,
               color: T.ambra, fontSize: 12, fontWeight: 500, padding: '5px 14px',
               borderRadius: 20, marginBottom: 32,
             }}>
@@ -210,7 +228,7 @@ export default function HomePage() {
 
             {/* headline */}
             <h1 style={{
-              fontFamily: 'var(--font-display), serif',
+              fontFamily: 'var(--font-display, serif)',
               fontSize: 'clamp(44px, 6vw, 80px)',
               fontWeight: 500, color: T.crema,
               lineHeight: 1.1, marginBottom: 24, maxWidth: 720,
@@ -269,7 +287,7 @@ export default function HomePage() {
                 background: '#fff', border: '1px solid rgba(45,32,22,.08)',
                 borderRadius: 16, padding: '28px 24px', textAlign: 'center',
               }}>
-                <div style={{ fontFamily: 'var(--font-display), serif', fontSize: 40, fontWeight: 500, color: T.espresso, marginBottom: 6 }}>{s.n}</div>
+                <div style={{ fontFamily: 'var(--font-display, serif)', fontSize: 40, fontWeight: 500, color: T.espresso, marginBottom: 6 }}>{s.n}</div>
                 <div style={{ fontSize: 13, color: 'rgba(45,32,22,.5)', lineHeight: 1.4 }}>{s.label}</div>
               </div>
             ))}
@@ -281,7 +299,7 @@ export default function HomePage() {
           <div style={{ maxWidth: 760, margin: '0 auto' }}>
             <div style={{ marginBottom: 48 }}>
               <div style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.terracotta, marginBottom: 10 }}>Come funziona</div>
-              <h2 style={{ fontFamily: 'var(--font-display), serif', fontSize: 36, fontWeight: 500, color: T.espresso, lineHeight: 1.2 }}>
+              <h2 style={{ fontFamily: 'var(--font-display, serif)', fontSize: 36, fontWeight: 500, color: T.espresso, lineHeight: 1.2 }}>
                 Dal menù cartaceo<br />al digitale in 3 passi
               </h2>
             </div>
@@ -312,7 +330,7 @@ export default function HomePage() {
           <div style={{ maxWidth: 1000, margin: '0 auto' }}>
             <div style={{ marginBottom: 40 }}>
               <div style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.terracotta, marginBottom: 10 }}>Template</div>
-              <h2 style={{ fontFamily: 'var(--font-display), serif', fontSize: 36, fontWeight: 500, color: T.espresso, lineHeight: 1.2 }}>
+              <h2 style={{ fontFamily: 'var(--font-display, serif)', fontSize: 36, fontWeight: 500, color: T.espresso, lineHeight: 1.2 }}>
                 Un design per ogni locale
               </h2>
             </div>
@@ -320,7 +338,7 @@ export default function HomePage() {
               {TEMPLATES.map(tmpl => (
                 <div key={tmpl.name} style={{ border: '1px solid rgba(45,32,22,.1)', borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
                   <div style={{ height: 72, background: tmpl.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ fontFamily: 'var(--font-display), serif', fontSize: 13, color: tmpl.color, letterSpacing: 2, textTransform: 'uppercase' }}>{tmpl.name}</span>
+                    <span style={{ fontFamily: 'var(--font-display, serif)', fontSize: 13, color: tmpl.color, letterSpacing: 2, textTransform: 'uppercase' }}>{tmpl.name}</span>
                   </div>
                   <div style={{ padding: '8px 10px' }}>
                     <div style={{ fontSize: 12, fontWeight: 500, color: T.espresso }}>{tmpl.name}</div>
@@ -337,13 +355,13 @@ export default function HomePage() {
           <div style={{ maxWidth: 900, margin: '0 auto' }}>
             <div style={{ marginBottom: 48 }}>
               <div style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.terracotta, marginBottom: 10 }}>Ristoratori reali</div>
-              <h2 style={{ fontFamily: 'var(--font-display), serif', fontSize: 36, fontWeight: 500, color: T.espresso }}>
+              <h2 style={{ fontFamily: 'var(--font-display, serif)', fontSize: 36, fontWeight: 500, color: T.espresso }}>
                 Chi usa SmartMenu ogni giorno
               </h2>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
               {REVIEWS.map(r => (
-                <div key={r.name} style={{ background: T.crema, border: '1px solid rgba(45,32,22,.08)', borderRadius: 16, padding: 24 }}>
+                <div key={r.name} style={{ background: T.crema, border: '1px solid rgba(45,32,22,.08)', borderRadius: 16, padding: '24px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
                     <div style={{ width: 40, height: 40, borderRadius: '50%', background: r.bg, color: r.color, fontSize: 13, fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{r.initials}</div>
                     <div>
@@ -364,7 +382,7 @@ export default function HomePage() {
           <div style={{ maxWidth: 760, margin: '0 auto' }}>
             <div style={{ marginBottom: 48 }}>
               <div style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.terracotta, marginBottom: 10 }}>Prezzi</div>
-              <h2 style={{ fontFamily: 'var(--font-display), serif', fontSize: 36, fontWeight: 500, color: T.espresso }}>
+              <h2 style={{ fontFamily: 'var(--font-display, serif)', fontSize: 36, fontWeight: 500, color: T.espresso }}>
                 Semplice. Senza sorprese.
               </h2>
             </div>
@@ -372,7 +390,7 @@ export default function HomePage() {
               {/* Free */}
               <div style={{ background: '#fff', border: '1px solid rgba(45,32,22,.1)', borderRadius: 20, padding: 28 }}>
                 <div style={{ fontSize: 15, fontWeight: 500, color: T.espresso, marginBottom: 4 }}>Gratis</div>
-                <div style={{ fontFamily: 'var(--font-display), serif', fontSize: 40, fontWeight: 500, color: T.espresso, marginBottom: 4 }}>
+                <div style={{ fontFamily: 'var(--font-display, serif)', fontSize: 40, fontWeight: 500, color: T.espresso, marginBottom: 4 }}>
                   €0 <span style={{ fontSize: 14, fontWeight: 400, color: 'rgba(45,32,22,.4)' }}>/ sempre</span>
                 </div>
                 <p style={{ fontSize: 13, color: 'rgba(45,32,22,.5)', marginBottom: 20, lineHeight: 1.5 }}>Per chi vuole provare senza impegno.</p>
@@ -386,7 +404,7 @@ export default function HomePage() {
                 </div>
                 <Link href="/login" style={{
                   display: 'block', marginTop: 24, textAlign: 'center',
-                  border: '1.5px solid rgba(45,32,22,.2)', color: T.espresso,
+                  border: `1.5px solid rgba(45,32,22,.2)`, color: T.espresso,
                   padding: '10px', borderRadius: 10, fontSize: 13, fontWeight: 500, textDecoration: 'none',
                 }}>Inizia gratis</Link>
               </div>
@@ -394,7 +412,7 @@ export default function HomePage() {
               <div style={{ background: T.espresso, borderRadius: 20, padding: 28, border: `2px solid ${T.terracotta}` }}>
                 <div style={{ display: 'inline-block', background: 'rgba(196,98,45,.25)', color: T.ambra, fontSize: 10, fontWeight: 500, padding: '3px 10px', borderRadius: 20, marginBottom: 10 }}>Più scelto</div>
                 <div style={{ fontSize: 15, fontWeight: 500, color: T.crema, marginBottom: 4 }}>Pro</div>
-                <div style={{ fontFamily: 'var(--font-display), serif', fontSize: 40, fontWeight: 500, color: T.crema, marginBottom: 4 }}>
+                <div style={{ fontFamily: 'var(--font-display, serif)', fontSize: 40, fontWeight: 500, color: T.crema, marginBottom: 4 }}>
                   €19 <span style={{ fontSize: 14, fontWeight: 400, color: 'rgba(245,240,232,.4)' }}>/ mese</span>
                 </div>
                 <p style={{ fontSize: 13, color: 'rgba(245,240,232,.5)', marginBottom: 20, lineHeight: 1.5 }}>Per fare bella figura ogni giorno.</p>
@@ -421,7 +439,7 @@ export default function HomePage() {
           <div style={{ maxWidth: 680, margin: '0 auto' }}>
             <div style={{ marginBottom: 40 }}>
               <div style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: T.terracotta, marginBottom: 10 }}>FAQ</div>
-              <h2 style={{ fontFamily: 'var(--font-display), serif', fontSize: 36, fontWeight: 500, color: T.espresso }}>Domande frequenti</h2>
+              <h2 style={{ fontFamily: 'var(--font-display, serif)', fontSize: 36, fontWeight: 500, color: T.espresso }}>Domande frequenti</h2>
             </div>
             {FAQS.map((faq, i) => (
               <div key={i} style={{ padding: '20px 0', borderBottom: i < FAQS.length - 1 ? '1px solid rgba(45,32,22,.08)' : 'none' }}>
@@ -436,8 +454,8 @@ export default function HomePage() {
         <section style={{ background: T.espresso, padding: '100px 24px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 600, height: 600, borderRadius: '50%', background: T.terracotta, opacity: 0.06, pointerEvents: 'none' }} />
           <div style={{ position: 'relative', zIndex: 10, maxWidth: 560, margin: '0 auto' }}>
-            <h2 style={{ fontFamily: 'var(--font-display), serif', fontSize: 44, fontWeight: 500, color: T.crema, lineHeight: 1.15, marginBottom: 16 }}>
-              Il tuo ristorante<br />merita un menù all&apos;altezza.
+            <h2 style={{ fontFamily: 'var(--font-display, serif)', fontSize: 44, fontWeight: 500, color: T.crema, lineHeight: 1.15, marginBottom: 16 }}>
+              Il tuo ristorante<br />merita un menù all'altezza.
             </h2>
             <p style={{ fontSize: 15, color: 'rgba(245,240,232,.45)', marginBottom: 36 }}>
               Gratis, pronto in 2 minuti. Nessuna carta di credito richiesta.

@@ -3,26 +3,48 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* SmartMenu Brand Palette */
+  --sm-espresso: #2D2016;
+  --sm-terracotta: #C4622D;
+  --sm-ambra: #E8A84A;
+  --sm-oliva: #4A7C59;
+  --sm-crema: #F5F0E8;
+  --sm-carbone: #2C2C2A;
+
+  --background: #F5F0E8;
+  --foreground: #2C2C2A;
 }
 
 .dark {
-  --background: #020617;
-  --foreground: #e2e8f0;
+  --background: #2D2016;
+  --foreground: #F5F0E8;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  /* Brand tokens for Tailwind */
+  --color-espresso: #2D2016;
+  --color-terracotta: #C4622D;
+  --color-ambra: #E8A84A;
+  --color-oliva: #4A7C59;
+  --color-crema: #F5F0E8;
+  --color-carbone: #2C2C2A;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Display font for headings */
+h1, h2, h3 {
+  font-family: var(--font-display), 'Fraunces', Georgia, serif;
 }
 
 /* Toast animation */
