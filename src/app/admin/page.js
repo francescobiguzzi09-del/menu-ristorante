@@ -1128,7 +1128,7 @@ function AdminDashboardContent() {
 
                     {/* Elegant */}
                     <div
-                      onClick={() => handleTemplateChange('')}
+                      onClick={() => handleTemplateChange('elegant')}
                       className={`isolate relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${(!settings.template || settings.template === 'elegant') ? 'border-indigo-500 shadow-lg scale-[1.02] z-10' : 'border-slate-100 hover:border-indigo-200 opacity-70 hover:opacity-100'}`}
                     >
                       <div className="absolute inset-0 bg-[#0a0a0b] -z-10"></div>
@@ -1142,7 +1142,7 @@ function AdminDashboardContent() {
 
                     {/* Modern */}
                     <div
-                      onClick={() => handleTemplateChange('')}
+                      onClick={() => handleTemplateChange('modern')}
                       className={`isolate relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'modern' ? 'border-zinc-900 shadow-lg scale-[1.02] z-10' : 'border-slate-100 hover:border-zinc-300 opacity-70 hover:opacity-100'}`}
                     >
                       <div className="absolute inset-0 bg-white -z-10"></div>
@@ -1157,7 +1157,7 @@ function AdminDashboardContent() {
 
                     {/* Rustic */}
                     <div
-                      onClick={() => handleTemplateChange('')}
+                      onClick={() => handleTemplateChange('rustic')}
                       className={`isolate relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'rustic' ? 'border-[#d97757] shadow-lg scale-[1.02] z-10' : 'border-slate-100 hover:border-[#e8dbce] opacity-70 hover:opacity-100'}`}
                     >
                       <div className="absolute inset-0 bg-[#fdfbf7] -z-10"></div>
@@ -1172,7 +1172,7 @@ function AdminDashboardContent() {
 
                     {/* Cinematic (Premium) */}
                     <div
-                      onClick={() => handleTemplateChange('')}
+                      onClick={() => handleTemplateChange('cinematic')}
                       className={`isolate relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'cinematic' ? 'border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.3)] scale-[1.02] z-10' : 'border-slate-100 hover:border-amber-300 opacity-70 hover:opacity-100'}`}
                     >
                       <div className="absolute inset-0 bg-slate-950 -z-10"></div>
@@ -1187,7 +1187,7 @@ function AdminDashboardContent() {
 
                     {/* Vibrant */}
                     <div
-                      onClick={() => handleTemplateChange('')}
+                      onClick={() => handleTemplateChange('vibrant')}
                       className={`isolate relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'vibrant' ? 'border-slate-900 shadow-[6px_6px_0px_#fde047] scale-[1.02] -translate-y-1 z-10' : 'border-slate-100 hover:border-slate-300 opacity-70 hover:opacity-100'}`}
                     >
                       <span className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">Gratis in Beta</span>
@@ -1203,7 +1203,7 @@ function AdminDashboardContent() {
 
                     {/* Luxury (Premium) */}
                     <div
-                      onClick={() => handleTemplateChange('')}
+                      onClick={() => handleTemplateChange('luxury')}
                       className={`isolate relative cursor-pointer rounded-2xl border-[3px] transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'luxury' ? 'border-stone-800 shadow-2xl scale-[1.02] z-10' : 'border-slate-200 hover:border-stone-400 opacity-70 hover:opacity-100'}`}
                     >
                       <span className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">Gratis in Beta</span>
@@ -1219,7 +1219,7 @@ function AdminDashboardContent() {
 
                     {/* Sushi (New Dark) */}
                     <div
-                      onClick={() => handleTemplateChange('')}
+                      onClick={() => handleTemplateChange('sushi')}
                       className={`isolate relative cursor-pointer rounded-2xl border-[3px] transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 bg-[#020617] ${settings.template === 'sushi' ? 'border-emerald-500 shadow-2xl scale-[1.02] z-10' : 'border-slate-800 hover:border-emerald-900 opacity-70 hover:opacity-100'}`}
                     >
                       <span className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">New</span>
@@ -1233,7 +1233,7 @@ function AdminDashboardContent() {
 
                     {/* Taverna (New Vintage) */}
                     <div
-                      onClick={() => handleTemplateChange('')}
+                      onClick={() => handleTemplateChange('taverna')}
                       className={`isolate relative cursor-pointer rounded-2xl border-[3px] transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 bg-[#0a0a0b] ${settings.template === 'taverna' ? 'border-[#c9a66b] shadow-2xl scale-[1.02] z-10' : 'border-[#1a1a1c] hover:border-[#332e29] opacity-70 hover:opacity-100'}`}
                     >
                       <span className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">New</span>
@@ -1248,7 +1248,7 @@ function AdminDashboardContent() {
 
                     {/* Brunch (New Clean) */}
                     <div
-                      onClick={() => handleTemplateChange('')}
+                      onClick={() => handleTemplateChange('brunch')}
                       className={`isolate relative cursor-pointer rounded-3xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 bg-[#f8f9fa] ${settings.template === 'brunch' ? 'border-emerald-600 shadow-[0_10px_30px_rgba(5,150,105,0.2)] scale-[1.02] z-10' : 'border-slate-100 hover:border-emerald-200 opacity-70 hover:opacity-100'}`}
                     >
                       <span className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">New</span>
