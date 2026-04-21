@@ -9,7 +9,6 @@ import OrdersPanel from '@/components/OrdersPanel';
 import Footer from '@/components/Footer';
 import { useTheme } from '@/components/ThemeProvider';
 import { useToast } from '@/components/Toast';
-import { QrCode } from 'lucide-react';
 
 // Brand palette
 const B = {
@@ -25,9 +24,11 @@ export default function DashboardPage() {
   const [menus, setMenus] = useState([]);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('menus'); // 'menus' | 'analytics' | 'reviews' | 'orders'
+  const [activeTab, setActiveTab] = useState('menus');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [menuToDelete, setMenuToDelete] = useState(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef(null);
   const router = useRouter();
   const toast = useToast();
@@ -68,7 +69,6 @@ export default function DashboardPage() {
         }
       }
 
-      // Fetch user's menus
       const { data, error } = await supabase
         .from('menus')
         .select('restaurant_id, data')
@@ -122,35 +122,211 @@ export default function DashboardPage() {
 
   if (isLoading) return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FAF8F5', color: 'rgba(45,32,22,0.4)', fontFamily: "var(--font-inter)" }}>Caricamento Dashboard...</div>;
 
-  const tabStyle = (isActive) => ({
-    paddingBottom: 16, fontWeight: 600, fontSize: 13, padding: '0 8px 16px', cursor: 'pointer',
-    color: isActive ? B.terracotta : 'rgba(45,32,22,0.45)',
-    borderBottom: isActive ? `3px solid ${B.terracotta}` : '3px solid transparent',
-    background: 'none', border: 'none', borderBottomWidth: 3, borderBottomStyle: 'solid',
-    borderBottomColor: isActive ? B.terracotta : 'transparent',
-    transition: 'all .2s', whiteSpace: 'nowrap', flexShrink: 0,
-    display: 'flex', alignItems: 'center', gap: 6,
+  // Sidebar nav items
+  const navItems = [
+    { key: 'menus', label: 'I Miei Menù', icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/><path d="M12 3v6"/></svg>
+    )},
+    { key: 'analytics', label: 'Analytics', badge: 'Beta', icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+    )},
+    { key: 'reviews', label: 'Recensioni', badge: 'Beta', icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    )},
+    { key: 'orders', label: 'Ordini', badge: 'Beta', icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+    )},
+  ];
+
+  const generalItems = [
+    { href: '/dashboard/settings', label: 'Impostazioni', icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    )},
+    { href: '/faq', label: 'Aiuto', icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+    )},
+  ];
+
+  const totalDishes = menus.reduce((acc, menu) => acc + (menu.data?.menu?.length || 0), 0);
+  const totalCategories = menus.reduce((acc, menu) => {
+    const cats = new Set((menu.data?.menu || []).map(d => d.category).filter(Boolean));
+    return acc + cats.size;
+  }, 0);
+
+  // Filter menus by search
+  const filteredMenus = menus.filter(m => {
+    if (!searchQuery.trim()) return true;
+    const name = (m.data?.settings?.restaurantName || '').toLowerCase();
+    return name.includes(searchQuery.toLowerCase());
   });
 
   return (
-    <div style={{ minHeight: '100vh', background: '#FAF8F5', color: B.carbone, fontFamily: "var(--font-inter), 'Inter', sans-serif", display: 'flex', flexDirection: 'column', transition: 'background .3s' }}>
-      {/* HEADER */}
-      <header style={{
-        background: '#fff', borderBottom: '1px solid rgba(45,32,22,0.08)',
-        position: 'sticky', top: 0, zIndex: 40, transition: 'all .3s',
+    <div style={{ minHeight: '100vh', background: '#FAF8F5', color: B.carbone, fontFamily: "var(--font-inter), 'Inter', sans-serif", display: 'flex', transition: 'background .3s' }}>
+
+      {/* ═══════════════ LEFT SIDEBAR ═══════════════ */}
+      <aside style={{
+        width: 260, flexShrink: 0, background: '#fff',
+        borderRight: '1px solid rgba(45,32,22,0.08)',
+        display: 'flex', flexDirection: 'column',
+        position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 40,
+        transition: 'all .3s',
       }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px', height: 64, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-              <div style={{ width: 40, height: 40, borderRadius: 12, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        {/* Logo */}
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(45,32,22,0.06)' }}>
+          <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+            <div style={{ width: 40, height: 40, borderRadius: 12, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <img src="/sm-logo.png" alt="SmartMenu Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', transform: 'scale(2.5)' }} />
             </div>
-              <span style={{ fontFamily: 'var(--font-display), serif', fontSize: 18, fontWeight: 500, color: B.espresso, letterSpacing: -0.3 }}>SmartMenu</span>
-            </a>
-            <div style={{ height: 24, width: 1, background: 'rgba(45,32,22,0.1)' }} />
-            <h1 style={{ fontSize: 16, fontWeight: 600, color: B.espresso, fontFamily: "var(--font-inter), sans-serif" }}>I Miei Ristoranti</h1>
+            <span style={{ fontFamily: 'var(--font-display), serif', fontSize: 18, fontWeight: 500, color: B.espresso, letterSpacing: -0.3 }}>SmartMenu</span>
+          </a>
+        </div>
+
+        {/* MENU section */}
+        <div style={{ padding: '20px 16px 8px', flex: 1 }}>
+          <p style={{ fontSize: 10, fontWeight: 600, color: 'rgba(45,32,22,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em', padding: '0 8px', marginBottom: 8 }}>Menu</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {navItems.map(item => {
+              const isActive = activeTab === item.key;
+              return (
+                <button
+                  key={item.key}
+                  onClick={() => setActiveTab(item.key)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
+                    borderRadius: 12, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500,
+                    background: isActive ? 'rgba(196,98,45,0.08)' : 'transparent',
+                    color: isActive ? B.terracotta : 'rgba(45,32,22,0.55)',
+                    transition: 'all .2s', width: '100%', textAlign: 'left',
+                  }}
+                  onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(45,32,22,0.03)'; } }}
+                  onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; } }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', color: isActive ? B.terracotta : 'rgba(45,32,22,0.35)' }}>{item.icon}</span>
+                  {item.label}
+                  {item.badge && (
+                    <span style={{ fontSize: 9, background: B.oliva, color: '#fff', fontWeight: 600, padding: '2px 6px', borderRadius: 4, textTransform: 'uppercase', letterSpacing: '0.05em', marginLeft: 'auto' }}>{item.badge}</span>
+                  )}
+                </button>
+              );
+            })}
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+
+          {/* GENERAL section */}
+          <p style={{ fontSize: 10, fontWeight: 600, color: 'rgba(45,32,22,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em', padding: '0 8px', marginTop: 24, marginBottom: 8 }}>Generale</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {generalItems.map(item => (
+              <a
+                key={item.href}
+                href={item.href}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
+                  borderRadius: 12, fontSize: 13, fontWeight: 500,
+                  color: 'rgba(45,32,22,0.55)', textDecoration: 'none',
+                  transition: 'all .2s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(45,32,22,0.03)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+              >
+                <span style={{ display: 'flex', alignItems: 'center', color: 'rgba(45,32,22,0.35)' }}>{item.icon}</span>
+                {item.label}
+              </a>
+            ))}
+            <button
+              onClick={handleLogout}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
+                borderRadius: 12, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500,
+                background: 'transparent', color: '#dc2626', width: '100%', textAlign: 'left',
+                transition: 'all .2s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(220,38,38,0.04)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+            >
+              <span style={{ display: 'flex', alignItems: 'center' }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+              </span>
+              Esci
+            </button>
+          </div>
+        </div>
+
+        {/* Beta feedback card in sidebar */}
+        <div style={{ padding: '0 16px 20px' }}>
+          <div style={{
+            background: `linear-gradient(135deg, ${B.terracotta}, ${B.espresso})`,
+            borderRadius: 16, padding: 18, color: B.crema, position: 'relative', overflow: 'hidden',
+          }}>
+            <div style={{ position: 'absolute', top: -16, right: -16, width: 80, height: 80, borderRadius: '50%', background: '#fff', opacity: 0.06 }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+              <span style={{ fontSize: 13, fontWeight: 600 }}>Beta Gratuita</span>
+            </div>
+            <p style={{ fontSize: 11, color: 'rgba(245,240,232,0.6)', marginBottom: 14, lineHeight: 1.5 }}>
+              Tutti i servizi premium sono gratuiti. Inviaci i tuoi feedback!
+            </p>
+            <a href="mailto:info@smartmenu.ai" style={{
+              display: 'block', width: '100%', background: '#FAF8F5', color: B.espresso,
+              fontWeight: 600, padding: '8px 12px', borderRadius: 10, textAlign: 'center',
+              textDecoration: 'none', fontSize: 12, transition: 'opacity .2s', boxSizing: 'border-box',
+            }}>
+              Feedback
+            </a>
+          </div>
+        </div>
+      </aside>
+
+      {/* ═══════════════ MAIN CONTENT ═══════════════ */}
+      <div style={{ flex: 1, marginLeft: 260, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+
+        {/* ── TOP BAR ─────────────────────────────────── */}
+        <header style={{
+          background: '#fff', borderBottom: '1px solid rgba(45,32,22,0.08)',
+          position: 'sticky', top: 0, zIndex: 30,
+          padding: '0 32px', height: 64, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        }}>
+          {/* Search */}
+          <div style={{ position: 'relative', flex: 1, maxWidth: 400 }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(45,32,22,0.3)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input
+              type="text"
+              placeholder="Cerca ristorante..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              style={{
+                width: '100%', padding: '10px 16px 10px 42px', border: '1.5px solid rgba(45,32,22,0.08)',
+                borderRadius: 12, background: '#FAF8F5', fontSize: 13, fontWeight: 500,
+                outline: 'none', transition: 'all .2s', color: B.espresso,
+              }}
+              onFocus={e => { e.target.style.borderColor = B.terracotta; e.target.style.background = '#fff'; }}
+              onBlur={e => { e.target.style.borderColor = 'rgba(45,32,22,0.08)'; e.target.style.background = '#FAF8F5'; }}
+            />
+          </div>
+
+          {/* Right: icons + user */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {/* Dark mode toggle */}
+            <button onClick={toggleTheme} title={theme === 'dark' ? 'Modalità Chiara' : 'Modalità Scura'} style={{
+              width: 36, height: 36, borderRadius: 10, border: '1px solid rgba(45,32,22,0.08)',
+              background: '#FAF8F5', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', color: 'rgba(45,32,22,0.4)', transition: 'all .2s',
+            }}>
+              {theme === 'dark' ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" x2="12" y1="1" y2="3"/><line x1="12" x2="12" y1="21" y2="23"/><line x1="4.22" x2="5.64" y1="4.22" y2="5.64"/><line x1="18.36" x2="19.78" y1="18.36" y2="19.78"/><line x1="1" x2="3" y1="12" y2="12"/><line x1="21" x2="23" y1="12" y2="12"/><line x1="4.22" x2="5.64" y1="19.78" y2="18.36"/><line x1="18.36" x2="19.78" y1="5.64" y2="4.22"/></svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              )}
+            </button>
+
+            {/* Notifications */}
+            <button style={{
+              width: 36, height: 36, borderRadius: 10, border: '1px solid rgba(45,32,22,0.08)',
+              background: '#FAF8F5', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', color: 'rgba(45,32,22,0.4)', position: 'relative',
+            }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+              <span style={{ position: 'absolute', top: 6, right: 6, width: 7, height: 7, borderRadius: '50%', background: B.terracotta, border: '2px solid #fff' }} />
+            </button>
+
             {user?.email === 'francesco.biguzzi09@gmail.com' && (
               <button
                 onClick={() => router.push('/superadmin')}
@@ -165,7 +341,7 @@ export default function DashboardPage() {
                 Admin
               </button>
             )}
-            
+
             {/* User Dropdown */}
             <div style={{ position: 'relative' }} ref={dropdownRef}>
               <button
@@ -207,34 +383,6 @@ export default function DashboardPage() {
                     </a>
                   </div>
                   
-                  <div style={{ padding: 4, borderBottom: '1px solid rgba(45,32,22,0.06)' }}>
-                    <a href="/dashboard/settings" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', fontSize: 13, fontWeight: 500, color: 'rgba(45,32,22,0.7)', textDecoration: 'none', borderRadius: 10, transition: 'background .2s' }}>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                      Impostazioni Profilo
-                    </a>
-                  </div>
-
-                  {/* DARK MODE TOGGLE */}
-                  <div style={{ padding: 4, borderBottom: '1px solid rgba(45,32,22,0.06)' }}>
-                    <button onClick={toggleTheme} style={{
-                      width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '8px 12px', fontSize: 13, fontWeight: 500, color: 'rgba(45,32,22,0.7)',
-                      background: 'none', border: 'none', borderRadius: 10, cursor: 'pointer',
-                    }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        {theme === 'dark' ? (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" x2="12" y1="1" y2="3"/><line x1="12" x2="12" y1="21" y2="23"/><line x1="4.22" x2="5.64" y1="4.22" y2="5.64"/><line x1="18.36" x2="19.78" y1="18.36" y2="19.78"/><line x1="1" x2="3" y1="12" y2="12"/><line x1="21" x2="23" y1="12" y2="12"/><line x1="4.22" x2="5.64" y1="19.78" y2="18.36"/><line x1="18.36" x2="19.78" y1="5.64" y2="4.22"/></svg>
-                        ) : (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                        )}
-                        {theme === 'dark' ? 'Modalità Chiara' : 'Modalità Scura'}
-                      </span>
-                      <div style={{ width: 40, height: 24, borderRadius: 12, position: 'relative', background: theme === 'dark' ? B.terracotta : 'rgba(45,32,22,0.15)', transition: 'all .2s' }}>
-                        <div style={{ position: 'absolute', top: 2, width: 20, height: 20, background: '#fff', borderRadius: '50%', transition: 'all .2s', left: theme === 'dark' ? 18 : 2 }} />
-                      </div>
-                    </button>
-                  </div>
-                  
                   <div style={{ padding: 4 }}>
                     <button onClick={handleLogout} style={{
                       width: '100%', display: 'flex', alignItems: 'center', gap: 10,
@@ -249,59 +397,106 @@ export default function DashboardPage() {
               )}
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 24px', display: 'flex', gap: 32, alignItems: 'flex-start', width: '100%', flex: 1 }}>
-        
-        <div style={{ flex: 1, minWidth: 0 }}>
-          {/* HERO SECTION */}
-          <div style={{
-            position: 'relative', background: B.espresso, borderRadius: 24, padding: '36px 40px',
-            marginBottom: 32, overflow: 'hidden',
-          }}>
-            <div style={{ position: 'absolute', top: 0, right: 0, marginTop: -40, marginRight: -40, width: 200, height: 200, borderRadius: '50%', background: B.terracotta, opacity: 0.12 }} />
-            <div style={{ position: 'absolute', bottom: 0, left: 0, marginBottom: -40, marginLeft: -40, width: 160, height: 160, borderRadius: '50%', background: B.oliva, opacity: 0.1 }} />
-            
-            <div style={{ position: 'relative', zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 24 }}>
-              <div>
-                <p style={{ color: B.ambra, fontWeight: 500, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
-                  Pannello di Controllo
-                </p>
-                <h2 style={{ fontFamily: 'var(--font-display), serif', fontSize: 'clamp(22px, 3vw, 32px)', fontWeight: 500, color: B.crema, marginBottom: 8 }}>Benvenuto, {user?.user_metadata?.full_name || user?.email?.split('@')[0]}</h2>
-                <p style={{ color: 'rgba(245,240,232,0.5)', fontSize: 13, maxWidth: 420, lineHeight: 1.6 }}>Ecco la tua cabina di regia. Crea, modifica e pubblica i menù digitali dei tuoi ristoranti.</p>
+        {/* ── PAGE CONTENT ─────────────────────────────── */}
+        <main style={{ flex: 1, padding: '28px 32px' }}>
+          {/* Page title + CTA */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28, flexWrap: 'wrap', gap: 16 }}>
+            <div>
+              <h1 style={{ fontFamily: 'var(--font-display), serif', fontSize: 28, fontWeight: 500, color: B.espresso, marginBottom: 6 }}>
+                Dashboard
+              </h1>
+              <p style={{ fontSize: 14, color: 'rgba(45,32,22,0.5)', lineHeight: 1.5 }}>
+                Benvenuto, {user?.user_metadata?.full_name || user?.email?.split('@')[0]}. Gestisci i tuoi menù digitali.
+              </p>
+            </div>
+            <button
+              onClick={createNewMenu}
+              style={{
+                background: B.terracotta, color: B.crema, fontWeight: 600, padding: '12px 24px',
+                borderRadius: 12, border: 'none', cursor: 'pointer', fontSize: 14,
+                display: 'flex', alignItems: 'center', gap: 8, transition: 'all .2s',
+                boxShadow: '0 4px 12px rgba(196,98,45,0.2)',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 6px 20px rgba(196,98,45,0.3)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 4px 12px rgba(196,98,45,0.2)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+              Crea Nuovo Menù
+            </button>
+          </div>
+
+          {/* ── STAT CARDS (4 columns) ─────────────────── */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }}>
+            {/* Total Menus */}
+            <div style={{
+              background: B.terracotta, borderRadius: 16, padding: '20px 20px',
+              position: 'relative', overflow: 'hidden', color: B.crema,
+            }}>
+              <div style={{ position: 'absolute', top: -20, right: -20, width: 80, height: 80, borderRadius: '50%', background: '#fff', opacity: 0.08 }} />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <p style={{ fontSize: 12, fontWeight: 500, opacity: 0.8 }}>Menù Totali</p>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/><path d="M12 3v6"/></svg>
+                </div>
               </div>
-              
-              <button
-                onClick={createNewMenu}
-                style={{
-                  background: '#FAF8F5', color: B.espresso, fontWeight: 600, padding: '14px 28px',
-                  borderRadius: 16, border: 'none', cursor: 'pointer', fontSize: 14,
-                  display: 'flex', alignItems: 'center', gap: 8, transition: 'all .2s',
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-                }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-                Crea Nuovo Menù
-              </button>
+              <p style={{ fontFamily: 'var(--font-display), serif', fontSize: 36, fontWeight: 500, lineHeight: 1 }}>{menus.length}</p>
+            </div>
+
+            {/* Total Dishes */}
+            <div style={{
+              background: '#fff', border: '1px solid rgba(45,32,22,0.06)', borderRadius: 16, padding: '20px 20px',
+              position: 'relative', overflow: 'hidden',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <p style={{ fontSize: 12, fontWeight: 500, color: 'rgba(45,32,22,0.5)' }}>Piatti Pubblicati</p>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(74,124,89,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={B.oliva} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+                </div>
+              </div>
+              <p style={{ fontFamily: 'var(--font-display), serif', fontSize: 36, fontWeight: 500, color: B.espresso, lineHeight: 1 }}>{totalDishes}</p>
+            </div>
+
+            {/* Categories */}
+            <div style={{
+              background: '#fff', border: '1px solid rgba(45,32,22,0.06)', borderRadius: 16, padding: '20px 20px',
+              position: 'relative', overflow: 'hidden',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <p style={{ fontSize: 12, fontWeight: 500, color: 'rgba(45,32,22,0.5)' }}>Categorie</p>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(232,168,74,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={B.ambra} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+                </div>
+              </div>
+              <p style={{ fontFamily: 'var(--font-display), serif', fontSize: 36, fontWeight: 500, color: B.espresso, lineHeight: 1 }}>{totalCategories}</p>
+            </div>
+
+            {/* Quick Links */}
+            <div style={{
+              background: '#fff', border: '1px solid rgba(45,32,22,0.06)', borderRadius: 16, padding: '20px 20px',
+              position: 'relative', overflow: 'hidden',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <p style={{ fontSize: 12, fontWeight: 500, color: 'rgba(45,32,22,0.5)' }}>Link Rapidi</p>
+                <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(196,98,45,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={B.terracotta} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <a href="/api-docs" style={{ fontSize: 12, fontWeight: 500, color: B.terracotta, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  API Docs
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </a>
+                <a href="/dashboard/stripe" style={{ fontSize: 12, fontWeight: 500, color: B.terracotta, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  Stripe
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </a>
+              </div>
             </div>
           </div>
 
-          {/* TABS */}
-          <div style={{ display: 'flex', gap: 16, marginBottom: 28, borderBottom: '1px solid rgba(45,32,22,0.08)', overflowX: 'auto' }} className="hide-scrollbar">
-            <button onClick={() => setActiveTab('menus')} style={tabStyle(activeTab === 'menus')}>I Miei Menù</button>
-            <button onClick={() => setActiveTab('analytics')} style={tabStyle(activeTab === 'analytics')}>
-              Analytics <span style={{ fontSize: 9, background: B.oliva, color: '#fff', fontWeight: 600, padding: '2px 6px', borderRadius: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Beta Free</span>
-            </button>
-            <button onClick={() => setActiveTab('reviews')} style={tabStyle(activeTab === 'reviews')}>
-              Recensioni <span style={{ fontSize: 9, background: B.oliva, color: '#fff', fontWeight: 600, padding: '2px 6px', borderRadius: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Beta Free</span>
-            </button>
-            <button onClick={() => setActiveTab('orders')} style={tabStyle(activeTab === 'orders')}>
-              Ordini <span style={{ fontSize: 9, background: B.oliva, color: '#fff', fontWeight: 600, padding: '2px 6px', borderRadius: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Beta Free</span>
-            </button>
-          </div>
-
+          {/* ── TAB CONTENT ────────────────────────────── */}
           {activeTab === 'analytics' ? (
             <AnalyticsPanel menus={menus} />
           ) : activeTab === 'reviews' ? (
@@ -310,27 +505,8 @@ export default function DashboardPage() {
             <OrdersPanel menus={menus} />
           ) : (
             <>
-              {/* STATS */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 28 }}>
-                <div style={{ background: '#fff', border: '1px solid rgba(45,32,22,0.06)', borderRadius: 16, padding: '20px 24px', transition: 'all .3s' }}>
-                  <div style={{ width: 40, height: 40, background: 'rgba(196,98,45,0.08)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={B.terracotta} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/><path d="M12 3v6"/></svg>
-                  </div>
-                  <p style={{ fontSize: 11, fontWeight: 500, color: 'rgba(45,32,22,0.4)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Menù Attivi</p>
-                  <p style={{ fontFamily: 'var(--font-display), serif', fontSize: 32, fontWeight: 500, color: B.espresso }}>{menus.length}</p>
-                </div>
-                
-                <div style={{ background: '#fff', border: '1px solid rgba(45,32,22,0.06)', borderRadius: 16, padding: '20px 24px', transition: 'all .3s' }}>
-                  <div style={{ width: 40, height: 40, background: 'rgba(74,124,89,0.08)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={B.oliva} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
-                  </div>
-                  <p style={{ fontSize: 11, fontWeight: 500, color: 'rgba(45,32,22,0.4)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Piatti Pubblicati</p>
-                  <p style={{ fontFamily: 'var(--font-display), serif', fontSize: 32, fontWeight: 500, color: B.espresso }}>{menus.reduce((acc, menu) => acc + (menu.data?.menu?.length || 0), 0)}</p>
-                </div>
-              </div>
-
               {/* LISTA MENU */}
-              {menus.length === 0 ? (
+              {filteredMenus.length === 0 && menus.length === 0 ? (
                 <div style={{ background: '#fff', border: '1px solid rgba(45,32,22,0.06)', borderRadius: 24, padding: '60px 32px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
                   <div style={{ width: 80, height: 80, background: 'rgba(196,98,45,0.06)', border: '1px solid rgba(196,98,45,0.1)', borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', transform: 'rotate(3deg)' }}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={B.terracotta} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="9" x2="15" y1="9" y2="9"/><line x1="9" x2="15" y1="15" y2="15"/></svg>
@@ -344,9 +520,13 @@ export default function DashboardPage() {
                     Crea il tuo Primo Menù
                   </button>
                 </div>
+              ) : filteredMenus.length === 0 && searchQuery ? (
+                <div style={{ background: '#fff', border: '1px solid rgba(45,32,22,0.06)', borderRadius: 20, padding: '48px 32px', textAlign: 'center' }}>
+                  <p style={{ fontSize: 14, color: 'rgba(45,32,22,0.4)' }}>Nessun risultato per &quot;{searchQuery}&quot;</p>
+                </div>
               ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
-                  {menus.map((menu) => (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+                  {filteredMenus.map((menu) => (
                     <div key={menu.restaurant_id} onClick={() => router.push(`/admin?id=${menu.restaurant_id}`)} style={{
                       background: '#fff', border: '1px solid rgba(45,32,22,0.06)', borderRadius: 20,
                       overflow: 'hidden', cursor: 'pointer', transition: 'all .3s', display: 'flex', flexDirection: 'column',
@@ -412,70 +592,10 @@ export default function DashboardPage() {
               )}
             </>
           )}
-        </div>
+        </main>
 
-        {/* SIDEBAR DESTRA */}
-        <aside style={{ width: 300, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 20 }}>
-          {/* BANNER BETA FEEDBACK */}
-          <div style={{
-            background: `linear-gradient(135deg, ${B.terracotta}, ${B.espresso})`,
-            borderRadius: 20, padding: 24, color: B.crema, position: 'relative', overflow: 'hidden',
-          }}>
-            <div style={{ position: 'absolute', top: 0, right: 0, marginTop: -20, marginRight: -20, width: 100, height: 100, borderRadius: '50%', background: '#fff', opacity: 0.06 }} />
-            <h3 style={{ fontFamily: 'var(--font-display), serif', fontWeight: 500, fontSize: 18, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
-              Aiutaci a Migliorare
-            </h3>
-            <p style={{ fontSize: 13, color: 'rgba(245,240,232,0.65)', marginBottom: 20, lineHeight: 1.6 }}>
-              Benvenuto nella Beta! Hai accesso a tutti i servizi premium gratuitamente. Inviaci i tuoi feedback via email.
-            </p>
-            <a href="mailto:info@smartmenu.ai" style={{
-              display: 'block', width: '100%', background: '#FAF8F5', color: B.espresso,
-              fontWeight: 600, padding: '12px 16px', borderRadius: 12, textAlign: 'center',
-              textDecoration: 'none', fontSize: 13, transition: 'opacity .2s', boxSizing: 'border-box',
-            }}>
-              Lascia un Feedback
-            </a>
-          </div>
-
-          {/* QUICK LINKS */}
-          <div style={{ background: '#fff', borderRadius: 20, padding: 20, border: '1px solid rgba(45,32,22,0.06)' }}>
-            <h3 style={{ fontFamily: 'var(--font-inter), sans-serif', fontWeight: 600, fontSize: 14, color: B.espresso, marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(45,32,22,0.35)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-              Link Rapidi
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              {[
-                { href: '/api-docs', label: 'Documentazione API', icon: <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg> },
-                { href: '/faq', label: 'Supporto e Aiuto', icon: <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg> },
-                { href: '/dashboard/stripe', label: 'Impostazioni Stripe', icon: <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg> },
-              ].map(link => (
-                <a key={link.href} href={link.href} style={{
-                  display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 500,
-                  color: 'rgba(45,32,22,0.6)', textDecoration: 'none', padding: '8px 10px', borderRadius: 10,
-                  transition: 'all .2s',
-                }}>
-                  <div style={{ width: 32, height: 32, borderRadius: 8, background: '#FAF8F5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(45,32,22,0.4)', flexShrink: 0 }}>
-                    {link.icon}
-                  </div>
-                  {link.label}
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* ADSENSE PLACEHOLDER */}
-          <div style={{
-            background: '#FAF8F5', border: '2px dashed rgba(45,32,22,0.12)', borderRadius: 20,
-            height: 250, display: 'flex', flexDirection: 'column', alignItems: 'center',
-            justifyContent: 'center', textAlign: 'center', padding: 24, color: 'rgba(45,32,22,0.3)',
-          }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 8 }}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-            <p style={{ fontWeight: 500, fontSize: 12, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Spazio Pubblicitario</p>
-            <p style={{ fontSize: 11 }}>Riservato a Google AdSense o Banner Promozionali.</p>
-          </div>
-        </aside>
-      </main>
+        <Footer />
+      </div>
 
       {/* DELETE MODAL */}
       {menuToDelete && (
@@ -490,8 +610,6 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
-
-      <Footer />
     </div>
   );
 }

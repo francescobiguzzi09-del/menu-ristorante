@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import Footer from '@/components/Footer';
-import { QrCode } from 'lucide-react';
 
 export const metadata = {
   title: 'Privacy Policy — SmartMenu AI',

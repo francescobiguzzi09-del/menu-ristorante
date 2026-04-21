@@ -1,7 +1,6 @@
 "use client";
 
 import Link from 'next/link';
-import { QrCode } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -13,10 +12,10 @@ export default function Footer() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
               <div style={{
-                width: 36, height: 36, borderRadius: 8, background: '#C4622D',
+                width: 36, height: 36, borderRadius: 8, overflow: 'hidden',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <QrCode size={18} color="#F5F0E8" />
+                <img src="/sm-logo.png" alt="SmartMenu Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', transform: 'scale(2.5)' }} />
               </div>
               <span style={{ fontFamily: 'var(--font-display), serif', fontSize: 18, fontWeight: 500, color: '#F5F0E8', letterSpacing: -0.3 }}>
                 SmartMenu

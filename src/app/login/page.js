@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/Toast';
-import { QrCode } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -88,11 +87,11 @@ export default function LoginPage() {
       <div style={{ width: '100%', maxWidth: 420, background: '#fff', borderRadius: 24, boxShadow: '0 8px 32px rgba(45,32,22,0.08)', border: '1px solid rgba(45,32,22,0.06)', padding: '36px 32px' }}>
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <div style={{
-            width: 48, height: 48, borderRadius: 12, background: '#C4622D',
+            width: 48, height: 48, borderRadius: 12, overflow: 'hidden',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             margin: '0 auto 16px',
           }}>
-            <QrCode size={24} color="#F5F0E8" />
+            <img src="/sm-logo.png" alt="SmartMenu Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', transform: 'scale(2.5)' }} />
           </div>
           <h1 style={{ fontFamily: 'var(--font-display), serif', fontSize: 24, fontWeight: 500, color: '#2D2016', marginBottom: 8 }}>
             {isLogin ? 'Bentornato' : 'Crea il tuo Account'}

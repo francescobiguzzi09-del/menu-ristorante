@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Footer from '@/components/Footer';
-import { ArrowRight, QrCode } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 // ─── Brand colors ─────────────────────────────────────────────────────────────
 const T = {
@@ -149,10 +149,10 @@ export default function HomePage() {
       }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
           <div style={{
-            width: 36, height: 36, borderRadius: 8, background: T.terracotta,
+            width: 36, height: 36, borderRadius: 8, overflow: 'hidden',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <QrCode size={18} color={T.crema} />
+            <img src="/sm-logo.png" alt="SmartMenu Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', transform: 'scale(2.5)' }} />
           </div>
           <span style={{ fontFamily: 'var(--font-display), serif', fontSize: 18, fontWeight: 500, color: T.crema, letterSpacing: -0.3 }}>
             SmartMenu
