@@ -9,7 +9,7 @@ export default function ApiDocsPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex justify-between items-center">
           <Link href="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
-              <img src="/sm-logo.png" alt="Smart Menu Logo" className="w-full h-full object-contain scale-[2.5]" />
+              <img src="/sm-logo.svg" alt="Smart Menu Logo" className="w-full h-full object-contain " />
             </div>
             <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">API Reference</h1>
           </Link>

@@ -5,7 +5,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Footer from '@/components/Footer';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Menu, X } from 'lucide-react';
+import { useMobile } from '@/hooks/useMobile';
 
 // ─── Brand colors ─────────────────────────────────────────────────────────────
 const T = {
@@ -129,6 +130,8 @@ const Stars = ({ n }) => (
 
 export default function HomePage() {
   const [user, setUser] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isMobile = useMobile(768);
   const router = useRouter();
 
   useEffect(() => {
@@ -136,6 +139,11 @@ export default function HomePage() {
       setUser(session?.user || null);
     });
   }, []);
+
+  // Close mobile menu on resize to desktop
+  useEffect(() => {
+    if (!isMobile) setMobileMenuOpen(false);
+  }, [isMobile]);
 
   return (
     <div style={{ minHeight: '100vh', background: T.crema, fontFamily: "var(--font-inter), 'Inter', sans-serif", overflowX: 'hidden' }}>
@@ -152,37 +160,103 @@ export default function HomePage() {
             width: 36, height: 36, borderRadius: 8, overflow: 'hidden',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <img src="/sm-logo.png" alt="SmartMenu Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', transform: 'scale(2.5)' }} />
+            <img src="/sm-logo.svg" alt="SmartMenu Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
           <span style={{ fontFamily: 'var(--font-display), serif', fontSize: 18, fontWeight: 500, color: T.crema, letterSpacing: -0.3 }}>
             SmartMenu
           </span>
         </Link>
 
-        <nav style={{ display: 'flex', gap: 28, alignItems: 'center' }}>
-          {['Come funziona', 'Template', 'Prezzi', 'FAQ'].map(item => (
-            <a key={item} href={`#${item.toLowerCase().replace(' ', '-')}`}
-              style={{ fontSize: 13, fontWeight: 400, color: 'rgba(245,240,232,0.6)', textDecoration: 'none', transition: 'color .2s' }}
-              onMouseEnter={e => e.target.style.color = T.crema}
-              onMouseLeave={e => e.target.style.color = 'rgba(245,240,232,0.6)'}
-            >{item}</a>
-          ))}
-        </nav>
+        {/* Desktop nav */}
+        {!isMobile && (
+          <nav style={{ display: 'flex', gap: 28, alignItems: 'center' }}>
+            {['Come funziona', 'Template', 'Prezzi', 'FAQ'].map(item => (
+              <a key={item} href={`#${item.toLowerCase().replace(' ', '-')}`}
+                style={{ fontSize: 13, fontWeight: 400, color: 'rgba(245,240,232,0.6)', textDecoration: 'none', transition: 'color .2s', padding: '12px 8px' }}
+                onMouseEnter={e => e.target.style.color = T.crema}
+                onMouseLeave={e => e.target.style.color = 'rgba(245,240,232,0.6)'}
+              >{item}</a>
+            ))}
+          </nav>
+        )}
 
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          {user ? (
-            <Link href="/dashboard" style={{ fontSize: 13, color: T.crema, textDecoration: 'none', fontWeight: 500 }}>Dashboard</Link>
-          ) : (
-            <>
-              <Link href="/login" style={{ fontSize: 13, color: 'rgba(245,240,232,0.6)', textDecoration: 'none' }}>Accedi</Link>
-              <Link href="/login" style={{
-                fontSize: 13, fontWeight: 500, background: T.terracotta, color: T.crema,
-                padding: '8px 16px', borderRadius: 8, textDecoration: 'none',
-              }}>Registrati gratis</Link>
-            </>
-          )}
-        </div>
+        {/* Desktop auth buttons */}
+        {!isMobile && (
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            {user ? (
+              <Link href="/dashboard" style={{ fontSize: 13, color: T.crema, textDecoration: 'none', fontWeight: 500 }}>Dashboard</Link>
+            ) : (
+              <>
+                <Link href="/login" style={{ fontSize: 13, color: 'rgba(245,240,232,0.6)', textDecoration: 'none' }}>Accedi</Link>
+                <Link href="/login" style={{
+                  fontSize: 13, fontWeight: 500, background: T.terracotta, color: T.crema,
+                  padding: '8px 16px', borderRadius: 8, textDecoration: 'none',
+                }}>Registrati gratis</Link>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Mobile hamburger button */}
+        {isMobile && (
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Menu"
+            style={{
+              background: 'none', border: 'none', color: T.crema,
+              cursor: 'pointer', padding: 8, display: 'flex', alignItems: 'center',
+            }}
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        )}
       </header>
+
+      {/* ── MOBILE MENU OVERLAY ──────────────────────────────────────── */}
+      {isMobile && mobileMenuOpen && (
+        <div style={{
+          position: 'fixed', top: 64, left: 0, right: 0, bottom: 0,
+          background: T.espresso, zIndex: 49,
+          display: 'flex', flexDirection: 'column',
+          padding: '24px 24px 40px',
+          animation: 'fadeSlideIn 0.25s ease forwards',
+        }}>
+          <style>{`@keyframes fadeSlideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+          <nav style={{ display: 'flex', flexDirection: 'column', gap: 0, flex: 1 }}>
+            {['Come funziona', 'Template', 'Prezzi', 'FAQ'].map(item => (
+              <a
+                key={item}
+                href={`#${item.toLowerCase().replace(' ', '-')}`}
+                onClick={() => setMobileMenuOpen(false)}
+                style={{
+                  fontSize: 18, fontWeight: 500, color: T.crema, textDecoration: 'none',
+                  padding: '18px 0', borderBottom: '1px solid rgba(245,240,232,0.08)',
+                  transition: 'color .2s',
+                }}
+              >{item}</a>
+            ))}
+          </nav>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 24 }}>
+            {user ? (
+              <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} style={{
+                fontSize: 15, fontWeight: 600, background: T.terracotta, color: T.crema,
+                padding: '14px 24px', borderRadius: 12, textDecoration: 'none', textAlign: 'center',
+              }}>Dashboard</Link>
+            ) : (
+              <>
+                <Link href="/login" onClick={() => setMobileMenuOpen(false)} style={{
+                  fontSize: 15, fontWeight: 600, background: T.terracotta, color: T.crema,
+                  padding: '14px 24px', borderRadius: 12, textDecoration: 'none', textAlign: 'center',
+                }}>Registrati gratis</Link>
+                <Link href="/login" onClick={() => setMobileMenuOpen(false)} style={{
+                  fontSize: 15, color: 'rgba(245,240,232,0.5)', textDecoration: 'none', textAlign: 'center',
+                  padding: '10px 0',
+                }}>Accedi</Link>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       <main>
 
@@ -227,12 +301,13 @@ export default function HomePage() {
               Scatta una foto al tuo menù cartaceo. L'AI lo trasforma in un menù digitale elegante in 2 minuti — QR code, traduzione automatica e allergeni inclusi.
             </p>
 
-            <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap', marginBottom: 40 }}>
-              <Link href="/admin" style={{
-                display: 'inline-flex', alignItems: 'center', gap: 8,
+            <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap', marginBottom: 40, flexDirection: isMobile ? 'column' : 'row' }}>
+              <Link href="/onboarding" style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 background: T.terracotta, color: T.crema, fontWeight: 500,
                 fontSize: 15, padding: '13px 28px', borderRadius: 10,
                 textDecoration: 'none', transition: 'background .2s',
+                width: isMobile ? '100%' : 'auto',
               }}>
                 Crea il menù gratis <ArrowRight size={16} />
               </Link>
@@ -263,7 +338,7 @@ export default function HomePage() {
 
         {/* ── STATS ─────────────────────────────────────────────────────────── */}
         <section style={{ background: T.crema, padding: '64px 24px' }}>
-          <div style={{ maxWidth: 860, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+          <div style={{ maxWidth: 860, margin: '0 auto', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 20 }}>
             {STATS.map(s => (
               <div key={s.n} style={{
                 background: '#fff', border: '1px solid rgba(45,32,22,.08)',
@@ -368,7 +443,7 @@ export default function HomePage() {
                 Semplice. Senza sorprese.
               </h2>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
               {/* Free */}
               <div style={{ background: '#fff', border: '1px solid rgba(45,32,22,.1)', borderRadius: 20, padding: 28 }}>
                 <div style={{ fontSize: 15, fontWeight: 500, color: T.espresso, marginBottom: 4 }}>Gratis</div>
@@ -442,7 +517,7 @@ export default function HomePage() {
             <p style={{ fontSize: 15, color: 'rgba(245,240,232,.45)', marginBottom: 36 }}>
               Gratis, pronto in 2 minuti. Nessuna carta di credito richiesta.
             </p>
-            <Link href="/admin" style={{
+            <Link href="/onboarding" style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               background: T.terracotta, color: T.crema,
               fontSize: 15, fontWeight: 500, padding: '14px 32px', borderRadius: 12,

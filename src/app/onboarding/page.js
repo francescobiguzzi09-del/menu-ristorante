@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/components/Toast';
+import { useMobile } from '@/hooks/useMobile';
 
 // Brand palette
 const B = {
@@ -18,6 +19,7 @@ const B = {
 export default function OnboardingWizard() {
   const router = useRouter();
   const toast = useToast();
+  const isMobile = useMobile(640);
   
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -206,6 +208,7 @@ export default function OnboardingWizard() {
                   width: '100%', background: 'rgba(245,240,232,0.06)', border: '1.5px solid rgba(245,240,232,0.12)',
                   borderRadius: 16, padding: '16px 20px', fontSize: 18, fontWeight: 600, color: B.crema,
                   outline: 'none', transition: 'all .25s cubic-bezier(0.4, 0, 0.2, 1)', boxSizing: 'border-box', marginBottom: 20,
+                  minHeight: 54,
                 }}
                 onFocus={e => e.target.style.borderColor = B.terracotta}
                 onBlur={e => e.target.style.borderColor = 'rgba(245,240,232,0.12)'}
@@ -302,7 +305,7 @@ export default function OnboardingWizard() {
             <h1 style={{ fontFamily: 'var(--font-display), serif', fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 500, color: B.crema, marginBottom: 12 }}>Scegli l&apos;Estetica.</h1>
             <p style={{ fontSize: 16, color: 'rgba(245,240,232,0.4)', marginBottom: 28 }}>Non preoccuparti, potrai cambiare colori e layout in qualsiasi momento.</p>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 28 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: 12, marginBottom: 28 }}>
               {[
                 { id: 'modern', label: 'Modern', letterBg: '#fff', letterColor: B.espresso, borderActive: B.terracotta, bgActive: 'rgba(196,98,45,0.1)' },
                 { id: 'sushi', label: 'Sushi', letterBg: B.espresso, letterColor: B.oliva, borderActive: B.oliva, bgActive: 'rgba(74,124,89,0.1)' },
@@ -361,17 +364,61 @@ export default function OnboardingWizard() {
         {/* --- STEP 4: SUCCESS --- */}
         {step === 4 && (
           <div style={{ display: 'flex', flexDirection: 'column', flex: 1, alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-            <div style={{ width: 'clamp(200px, 50vw, 320px)', marginBottom: 24 }}>
-              <video 
-                src="/success-video.webm" 
-                autoPlay 
-                muted 
-                playsInline
-                onEnded={() => {
-                  if (createdMenuId) router.push(`/admin?id=${createdMenuId}`);
-                }}
-                style={{ width: '100%', height: 'auto', pointerEvents: 'none' }}
-              />
+            <style>{`
+              @keyframes squareSwap {
+                0%, 10%   { transform: translate(0, 0); }
+                25%, 35%  { transform: translate(calc(9px + 7px), 0); }
+                50%, 60%  { transform: translate(calc(9px + 7px), calc(9px + 7px)); }
+                75%, 85%  { transform: translate(0, calc(9px + 7px)); }
+                100%      { transform: translate(0, 0); }
+              }
+              @keyframes squareSwapB {
+                0%, 10%   { transform: translate(0, 0); }
+                25%, 35%  { transform: translate(0, calc(9px + 7px)); }
+                50%, 60%  { transform: translate(calc(-9px - 7px), calc(9px + 7px)); }
+                75%, 85%  { transform: translate(calc(-9px - 7px), 0); }
+                100%      { transform: translate(0, 0); }
+              }
+              @keyframes squareSwapC {
+                0%, 10%   { transform: translate(0, 0); }
+                25%, 35%  { transform: translate(0, calc(-9px - 7px)); }
+                50%, 60%  { transform: translate(calc(9px + 7px), calc(-9px - 7px)); }
+                75%, 85%  { transform: translate(calc(9px + 7px), 0); }
+                100%      { transform: translate(0, 0); }
+              }
+              @keyframes squareSwapD {
+                0%, 10%   { transform: translate(0, 0); }
+                25%, 35%  { transform: translate(calc(-9px - 7px), 0); }
+                50%, 60%  { transform: translate(calc(-9px - 7px), calc(-9px - 7px)); }
+                75%, 85%  { transform: translate(0, calc(-9px - 7px)); }
+                100%      { transform: translate(0, 0); }
+              }
+              @keyframes logoGlow {
+                0%, 100% { box-shadow: 0 0 40px rgba(196,98,45,0.3); }
+                50%      { box-shadow: 0 0 80px rgba(196,98,45,0.5); }
+              }
+            `}</style>
+            <div style={{
+              width: 'clamp(120px, 30vw, 180px)', height: 'clamp(120px, 30vw, 180px)',
+              borderRadius: 32, background: B.terracotta,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              marginBottom: 40, position: 'relative',
+              animation: 'logoGlow 2s ease-in-out infinite',
+            }}>
+              <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '60%', height: '60%' }}>
+                {/* Top-left square */}
+                <rect x="12" y="12" width="7" height="7" rx="1.5" fill="#FAF8F5" fillOpacity="0.9"
+                  style={{ animation: 'squareSwap 3s cubic-bezier(0.4, 0, 0.2, 1) infinite' }} />
+                {/* Top-right square */}
+                <rect x="21" y="12" width="7" height="7" rx="1.5" fill="#FAF8F5" fillOpacity="0.6"
+                  style={{ animation: 'squareSwapB 3s cubic-bezier(0.4, 0, 0.2, 1) infinite' }} />
+                {/* Bottom-left square */}
+                <rect x="12" y="21" width="7" height="7" rx="1.5" fill="#FAF8F5" fillOpacity="0.6"
+                  style={{ animation: 'squareSwapC 3s cubic-bezier(0.4, 0, 0.2, 1) infinite' }} />
+                {/* Bottom-right square */}
+                <rect x="21" y="21" width="7" height="7" rx="1.5" fill="#FAF8F5" fillOpacity="0.9"
+                  style={{ animation: 'squareSwapD 3s cubic-bezier(0.4, 0, 0.2, 1) infinite' }} />
+              </svg>
             </div>
             <h1 style={{ fontFamily: 'var(--font-display), serif', fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 500, color: B.crema, marginBottom: 12 }}>Il Tuo Menù è Pronto!</h1>
             <p style={{ fontSize: 18, color: B.oliva, marginBottom: 24, fontWeight: 500 }}>Preparati alla perfezione. Reindirizzamento al Cruscotto in corso...</p>

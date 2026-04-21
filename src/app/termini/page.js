@@ -17,7 +17,7 @@ export default function Termini() {
         <div style={{ maxWidth: 800, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
             <div style={{ width: 40, height: 40, borderRadius: 12, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <img src="/sm-logo.png" alt="SmartMenu Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', transform: 'scale(2.5)' }} />
+              <img src="/sm-logo.svg" alt="SmartMenu Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             </div>
             <span style={{ fontFamily: 'var(--font-display), serif', fontSize: 18, fontWeight: 500, color: '#F5F0E8', letterSpacing: -0.3 }}>SmartMenu</span>
           </Link>

@@ -69,8 +69,8 @@ export default function ReviewsPanel({ menus }) {
       {/* HEADER + SELETTORE RISTORANTE */}
       <div className="bg-white rounded-3xl border border-slate-200 p-6 flex flex-col md:flex-row gap-4 justify-between items-center shadow-sm">
         <div className="flex items-center gap-4 w-full md:w-auto">
-          <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20 shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="0"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20 shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </div>
           <div>
             <h2 className="text-xl font-black text-slate-900 tracking-tight">Recensioni</h2>
@@ -102,7 +102,7 @@ export default function ReviewsPanel({ menus }) {
         </div>
       ) : reviews.length === 0 ? (
         <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center shadow-sm">
-          <div className="text-5xl mb-4 opacity-30">&#11088;</div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-4 opacity-30 text-amber-500"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           <h3 className="text-lg font-bold text-slate-700 mb-1">Nessuna recensione</h3>
           <p className="text-slate-500 text-sm max-w-sm mx-auto">I clienti potranno lasciare recensioni direttamente dal menu digitale. Assicurati di aver configurato il link TripAdvisor nelle impostazioni del menu.</p>
         </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from 'react';
 import QRCode from 'react-qr-code';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import MenuRenderer from '@/components/MenuRenderer';
 import { useToast } from '@/components/Toast';
@@ -482,7 +483,7 @@ function AdminDashboardContent() {
       <aside className="w-[80px] sm:w-[240px] bg-[#2D2016] flex flex-col items-center sm:items-stretch py-6 border-r border-[#F5F0E8]/10 z-20 shrink-0">
         <div className="px-0 sm:px-6 mb-8 flex items-center justify-center sm:justify-start gap-3">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
-            <img src="/sm-logo.png" alt="Smart Menu Logo" className="w-full h-full object-contain scale-[2.5]" />
+            <Image src="/sm-logo.svg" alt="Smart Menu Logo" width={40} height={40} className="w-full h-full object-contain " />
           </div>
           <div className="hidden sm:flex flex-col">
             <h1 className="text-lg font-black tracking-tight text-[#F5F0E8] leading-tight truncate">SmartMenu AI</h1>
@@ -495,14 +496,14 @@ function AdminDashboardContent() {
 
         <nav className="flex-1 px-3 sm:px-4 space-y-1.5 overflow-y-auto w-full scrollbar-hide py-2">
           {/* Piatti e Menu */}
-          <button onClick={() => setActiveTab('menu')} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all font-bold text-sm ${activeTab === 'menu' ? 'bg-[#C4622D] text-[#F5F0E8] shadow-lg shadow-[#C4622D]/20' : 'text-[#F5F0E8]/50 hover:text-[#F5F0E8] hover:bg-[#F5F0E8]/10'}`}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m2 5 6-3 6 3 6-3v16l-6 3-6-3-6 3v-16Z" /><path d="M8 2v16" /><path d="M16 6v16" /></svg>
+          <button onClick={() => setActiveTab('menu')} className={`w-full flex items-center justify-center sm:justify-start gap-3 p-3 rounded-xl transition-all font-bold text-sm ${activeTab === 'menu' ? 'bg-[#C4622D] text-[#F5F0E8] shadow-lg shadow-[#C4622D]/20' : 'text-[#F5F0E8]/50 hover:text-[#F5F0E8] hover:bg-[#F5F0E8]/10'}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0" strokeLinecap="round" strokeLinejoin="round"><path d="m2 5 6-3 6 3 6-3v16l-6 3-6-3-6 3v-16Z" /><path d="M8 2v16" /><path d="M16 6v16" /></svg>
             <span className="hidden sm:block truncate">Piatti e Menu</span>
           </button>
 
           {/* Upselling & Promo */}
-          <button onClick={() => setActiveTab('upsell')} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all font-bold text-sm ${activeTab === 'upsell' ? 'bg-[#C4622D] text-[#F5F0E8] shadow-lg shadow-[#C4622D]/20' : 'text-[#F5F0E8]/50 hover:text-[#F5F0E8] hover:bg-[#F5F0E8]/10'}`}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3 3 3 9-3 9 19-9Z" /><path d="M13 13 8 8" /></svg>
+          <button onClick={() => setActiveTab('upsell')} className={`w-full flex items-center justify-center sm:justify-start gap-3 p-3 rounded-xl transition-all font-bold text-sm ${activeTab === 'upsell' ? 'bg-[#C4622D] text-[#F5F0E8] shadow-lg shadow-[#C4622D]/20' : 'text-[#F5F0E8]/50 hover:text-[#F5F0E8] hover:bg-[#F5F0E8]/10'}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0" strokeLinecap="round" strokeLinejoin="round"><path d="m3 3 3 9-3 9 19-9Z" /><path d="M13 13 8 8" /></svg>
             <span className="hidden sm:block truncate">Upselling & Promo</span>
           </button>
 
@@ -513,14 +514,14 @@ function AdminDashboardContent() {
           </div>
 
           {/* Tema & Colori (ex Estetica) */}
-          <button onClick={() => setActiveTab('design')} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all font-bold text-sm ${activeTab === 'design' ? 'bg-[#C4622D] text-[#F5F0E8] shadow-lg shadow-[#C4622D]/20' : 'text-[#F5F0E8]/50 hover:text-[#F5F0E8] hover:bg-[#F5F0E8]/10'}`}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>
+          <button onClick={() => setActiveTab('design')} className={`w-full flex items-center justify-center sm:justify-start gap-3 p-3 rounded-xl transition-all font-bold text-sm ${activeTab === 'design' ? 'bg-[#C4622D] text-[#F5F0E8] shadow-lg shadow-[#C4622D]/20' : 'text-[#F5F0E8]/50 hover:text-[#F5F0E8] hover:bg-[#F5F0E8]/10'}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>
             <span className="hidden sm:block truncate">Tema & Colori</span>
           </button>
 
           {/* Tipografia */}
-          <button onClick={() => setActiveTab('typography')} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all font-bold text-sm ${activeTab === 'typography' ? 'bg-[#C4622D] text-[#F5F0E8] shadow-lg shadow-[#C4622D]/20' : 'text-[#F5F0E8]/50 hover:text-[#F5F0E8] hover:bg-[#F5F0E8]/10'}`}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 7 4 4 20 4 20 7" /><line x1="9" x2="15" y1="20" y2="20" /><line x1="12" x2="12" y1="4" y2="20" /></svg>
+          <button onClick={() => setActiveTab('typography')} className={`w-full flex items-center justify-center sm:justify-start gap-3 p-3 rounded-xl transition-all font-bold text-sm ${activeTab === 'typography' ? 'bg-[#C4622D] text-[#F5F0E8] shadow-lg shadow-[#C4622D]/20' : 'text-[#F5F0E8]/50 hover:text-[#F5F0E8] hover:bg-[#F5F0E8]/10'}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 7 4 4 20 4 20 7" /><line x1="9" x2="15" y1="20" y2="20" /><line x1="12" x2="12" y1="4" y2="20" /></svg>
             <span className="hidden sm:block truncate">Tipografia</span>
           </button>
 
@@ -531,26 +532,26 @@ function AdminDashboardContent() {
           </div>
 
           {/* Integrazione Sito */}
-          <button onClick={() => setActiveTab('widget')} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all font-bold text-sm ${activeTab === 'widget' ? 'bg-[#C4622D] text-[#F5F0E8] shadow-lg shadow-[#C4622D]/20' : 'text-[#F5F0E8]/50 hover:text-[#F5F0E8] hover:bg-[#F5F0E8]/10'}`}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg>
+          <button onClick={() => setActiveTab('widget')} className={`w-full flex items-center justify-center sm:justify-start gap-3 p-3 rounded-xl transition-all font-bold text-sm ${activeTab === 'widget' ? 'bg-[#C4622D] text-[#F5F0E8] shadow-lg shadow-[#C4622D]/20' : 'text-[#F5F0E8]/50 hover:text-[#F5F0E8] hover:bg-[#F5F0E8]/10'}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg>
             <span className="hidden sm:block truncate">Integrazione Sito</span>
           </button>
 
           {/* Impostazioni Base */}
-          <button onClick={() => setActiveTab('settings')} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all font-bold text-sm ${activeTab === 'settings' ? 'bg-[#C4622D] text-[#F5F0E8] shadow-lg shadow-[#C4622D]/20' : 'text-[#F5F0E8]/50 hover:text-[#F5F0E8] hover:bg-[#F5F0E8]/10'}`}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></svg>
+          <button onClick={() => setActiveTab('settings')} className={`w-full flex items-center justify-center sm:justify-start gap-3 p-3 rounded-xl transition-all font-bold text-sm ${activeTab === 'settings' ? 'bg-[#C4622D] text-[#F5F0E8] shadow-lg shadow-[#C4622D]/20' : 'text-[#F5F0E8]/50 hover:text-[#F5F0E8] hover:bg-[#F5F0E8]/10'}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></svg>
             <span className="hidden sm:block truncate">Impostazioni</span>
           </button>
         </nav>
 
         <div className="px-3 sm:px-4 mt-auto space-y-3">
-          <button onClick={handleSaveMenuClick} disabled={isSaving} className="w-full bg-emerald-500 hover:bg-emerald-600 text-[#F5F0E8] font-black py-4 px-2 sm:px-4 rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex flex-col items-center justify-center gap-1 text-xs sm:text-sm disabled:opacity-50" title="Salva Menu">
+          <button onClick={handleSaveMenuClick} disabled={isSaving} className="w-full bg-[#C4622D] hover:bg-[#B35625] text-[#F5F0E8] font-black py-4 px-2 sm:px-4 rounded-xl transition-all shadow-lg shadow-[#C4622D]/20 flex flex-row items-center justify-center gap-2 text-sm disabled:opacity-50" title="Salva Menu">
             {isSaving ? (
-              <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              <svg className="animate-spin h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
             ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" className="shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
             )}
-            <span className="hidden sm:block">{isSaving ? 'Salvataggio...' : 'Salva Modifiche'}</span>
+            <span className="hidden sm:block">{isSaving ? 'Salvataggio...' : 'Salva Menu'}</span>
           </button>
           {user && (
             <button onClick={() => router.push('/dashboard')} className="w-full text-xs font-bold text-[#F5F0E8]/50 hover:text-[#F5F0E8] transition-colors bg-[#F5F0E8]/10 hover:bg-slate-700 py-3 px-2 rounded-xl flex justify-center items-center gap-2">
@@ -584,7 +585,7 @@ function AdminDashboardContent() {
                 <section>
                   <div className="flex items-center gap-2 mb-4">
                     <div className="h-6 w-1 bg-[#4A7C59]/50 rounded-full"></div>
-                    <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest">Traduzioni IA (Gratis in Beta)</h2>
+                    <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2 flex-wrap">Traduzioni IA <span className="text-[9px] bg-emerald-500 text-[#F5F0E8] font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm whitespace-nowrap shrink-0">Gratis in Beta</span></h2>
                   </div>
                   <div className="bg-gradient-to-br from-fuchsia-50 to-[#4A7C59]/10 rounded-3xl border border-[#4A7C59]/20 p-5 sm:p-8 shadow-sm">
                     <div className="text-center max-w-xl mx-auto">
@@ -597,16 +598,14 @@ function AdminDashboardContent() {
                       <button
                         onClick={handleTranslate}
                         disabled={isTranslating}
-                        className={`${translateSuccess ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/30' : 'bg-[#4A7C59] hover:bg-[#3d664a] shadow-[#4A7C59]/30'} text-[#F5F0E8] font-black py-3.5 px-6 rounded-xl transition-all shadow-lg flex items-center justify-center gap-3 w-full sm:w-auto mx-auto relative overflow-hidden`}
+                        className={`${translateSuccess ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/30' : 'bg-[#2D2016] hover:bg-black shadow-[#2D2016]/20'} text-[#F5F0E8] font-black py-4 px-6 rounded-xl transition-all shadow-lg flex items-center justify-center gap-3 w-full sm:w-auto mx-auto relative overflow-hidden`}
                       >
                         {isTranslating ? (
                           <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-[#F5F0E8]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                         ) : translateSuccess ? (
                           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                        ) : (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m2 5 6-3 6 3 6-3v16l-6 3-6-3-6 3v-16Z" /><path d="M8 2v16" /><path d="M16 6v16" /></svg>
-                        )}
-                        {isTranslating ? 'Traduzione in corso...' : translateSuccess ? 'Traduzione Completata!' : 'Genera Traduzioni IA (EN, DE, FR, ES)'}
+                        ) : null}
+                        {isTranslating ? 'Traduzione in corso...' : translateSuccess ? 'Traduzione Completata!' : 'Visualizza in 4 Lingue'}
                       </button>
 
                       {translateSuccess && (
@@ -1036,7 +1035,7 @@ function AdminDashboardContent() {
                         </div>
                       )}
                       <div className="md:col-span-6 flex justify-end mt-2">
-                        <button onClick={handleAddProduct} className="bg-[#F5F0E8]/10 hover:bg-slate-900 text-[#F5F0E8] font-bold py-3 px-8 rounded-xl text-sm transition-colors shadow-sm self-end">
+                        <button onClick={handleAddProduct} className="bg-slate-900 hover:bg-black text-[#F5F0E8] font-bold py-3 px-8 rounded-xl text-sm transition-colors shadow-sm self-end">
                           Aggiungi Piatto
                         </button>
                       </div>
@@ -1079,7 +1078,7 @@ function AdminDashboardContent() {
                             <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors z-20"></div>
                             <span className="absolute inset-x-2 bottom-4 text-[#F5F0E8] text-center font-black text-sm md:text-base tracking-tight drop-shadow-md truncate z-30">{cat}</span>
                             <input type="file" accept="image/*" id={`cat-img-${cat}`} className="hidden" onChange={(e) => handleUploadCategoryImage(e, cat)} />
-                            <div className="absolute inset-0 flex items-center justify-center flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-40 bg-black/40 backdrop-blur-sm">
+                            <div className="absolute inset-0 flex items-center justify-center flex-col gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity z-40 bg-black/40 backdrop-blur-sm">
                               <button
                                 onClick={() => document.getElementById(`cat-img-${cat}`).click()}
                                 className="cursor-pointer bg-white text-slate-900 border border-[#2D2016]/10 text-[10px] sm:text-xs font-black px-4 py-2 uppercase rounded-xl hover:bg-[#FAF8F5] transition-colors shadow-sm"
@@ -1190,7 +1189,7 @@ function AdminDashboardContent() {
                       onClick={() => handleTemplateChange('vibrant')}
                       className={`isolate relative cursor-pointer rounded-2xl border-2 transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'vibrant' ? 'border-slate-900 shadow-[6px_6px_0px_#fde047] scale-[1.02] -translate-y-1 z-10' : 'border-slate-100 hover:border-slate-300 opacity-70 hover:opacity-100'}`}
                     >
-                      <span className="absolute top-2 right-2 bg-emerald-500 text-[#F5F0E8] text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">Gratis in Beta</span>
+                      <span className="absolute top-2 right-2 bg-emerald-500 text-[#F5F0E8] text-[8px] font-black tracking-widest uppercase px-1.5 py-0.5 rounded shadow-sm z-20 whitespace-nowrap shrink-0">Gratis in Beta</span>
                       <div className="absolute inset-0 bg-pink-50 -z-10"></div>
                       <div className="absolute bottom-[-10%] left-[-10%] w-24 h-24 bg-yellow-400 rounded-full -z-10"></div>
                       <div className="w-12 h-10 mb-auto mt-4 bg-blue-600 rounded-xl transform -rotate-6 flex items-center justify-center shadow-sm border border-blue-700">
@@ -1206,7 +1205,7 @@ function AdminDashboardContent() {
                       onClick={() => handleTemplateChange('luxury')}
                       className={`isolate relative cursor-pointer rounded-2xl border-[3px] transition-all overflow-hidden aspect-[4/5] flex flex-col items-center justify-end p-4 ${settings.template === 'luxury' ? 'border-stone-800 shadow-2xl scale-[1.02] z-10' : 'border-[#2D2016]/10 hover:border-stone-400 opacity-70 hover:opacity-100'}`}
                     >
-                      <span className="absolute top-2 right-2 bg-emerald-500 text-[#F5F0E8] text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded shadow-sm z-20">Gratis in Beta</span>
+                      <span className="absolute top-2 right-2 bg-emerald-500 text-[#F5F0E8] text-[8px] font-black tracking-widest uppercase px-1.5 py-0.5 rounded shadow-sm z-20 whitespace-nowrap shrink-0">Gratis in Beta</span>
                       <div className="absolute inset-0 bg-stone-100 -z-10"></div>
                       <div className="absolute top-0 inset-x-0 h-1/2 bg-gradient-to-b from-stone-200 to-transparent -z-10"></div>
                       <div className="w-10 h-14 mb-auto mt-2 border border-stone-800 flex items-center justify-center bg-transparent">
@@ -1533,14 +1532,14 @@ function AdminDashboardContent() {
                           </div>
                         </div>
                         <div className="w-full md:w-1/2 md:border-l border-slate-100 md:pl-8 flex flex-col h-full">
-                          <label className="text-sm font-bold text-slate-700 flex items-center justify-between gap-2 mb-1">
-                            <span>White-Label <span className="text-[9px] bg-emerald-500 text-[#F5F0E8] font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm ml-2">Gratis in Beta</span></span>
-                            <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                              <input type="checkbox" className="sr-only peer" checked={settings.whiteLabel || false} onChange={(e) => setSettings({ ...settings, whiteLabel: e.target.checked })} />
-                              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                          <label className="text-sm font-bold text-slate-700 flex items-center justify-between gap-2 mb-1 flex-wrap">
+                            <span className="flex items-center flex-wrap gap-2">White-Label <span className="text-[9px] bg-slate-500 text-[#F5F0E8] font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm whitespace-nowrap shrink-0">Presto Disponibile</span></span>
+                            <label className="relative inline-flex items-center cursor-not-allowed shrink-0">
+                              <input type="checkbox" className="sr-only peer" checked={false} disabled />
+                              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500 opacity-50"></div>
                             </label>
                           </label>
-                          <p className="text-xs text-slate-500 mt-2">Rimuove il marchio "Powered by SmartMenu AI" in fondo alla pagina per un'esperienza 100% dedicata al tuo brand.</p>
+                          <p className="text-xs text-slate-500 mt-2">Quest&apos;opzione rimuoverà il marchio "Powered by SmartMenu AI" per un'esperienza 100% dedicata al brand.</p>
                         </div>
                       </div>
 
@@ -1571,7 +1570,7 @@ function AdminDashboardContent() {
                         <div className="w-full md:w-2/3 md:border-l border-slate-100 md:pl-8 flex flex-col h-full">
                           <label className="text-sm font-bold text-slate-700 flex items-center gap-2 mb-2">
                             Link Recensioni TripAdvisor
-                            <span className="text-[9px] bg-emerald-500 text-[#F5F0E8] font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm">Gratis in Beta</span>
+                            <span className="text-[9px] bg-emerald-500 text-[#F5F0E8] font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm whitespace-nowrap shrink-0">Gratis in Beta</span>
                           </label>
                           <p className="text-xs text-slate-500 mb-3">Inserisci il link alla pagina TripAdvisor. I clienti potranno lasciare una recensione direttamente.</p>
                           <input
@@ -1590,7 +1589,7 @@ function AdminDashboardContent() {
                         <div className="flex flex-col">
                           <label className="text-sm font-bold text-slate-700 flex items-center gap-2 mb-2">
                             Testi Personalizzati Template
-                            <span className="text-[9px] bg-emerald-500 text-[#F5F0E8] font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm">Gratis in Beta</span>
+                            <span className="text-[9px] bg-emerald-500 text-[#F5F0E8] font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm whitespace-nowrap shrink-0">Gratis in Beta</span>
                           </label>
                           <p className="text-xs text-slate-500 mb-4">Sostituisci i testi pre-impostati che appaiono in base al template (come gli slogan in alto o i saluti finali). Lascia vuoto per usare il testo predefinito.</p>
 
@@ -1624,7 +1623,7 @@ function AdminDashboardContent() {
                       {/* Ordina dal Menu */}
                       <div className="border-t border-slate-100 pt-6 mt-6 opacity-75">
                         <label className="text-sm font-bold text-slate-700 flex items-center justify-between gap-2 mb-1">
-                          <span>Funzione Ordina <span className="text-[9px] bg-[#FAF8F5]0 text-[#F5F0E8] font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm ml-2">In Manutenzione</span></span>
+                          <span className="flex items-center flex-wrap gap-2">Funzione Ordina <span className="text-[9px] bg-slate-500 text-[#F5F0E8] font-black px-1.5 py-0.5 rounded uppercase tracking-widest shadow-sm whitespace-nowrap shrink-0">In Manutenzione</span></span>
                           <label className="relative inline-flex items-center cursor-pointer shrink-0 opacity-50">
                             <input type="checkbox" disabled className="sr-only peer" checked={settings.enableOrdering || false} onChange={(e) => setSettings({ ...settings, enableOrdering: e.target.checked })} />
                             <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
@@ -1714,9 +1713,12 @@ function AdminDashboardContent() {
         <div className="text-center mb-6 mt-12 w-full max-w-[320px]">
           <p className="text-xs text-slate-400 font-medium tracking-wide">La versione reale su un dispositivo mobile potrebbe variare leggermente.</p>
         </div>
-        <div className="relative bg-[#2D2016] rounded-[3rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border-[12px] border-[#F5F0E8]/10 transition-all origin-center overflow-hidden flex flex-col" style={{ width: 360, height: 740, transform: 'scale(0.85)' }}>
-          <div className="h-6 border-b border-[#F5F0E8]/10 flex items-center justify-center px-5 shrink-0 z-50 bg-[#2D2016]">
-            <div className="w-16 h-3 bg-slate-900 rounded-b-xl absolute top-0 left-1/2 -translate-x-1/2"></div>
+        <div className="relative bg-black rounded-[3rem] shadow-2xl border-[10px] border-black transition-all origin-center overflow-hidden flex flex-col" style={{ width: 360, height: 740, transform: 'scale(0.85)' }}>
+          <div className="h-7 w-full flex items-center justify-center shrink-0 z-50 bg-black absolute top-0 left-0 right-0">
+            <div className="w-28 h-6 bg-black rounded-b-[18px] flex items-center justify-center gap-2.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-slate-800/80 shadow-[inset_0_0_2px_rgba(255,255,255,0.1)]"></div>
+              <div className="w-10 h-1.5 rounded-full bg-slate-800/80 shadow-[inset_0_0_2px_rgba(255,255,255,0.1)]"></div>
+            </div>
           </div>
           <div className="flex-1 relative w-full bg-[#FAF8F5]">
             <iframe ref={desktopIframeRef} src="/preview" className="w-full h-full border-0 absolute inset-0 bg-[#FAF8F5]" title="Live Preview Simulator" />
@@ -1881,27 +1883,31 @@ function AdminDashboardContent() {
             </button>
             <button
               onClick={() => setPreviewDevice('ipad')}
-              className={`px-3 sm:px-5 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all ${previewDevice === 'ipad' ? 'bg-[#C4622D] text-[#F5F0E8] shadow-md' : 'text-[#F5F0E8]/50 hover:text-[#F5F0E8] hover:bg-white/5'}`}
+              className={`px-3 sm:px-5 py-2 text-xs sm:text-sm font-bold rounded-xl transition-all hidden sm:block ${previewDevice === 'ipad' ? 'bg-[#C4622D] text-[#F5F0E8] shadow-md' : 'text-[#F5F0E8]/50 hover:text-[#F5F0E8] hover:bg-white/5'}`}
             >
               iPad Mini
             </button>
           </div>
 
-          {/* TELEFONO SIMULATO */}
+          {/* X PER CHIUDERE - SEMPRE VISIBILE IN ALTO A DESTRA */}
+          <button onClick={() => setShowPreview(false)} className="absolute top-6 right-6 lg:right-12 z-[250] bg-black/50 text-[#F5F0E8] hover:bg-white text-[#F5F0E8] hover:text-slate-900 transition-all p-3 sm:p-4 rounded-full flex items-center justify-center shadow-xl border border-white/10 backdrop-blur-md">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+          </button>
+
           <div
-            className="relative bg-[#2D2016] rounded-[3rem] shadow-[0_0_80px_rgba(0,0,0,0.6)] flex flex-col overflow-hidden border-[12px] border-[#F5F0E8]/10 transition-all duration-500 origin-top shrink-0"
+            className="relative bg-[#111111] rounded-[3rem] shadow-[0_0_80px_rgba(0,0,0,0.6)] flex flex-col overflow-hidden border-[8px] sm:border-[12px] border-[#222222] transition-all duration-500 origin-top shrink-0"
             style={{
               width: previewDevice === 'ipad' ? 768 : previewDevice === 'iphone' ? 393 : 360,
               height: previewDevice === 'ipad' ? 1024 : previewDevice === 'iphone' ? 852 : 740,
               transform: `scale(${previewScale})`
             }}
           >
-            <div className="h-7 border-b border-[#F5F0E8]/10 flex items-center justify-between px-5 shrink-0 z-50 bg-[#2D2016]">
+            <div className="h-8 border-b border-[#333333] flex items-center justify-between px-5 shrink-0 z-50 bg-[#111111] relative">
               <div className="flex items-center gap-2">
                 <span className="flex h-1.5 w-1.5 relative"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span></span>
                 <span className="text-slate-300 font-bold text-[8px] tracking-widest uppercase truncate">{previewDevice === 'ipad' ? 'iPad Mini' : previewDevice === 'iphone' ? 'iPhone 14 Pro' : 'Galaxy S8+'}</span>
               </div>
-              <div className="w-16 h-4 bg-slate-900 rounded-b-xl absolute top-0 left-1/2 -translate-x-1/2 hidden sm:block"></div>
+              <div className="w-20 h-4 bg-black rounded-b-2xl absolute top-0 left-1/2 -translate-x-1/2 hidden sm:block before:content-[''] before:w-1.5 before:h-1.5 before:bg-[#222] before:rounded-full before:absolute before:left-3 before:top-1.5"></div>
               <button onClick={() => setShowPreview(false)} className="text-slate-500 hover:text-[#F5F0E8] transition-colors bg-white/5 hover:bg-white/10 p-1 rounded-lg flex items-center gap-1 md:hidden">
                 <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
               </button>
@@ -1916,10 +1922,6 @@ function AdminDashboardContent() {
             </div>
           </div>
 
-          {/* BOTTONE CHIUDI X SCREEN GRANDE */}
-          <button onClick={() => setShowPreview(false)} className="hidden md:flex absolute top-6 right-6 text-[#F5F0E8]/50 hover:text-[#F5F0E8] transition-colors bg-white/5 hover:bg-white/10 p-3 rounded-full items-center gap-1 shadow-lg border border-white/10 backdrop-blur-sm z-50">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-          </button>
         </div>
       )}
 

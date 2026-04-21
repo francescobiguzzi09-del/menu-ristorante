@@ -83,9 +83,10 @@ export default function MenuRenderer({ menu, settings: propSettings, restaurantI
   // Tracker invisibile per le statistiche (Visualizzazione Pagina)
   useEffect(() => {
     if (!restaurantId || restaurantId.startsWith('guest-')) return;
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Rome';
     fetch('/api/track', {
       method: 'POST',
-      body: JSON.stringify({ event: 'page_view', restaurantId }),
+      body: JSON.stringify({ event: 'page_view', restaurantId, timezone: tz }),
       headers: { 'Content-Type': 'application/json' }
     }).catch(e => console.error("Analytics Track Error", e));
   }, [restaurantId]);
@@ -227,7 +228,7 @@ export default function MenuRenderer({ menu, settings: propSettings, restaurantI
         {settings?.blockCategories && activeCategory && (
           <button 
             onClick={() => setActiveCategory(null)}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-6 py-3.5 rounded-full shadow-2xl font-bold flex items-center gap-2 drop-shadow-xl hover:-translate-y-1 hover:shadow-black/30 transition-all border border-slate-700"
+            className="fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-6 py-3.5 rounded-full shadow-2xl font-bold flex items-center gap-2 drop-shadow-xl hover:-translate-y-1 hover:shadow-black/30 transition-all border border-slate-700"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
             Torna alle categorie
@@ -242,7 +243,7 @@ export default function MenuRenderer({ menu, settings: propSettings, restaurantI
     <div className="relative" style={settings?.fontFamily ? { fontFamily: `var(--font-${settings.fontFamily})` } : {}}>
        {/* BOTTONE FILTRI FLOATING */}
        {menu && menu.some(item => item.dietaryTags && item.dietaryTags.length > 0) && (
-         <div className="fixed top-6 left-6 z-40 animate-in fade-in slide-in-from-top-4 duration-500">
+         <div className="fixed top-[max(1.5rem,env(safe-area-inset-top))] left-6 z-40 animate-in fade-in slide-in-from-top-4 duration-500">
             <button 
               onClick={() => setShowFilters(!showFilters)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl shadow-lg backdrop-blur-xl border transition-all ${activeFilters.length > 0 ? 'bg-teal-500/90 text-white border-teal-400/50' : 'bg-white/90 text-slate-700 border-white/50 hover:bg-white'}`}
@@ -285,7 +286,7 @@ export default function MenuRenderer({ menu, settings: propSettings, restaurantI
 
        {/* SELETTORE LINGUA COMPATTO */}
        {settings?.languages && settings.languages.length > 0 && (
-         <div className="fixed top-6 right-6 z-50">
+         <div className="fixed top-[max(1.5rem,env(safe-area-inset-top))] right-6 z-50">
             <button 
               onClick={() => setShowLangMenu(!showLangMenu)}
               className="w-10 h-10 bg-slate-900/90 backdrop-blur-xl text-white text-xs font-black tracking-widest uppercase rounded-full shadow-2xl border border-white/10 flex items-center justify-center transition-all hover:scale-110 hover:bg-slate-800"
@@ -440,7 +441,7 @@ export default function MenuRenderer({ menu, settings: propSettings, restaurantI
        {settings?.tripadvisorUrl && (
          <button
            onClick={() => { setShowReview(true); setReviewSubmitted(false); setReviewStars(0); setReviewComment(''); setReviewName(''); }}
-           className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-full shadow-2xl shadow-orange-500/30 flex items-center justify-center hover:scale-110 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500 group"
+           className="fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] right-6 z-40 w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-full shadow-2xl shadow-orange-500/30 flex items-center justify-center hover:scale-110 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500 group"
            title="Lascia una recensione"
          >
            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="0" className="group-hover:scale-110 transition-transform"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -579,7 +580,7 @@ export default function MenuRenderer({ menu, settings: propSettings, restaurantI
 
        {/* BOTTONE CARRELLO FLOATING (Premium) */}
        {settings?.enableOrdering && cart.length > 0 && !showCart && !showCheckout && !orderSuccess && (
-         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[90%] max-w-sm animate-in slide-in-from-bottom-5 duration-300">
+         <div className="fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-40 w-[90%] max-w-sm animate-in slide-in-from-bottom-5 duration-300">
            <button 
              onClick={() => setShowCart(true)}
              className="w-full bg-slate-900 text-white p-4 rounded-2xl flex items-center justify-between shadow-2xl hover:bg-black transition-all group"

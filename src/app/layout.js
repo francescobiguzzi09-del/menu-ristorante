@@ -16,6 +16,12 @@ export const metadata = {
   keywords: "menù digitale ristorante, qr code menù ristorante, menù digitale gratis, menù digitale con ordini tavolo",
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang="it" suppressHydrationWarning>

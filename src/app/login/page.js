@@ -91,7 +91,7 @@ export default function LoginPage() {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             margin: '0 auto 16px',
           }}>
-            <img src="/sm-logo.png" alt="SmartMenu Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', transform: 'scale(2.5)' }} />
+            <img src="/sm-logo.svg" alt="SmartMenu Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
           <h1 style={{ fontFamily: 'var(--font-display), serif', fontSize: 24, fontWeight: 500, color: '#2D2016', marginBottom: 8 }}>
             {isLogin ? 'Bentornato' : 'Crea il tuo Account'}

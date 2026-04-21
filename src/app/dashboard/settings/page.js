@@ -79,7 +79,7 @@ export default function SettingsPage() {
 
   const inputStyle = {
     width: '100%', padding: '12px 16px', border: '1.5px solid rgba(45,32,22,0.12)',
-    borderRadius: 12, background: '#FAFAF7', fontSize: 14, fontWeight: 500,
+    borderRadius: 12, background: '#FAFAF7', fontSize: 16, fontWeight: 500,
     outline: 'none', transition: 'all .2s', boxSizing: 'border-box', color: '#2D2016',
   };
 

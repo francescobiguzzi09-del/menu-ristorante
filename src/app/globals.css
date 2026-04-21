@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
+
 
 :root {
   /* SmartMenu Brand Palette */
@@ -15,10 +15,7 @@
   --foreground: #2C2C2A;
 }
 
-.dark {
-  --background: #2D2016;
-  --foreground: #F5F0E8;
-}
+
 
 @theme inline {
   --color-background: var(--background);
@@ -59,3 +56,23 @@ h1, h2, h3 {
 /* Hide scrollbar utility */
 .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .hide-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Safe area insets for iPhone notch / home bar */
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.safe-top { padding-top: env(safe-area-inset-top); }
+
+/* Mobile sidebar overlay */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(45, 32, 22, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 39;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.sidebar-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}

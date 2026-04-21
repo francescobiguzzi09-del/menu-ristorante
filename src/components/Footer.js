@@ -1,12 +1,16 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
+import { useMobile } from '@/hooks/useMobile';
 
 export default function Footer() {
+  const isMobile = useMobile(640);
+
   return (
     <footer style={{ background: '#2D2016', borderTop: '1px solid rgba(245,240,232,0.08)' }}>
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '48px 24px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 32 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)', gap: isMobile ? 40 : 32 }}>
           
           {/* Brand */}
           <div>
@@ -15,7 +19,7 @@ export default function Footer() {
                 width: 36, height: 36, borderRadius: 8, overflow: 'hidden',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <img src="/sm-logo.png" alt="SmartMenu Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', transform: 'scale(2.5)' }} />
+                <Image src="/sm-logo.svg" alt="SmartMenu Logo" width={36} height={36} style={{ objectFit: 'contain' }} />
               </div>
               <span style={{ fontFamily: 'var(--font-display), serif', fontSize: 18, fontWeight: 500, color: '#F5F0E8', letterSpacing: -0.3 }}>
                 SmartMenu
@@ -29,20 +33,20 @@ export default function Footer() {
           {/* Piattaforma */}
           <div>
             <h3 style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.35)', marginBottom: 16 }}>Piattaforma</h3>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <li><Link href="/" style={{ fontSize: 13, color: 'rgba(245,240,232,0.55)', textDecoration: 'none', transition: 'color .2s' }} onMouseEnter={e => e.target.style.color='#C4622D'} onMouseLeave={e => e.target.style.color='rgba(245,240,232,0.55)'}>Home Page</Link></li>
-              <li><Link href="/dashboard" style={{ fontSize: 13, color: 'rgba(245,240,232,0.55)', textDecoration: 'none', transition: 'color .2s' }} onMouseEnter={e => e.target.style.color='#C4622D'} onMouseLeave={e => e.target.style.color='rgba(245,240,232,0.55)'}>La tua Dashboard</Link></li>
-              <li><Link href="/admin" style={{ fontSize: 13, color: 'rgba(245,240,232,0.55)', textDecoration: 'none', transition: 'color .2s' }} onMouseEnter={e => e.target.style.color='#C4622D'} onMouseLeave={e => e.target.style.color='rgba(245,240,232,0.55)'}>Crea Nuovo Menù</Link></li>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <li><Link href="/" style={{ fontSize: 13, color: 'rgba(245,240,232,0.55)', textDecoration: 'none', transition: 'color .2s', padding: '6px 0', display: 'block' }} onMouseEnter={e => e.target.style.color='#C4622D'} onMouseLeave={e => e.target.style.color='rgba(245,240,232,0.55)'}>Home Page</Link></li>
+              <li><Link href="/dashboard" style={{ fontSize: 13, color: 'rgba(245,240,232,0.55)', textDecoration: 'none', transition: 'color .2s', padding: '6px 0', display: 'block' }} onMouseEnter={e => e.target.style.color='#C4622D'} onMouseLeave={e => e.target.style.color='rgba(245,240,232,0.55)'}>La tua Dashboard</Link></li>
+              <li><Link href="/onboarding" style={{ fontSize: 13, color: 'rgba(245,240,232,0.55)', textDecoration: 'none', transition: 'color .2s', padding: '6px 0', display: 'block' }} onMouseEnter={e => e.target.style.color='#C4622D'} onMouseLeave={e => e.target.style.color='rgba(245,240,232,0.55)'}>Crea Nuovo Menù</Link></li>
             </ul>
           </div>
 
           {/* Risorse */}
           <div>
             <h3 style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(245,240,232,0.35)', marginBottom: 16 }}>Risorse e Note legali</h3>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <li><Link href="/faq" style={{ fontSize: 13, color: 'rgba(245,240,232,0.55)', textDecoration: 'none', transition: 'color .2s' }} onMouseEnter={e => e.target.style.color='#C4622D'} onMouseLeave={e => e.target.style.color='rgba(245,240,232,0.55)'}>Domande Frequenti (FAQ)</Link></li>
-              <li><Link href="/termini" style={{ fontSize: 13, color: 'rgba(245,240,232,0.55)', textDecoration: 'none', transition: 'color .2s' }} onMouseEnter={e => e.target.style.color='#C4622D'} onMouseLeave={e => e.target.style.color='rgba(245,240,232,0.55)'}>Termini di Servizio</Link></li>
-              <li><Link href="/privacy" style={{ fontSize: 13, color: 'rgba(245,240,232,0.55)', textDecoration: 'none', transition: 'color .2s' }} onMouseEnter={e => e.target.style.color='#C4622D'} onMouseLeave={e => e.target.style.color='rgba(245,240,232,0.55)'}>Privacy Policy</Link></li>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <li><Link href="/faq" style={{ fontSize: 13, color: 'rgba(245,240,232,0.55)', textDecoration: 'none', transition: 'color .2s', padding: '6px 0', display: 'block' }} onMouseEnter={e => e.target.style.color='#C4622D'} onMouseLeave={e => e.target.style.color='rgba(245,240,232,0.55)'}>Domande Frequenti (FAQ)</Link></li>
+              <li><Link href="/termini" style={{ fontSize: 13, color: 'rgba(245,240,232,0.55)', textDecoration: 'none', transition: 'color .2s', padding: '6px 0', display: 'block' }} onMouseEnter={e => e.target.style.color='#C4622D'} onMouseLeave={e => e.target.style.color='rgba(245,240,232,0.55)'}>Termini di Servizio</Link></li>
+              <li><Link href="/privacy" style={{ fontSize: 13, color: 'rgba(245,240,232,0.55)', textDecoration: 'none', transition: 'color .2s', padding: '6px 0', display: 'block' }} onMouseEnter={e => e.target.style.color='#C4622D'} onMouseLeave={e => e.target.style.color='rgba(245,240,232,0.55)'}>Privacy Policy</Link></li>
             </ul>
           </div>
 
@@ -71,6 +75,7 @@ export default function Footer() {
           marginTop: 40, paddingTop: 24,
           borderTop: '1px solid rgba(245,240,232,0.08)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 16 : 0,
         }}>
           <p style={{ fontSize: 12, color: 'rgba(245,240,232,0.3)' }}>
             © {new Date().getFullYear()} SmartMenu AI. Tutti i diritti riservati.
