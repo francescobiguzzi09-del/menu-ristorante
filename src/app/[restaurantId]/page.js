@@ -1,16 +1,23 @@
 import MenuRenderer from '@/components/MenuRenderer';
 
+import { supabase } from '@/lib/supabase';
+
 // Questa funzione legge i dati dinamicamente per il ristorante richiesto
 async function getRestaurantData(restaurantId) {
-  const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
-  // Assicura che l'URL includa l'ID del ristorante corretto
-  const url = `${protocol}://localhost:3000/api/menu?restaurantId=${restaurantId}`;
-  
   try {
-    const res = await fetch(url, { cache: 'no-store' });
-    if (!res.ok) return null;
-    return await res.json();
+    const { data, error } = await supabase
+      .from('menus')
+      .select('data')
+      .eq('restaurant_id', restaurantId)
+      .single();
+
+    if (error || !data) {
+      return null;
+    }
+    
+    return data.data;
   } catch (error) {
+    console.error("Errore nel recupero dati:", error);
     return null;
   }
 }

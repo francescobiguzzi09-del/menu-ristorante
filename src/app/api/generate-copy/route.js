@@ -19,7 +19,7 @@ export async function POST(request) {
       baseURL: "https://openrouter.ai/api/v1",
       apiKey: rawKey,
       defaultHeaders: {
-        "HTTP-Referer": "http://localhost:3000",
+        "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
         "X-Title": "Menu Ristorante Copy Generator",
       }
     });

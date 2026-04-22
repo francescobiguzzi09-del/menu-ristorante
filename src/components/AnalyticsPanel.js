@@ -76,15 +76,15 @@ export default function AnalyticsPanel({ menus }) {
    // Build chart from real daily_views data
    // Shows last 7 days: from 7 days ago up to yesterday (today's data will show tomorrow)
    const DAY_LABELS_IT = ['Do', 'Lu', 'Ma', 'Me', 'Gi', 'Ve', 'Sa'];
-   
+
    const chartInfo = useMemo(() => {
-      const dailyViews = (analytics.daily_views && typeof analytics.daily_views === 'object') 
-         ? analytics.daily_views 
+      const dailyViews = (analytics.daily_views && typeof analytics.daily_views === 'object')
+         ? analytics.daily_views
          : {};
-      
+
       const now = new Date();
       const days = [];
-      
+
       // Go back 7 days: day -7 to day -1 (yesterday)
       for (let i = 7; i >= 1; i--) {
          const d = new Date(now);
@@ -95,17 +95,17 @@ export default function AnalyticsPanel({ menus }) {
          const day = String(d.getDate()).padStart(2, '0');
          const dateKey = `${year}-${month}-${day}`;
          const dayOfWeek = d.getDay(); // 0=Sun, 1=Mon...
-         
+
          days.push({
             dateKey,
             label: DAY_LABELS_IT[dayOfWeek],
             value: dailyViews[dateKey] || 0
          });
       }
-      
+
       return days;
    }, [analytics.daily_views]);
-   
+
    const chartData = chartInfo.map(d => d.value);
    const chartLabels = chartInfo.map(d => d.label);
 
@@ -217,74 +217,74 @@ export default function AnalyticsPanel({ menus }) {
             </div>
 
             {/* VISUALIZZAZIONI ANDAMENTO */}
-             <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm flex flex-col w-full min-h-[360px]">
-                <h3 className="text-base font-black text-slate-900 mb-6 border-b border-slate-100 pb-4 flex items-center gap-2">
-                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-500"><path d="M3 3v18h18" /><path d="m19 9-5 5-4-4-3 3" /></svg>
-                   Visite (Ultimi 7 Giorni)
-                </h3>
-                
-                {(() => {
-                   const rawMaxRecord = Math.max(...chartData, 0);
-                   let yAxisMax = 4;
-                   if (rawMaxRecord > 0) {
-                      if (rawMaxRecord > 100) yAxisMax = Math.ceil(rawMaxRecord / 40) * 40;
-                      else if (rawMaxRecord > 20) yAxisMax = Math.ceil(rawMaxRecord / 20) * 20;
-                      else if (rawMaxRecord > 10) yAxisMax = Math.ceil(rawMaxRecord / 8) * 8;
-                      else yAxisMax = Math.ceil(rawMaxRecord / 4) * 4;
-                   }
-                   
-                   const yTicks = [yAxisMax, yAxisMax * 0.75, yAxisMax * 0.5, yAxisMax * 0.25, 0];
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm flex flex-col w-full min-h-[360px]">
+               <h3 className="text-base font-black text-slate-900 mb-6 border-b border-slate-100 pb-4 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-500"><path d="M3 3v18h18" /><path d="m19 9-5 5-4-4-3 3" /></svg>
+                  Visite (Ultimi 7 Giorni)
+               </h3>
 
-                   return (
-                      <div className="w-full relative mt-6 mb-8 h-56 sm:h-64 block">
-                         {/* Asse Y (Ordinate) */}
-                         <div className="absolute left-0 top-0 bottom-0 w-8 flex flex-col justify-between items-end text-[9px] font-bold text-slate-400 z-10">
-                            {yTicks.map((tick, i) => (
-                               <span key={i} className="leading-none pr-3 transform -translate-y-1/2">{tick}</span>
-                            ))}
-                         </div>
-                         
-                         {/* Spazio del grafico effettivo */}
-                         <div className="absolute left-8 right-0 top-0 bottom-0 flex justify-evenly sm:justify-around border-l border-b border-slate-100">
-                            
-                            {/* Griglia In background */}
-                            <div className="absolute inset-0 flex flex-col justify-between pointer-events-none z-0">
-                               {yTicks.map((_, i) => (
-                                  <div key={i} className={`w-full border-b ${i === yTicks.length - 1 ? 'border-transparent' : 'border-slate-100 border-dashed'}`}></div>
-                               ))}
-                            </div>
+               {(() => {
+                  const rawMaxRecord = Math.max(...chartData, 0);
+                  let yAxisMax = 4;
+                  if (rawMaxRecord > 0) {
+                     if (rawMaxRecord > 100) yAxisMax = Math.ceil(rawMaxRecord / 40) * 40;
+                     else if (rawMaxRecord > 20) yAxisMax = Math.ceil(rawMaxRecord / 20) * 20;
+                     else if (rawMaxRecord > 10) yAxisMax = Math.ceil(rawMaxRecord / 8) * 8;
+                     else yAxisMax = Math.ceil(rawMaxRecord / 4) * 4;
+                  }
 
-                            {/* Barre del grafico */}
-                            {chartData.map((val, i) => {
-                               const heightPct = yAxisMax === 0 ? 0 : Math.max(1, (val / yAxisMax) * 100);
-                               return (
-                                  <div key={i} className="w-full flex-1 relative group cursor-pointer z-10">
-                                     {/* La Barra Visiva */}
-                                     <div 
-                                       className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[24px] sm:max-w-[40px] bg-indigo-100 rounded-t-md sm:rounded-t-lg overflow-hidden group-hover:bg-indigo-300 transition-colors duration-300 shadow-sm" 
+                  const yTicks = [yAxisMax, yAxisMax * 0.75, yAxisMax * 0.5, yAxisMax * 0.25, 0];
+
+                  return (
+                     <div className="w-full relative mt-6 mb-8 h-56 sm:h-64 block">
+                        {/* Asse Y (Ordinate) */}
+                        <div className="absolute left-0 top-0 bottom-0 w-8 flex flex-col justify-between items-end text-[9px] font-bold text-slate-400 z-10">
+                           {yTicks.map((tick, i) => (
+                              <span key={i} className="leading-none pr-3 transform -translate-y-1/2">{tick}</span>
+                           ))}
+                        </div>
+
+                        {/* Spazio del grafico effettivo */}
+                        <div className="absolute left-8 right-0 top-0 bottom-0 flex justify-evenly sm:justify-around border-l border-b border-slate-100">
+
+                           {/* Griglia In background */}
+                           <div className="absolute inset-0 flex flex-col justify-between pointer-events-none z-0">
+                              {yTicks.map((_, i) => (
+                                 <div key={i} className={`w-full border-b ${i === yTicks.length - 1 ? 'border-transparent' : 'border-slate-100 border-dashed'}`}></div>
+                              ))}
+                           </div>
+
+                           {/* Barre del grafico */}
+                           {chartData.map((val, i) => {
+                              const heightPct = yAxisMax === 0 ? 0 : Math.max(1, (val / yAxisMax) * 100);
+                              return (
+                                 <div key={i} className="w-full flex-1 relative group cursor-pointer z-10">
+                                    {/* La Barra Visiva */}
+                                    <div
+                                       className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[24px] sm:max-w-[40px] bg-indigo-100 rounded-t-md sm:rounded-t-lg overflow-hidden group-hover:bg-indigo-300 transition-colors duration-300 shadow-sm"
                                        style={{ height: `${heightPct}%` }}
-                                     >
-                                        <div className="absolute top-0 w-full h-[3px] bg-indigo-500 rounded-t-md sm:rounded-t-lg"></div>
-                                        <div className="absolute bottom-0 w-full h-full bg-indigo-400/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
-                                     </div>
-                                     
-                                     {/* Asse X Labels */}
-                                     <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase absolute -bottom-7 left-1/2 -translate-x-1/2">
-                                        {chartLabels[i]}
-                                     </span>
-                                     
-                                     {/* Valore On Hover */}
-                                     <span className="text-[10px] sm:text-xs font-black text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-lg shadow-sm border border-indigo-100 opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-[calc(100%+8px)] left-1/2 -translate-x-1/2 z-20 pointer-events-none whitespace-nowrap">
-                                        {val} visite
-                                     </span>
-                                  </div>
-                               );
-                            })}
-                         </div>
-                      </div>
-                   )
-                })()}
-             </div>
+                                    >
+                                       <div className="absolute top-0 w-full h-[3px] bg-indigo-500 rounded-t-md sm:rounded-t-lg"></div>
+                                       <div className="absolute bottom-0 w-full h-full bg-indigo-400/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+                                    </div>
+
+                                    {/* Asse X Labels */}
+                                    <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase absolute -bottom-7 left-1/2 -translate-x-1/2">
+                                       {chartLabels[i]}
+                                    </span>
+
+                                    {/* Valore On Hover */}
+                                    <span className="text-[10px] sm:text-xs font-black text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-lg shadow-sm border border-indigo-100 opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-[calc(100%+8px)] left-1/2 -translate-x-1/2 z-20 pointer-events-none whitespace-nowrap">
+                                       {val} visite
+                                    </span>
+                                 </div>
+                              );
+                           })}
+                        </div>
+                     </div>
+                  )
+               })()}
+            </div>
 
          </div>
 
