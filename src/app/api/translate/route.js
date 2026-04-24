@@ -36,17 +36,20 @@ export async function POST(request) {
 STRICT RULES:
 1. You must return EXACTLY the same JSON array structure, but you MUST add a new property "translations" to EVERY object.
 2. The "translations" property MUST be a JSON object containing exactly these 4 keys: "en", "de", "fr", "es".
-3. Inside each language key, translate the original "name", "description", and "category" from Italian.
-4. Keep "id", "price", "image" and all other original fields unchanged.
-5. If an item has no "description", the translation of the description must be an empty string "".
-6. Return ONLY a valid JSON array. No markdown, no backticks, no \`\`\`json.`
+3. Inside each language key, translate ONLY the "description", "category", and "ingredients" fields from Italian. Do NOT translate "name" — dish names must always stay in the original language.
+4. Each language object must have exactly these keys: "description", "category", "ingredients". Do NOT include a "name" key.
+5. Keep "id", "price", "image", "name" and all other original fields unchanged.
+6. If an item has no "description", the translation of the description must be an empty string "".
+7. If an item has no "ingredients", the translation of ingredients must be an empty string "".
+8. You MUST return a JSON object with a single key "menu" containing the array of translated items. No markdown.`
         },
         {
           role: "user",
           content: JSON.stringify(items),
         },
       ],
-      max_tokens: 3000,
+      response_format: { type: "json_object" },
+      max_tokens: 10000,
       temperature: 0.1, // Deterministico e strutturato
     });
 
@@ -62,7 +65,8 @@ STRICT RULES:
 
     let translatedItems = [];
     try {
-      translatedItems = JSON.parse(jsonString);
+      const parsed = JSON.parse(jsonString);
+      translatedItems = parsed.menu || parsed;
     } catch (parseErr) {
       console.error("Errore Parsing JSON OpenRouter (Translate):", aiMessage);
       return NextResponse.json({ success: false, error: "OpenRouter ha risposto, ma il formato non era un JSON valido." }, { status: 500 });

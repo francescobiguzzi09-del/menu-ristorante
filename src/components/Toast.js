@@ -27,10 +27,10 @@ function ToastItem({ toast, onRemove }) {
   };
 
   const styles = {
-    success: 'bg-emerald-50 dark:bg-emerald-500/20 border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-200',
-    error: 'bg-rose-50 dark:bg-rose-500/20 border-rose-200 dark:border-rose-500/30 text-rose-800 dark:text-rose-200',
-    warning: 'bg-amber-50 dark:bg-amber-500/20 border-amber-200 dark:border-amber-500/30 text-amber-800 dark:text-amber-200',
-    info: 'bg-indigo-50 dark:bg-indigo-500/20 border-indigo-200 dark:border-indigo-500/30 text-indigo-800 dark:text-indigo-200',
+    success: 'bg-emerald-50 border-emerald-200 text-emerald-800',
+    error: 'bg-rose-50 border-rose-200 text-rose-800',
+    warning: 'bg-amber-50 border-amber-200 text-amber-800',
+    info: 'bg-indigo-50 border-indigo-200 text-indigo-800',
   };
 
   const iconColors = {

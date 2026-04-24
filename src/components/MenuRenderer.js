@@ -154,13 +154,16 @@ export default function MenuRenderer({ menu, settings: propSettings, restaurantI
         ? item.translations[activeLang].category 
         : item.category;
     
-    const localizedName = isTranslating && item.translations[activeLang].name 
-        ? item.translations[activeLang].name 
-        : item.name;
+    // Name is NEVER translated — dish names always stay in original language
+    const localizedName = item.name;
         
     const localizedDesc = isTranslating && item.translations[activeLang].description 
         ? item.translations[activeLang].description 
         : item.description;
+
+    const localizedIngredients = isTranslating && item.translations[activeLang].ingredients 
+        ? item.translations[activeLang].ingredients 
+        : item.ingredients;
 
     if (settings?.blockCategories && activeCategory && item.category !== activeCategory) {
       return acc;
@@ -173,7 +176,8 @@ export default function MenuRenderer({ menu, settings: propSettings, restaurantI
     acc[localizedCategory].push({
        ...item,
        name: localizedName,
-       description: localizedDesc
+       description: localizedDesc,
+       ingredients: localizedIngredients
     });
     
     return acc;

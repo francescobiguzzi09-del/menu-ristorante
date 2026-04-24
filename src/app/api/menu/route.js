@@ -29,12 +29,21 @@ export async function POST(request) {
     const { restaurantId, data, userId } = await request.json();
     if (!restaurantId) return NextResponse.json({ success: false, error: 'restaurantId mancante' }, { status: 400 });
 
+    // Fetch existing menu to preserve user_id if present
+    const { data: existingMenu } = await supabase
+      .from('menus')
+      .select('user_id')
+      .eq('restaurant_id', restaurantId)
+      .single();
+
+    const finalUserId = userId || (existingMenu?.user_id) || null;
+
     const { error } = await supabase
       .from('menus')
       .upsert({
         restaurant_id: restaurantId,
         data: data,
-        user_id: userId || null
+        user_id: finalUserId
       });
 
     if (error) throw error;

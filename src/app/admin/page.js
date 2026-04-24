@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import QRCode from 'react-qr-code';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import MenuRenderer from '@/components/MenuRenderer';
 import { useToast } from '@/components/Toast';
+import { useMobile } from '@/hooks/useMobile';
 
 function AdminDashboardContent() {
   const searchParams = useSearchParams();
@@ -39,6 +40,18 @@ function AdminDashboardContent() {
   const [previewScale, setPreviewScale] = useState(1);
   const [showPdfWarning, setShowPdfWarning] = useState(false);
   const [userHasCustomFont, setUserHasCustomFont] = useState(false);
+
+  // Mobile drawer state
+  const isMobile = useMobile(640);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+
+  // Draft restore state
+  const [showDraftBanner, setShowDraftBanner] = useState(false);
+  const [draftData, setDraftData] = useState(null);
+  const dataLoadedFromDb = useRef(false);
+
+  // Disable translations modal
+  const [showDisableTranslateModal, setShowDisableTranslateModal] = useState(false);
 
   const fileInputRef = useRef(null);
   const desktopIframeRef = useRef(null);
@@ -230,10 +243,46 @@ function AdminDashboardContent() {
           if (Array.isArray(data.menu)) setItems(data.menu);
           if (data.settings) setSettings(data.settings);
         }
+        dataLoadedFromDb.current = true;
+
+        // Check for localStorage draft
+        try {
+          const draftKey = `smartmenu-draft-${restaurantId}`;
+          const saved = localStorage.getItem(draftKey);
+          if (saved) {
+            const draft = JSON.parse(saved);
+            if (draft && draft.items && draft.settings) {
+              setDraftData(draft);
+              setShowDraftBanner(true);
+            }
+          }
+        } catch (e) { /* ignore */ }
+
         setIsLoading(false);
       })
       .catch(() => setIsLoading(false));
   }, [restaurantId]);
+
+  // Auto-save draft to localStorage (debounced)
+  useEffect(() => {
+    if (!restaurantId || !dataLoadedFromDb.current) return;
+    const timer = setTimeout(() => {
+      try {
+        const draftKey = `smartmenu-draft-${restaurantId}`;
+        localStorage.setItem(draftKey, JSON.stringify({
+          items,
+          settings,
+          timestamp: Date.now()
+        }));
+      } catch (e) { /* localStorage full or unavailable */ }
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [items, settings, restaurantId]);
+
+  // Close mobile drawer on resize to desktop
+  useEffect(() => {
+    if (!isMobile) setMobileDrawerOpen(false);
+  }, [isMobile]);
 
   // Handle Stripe redirect
   useEffect(() => {
@@ -382,6 +431,28 @@ function AdminDashboardContent() {
     }
   };
 
+  const handleDisableTranslate = () => {
+    // Remove translations from items
+    const newItems = items.map(item => {
+      const { translations, ...rest } = item;
+      return rest;
+    });
+    
+    // Remove languages from settings
+    const newSettings = { ...settings, languages: [] };
+    
+    setItems(newItems);
+    setSettings(newSettings);
+    lastTranslatedContent.current = '';
+    
+    if (restaurantId) {
+      processSaveMenu(newItems, newSettings);
+    }
+    
+    setShowDisableTranslateModal(false);
+    toast.success('Traduzioni rimosse con successo.', 'Fatto');
+  };
+
   const processSaveMenu = async (overrideItems = null, overrideSettings = null, silent = false) => {
     if (!restaurantId) return;
     if (!silent) setIsSaving(true);
@@ -401,6 +472,8 @@ function AdminDashboardContent() {
       });
       const resData = await res.json();
       if (!resData.success) throw new Error(resData.error);
+      // Clear localStorage draft after successful save
+      try { localStorage.removeItem(`smartmenu-draft-${restaurantId}`); } catch (e) { /* ignore */ }
       if (!silent) setShowSuccessModal(true);
     } catch (err) {
       if (!silent) toast.error('Errore durante il salvataggio: ' + err.message, 'Errore');
@@ -479,8 +552,62 @@ function AdminDashboardContent() {
   return (
     <div className="flex bg-[#FAF8F5] text-[#2D2016] font-sans h-[100dvh] overflow-hidden">
 
-      {/* ----------- COLONNA 1: SIDEBAR NAVIGAZIONE ----------- */}
-      <aside className="w-[80px] sm:w-[240px] bg-[#2D2016] flex flex-col items-center sm:items-stretch py-6 border-r border-[#F5F0E8]/10 z-20 shrink-0">
+      {/* ═══════════ MOBILE TOP BANNER ═══════════ */}
+      {isMobile && (
+        <header className="fixed top-0 left-0 right-0 h-14 bg-[#2D2016] flex items-center justify-between px-4 z-50 border-b border-[#F5F0E8]/10">
+          <a href="/" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden shrink-0">
+              <Image src="/sm-logo.svg" alt="Logo" width={32} height={32} className="w-full h-full object-contain" />
+            </div>
+            <span className="text-sm font-black tracking-tight text-[#F5F0E8]">SmartMenu AI</span>
+          </a>
+          <button
+            onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#F5F0E8]/10 text-[#F5F0E8]/70"
+          >
+            {mobileDrawerOpen ? (
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+            )}
+          </button>
+        </header>
+      )}
+
+      {/* ═══════════ MOBILE DRAWER OVERLAY ═══════════ */}
+      {isMobile && mobileDrawerOpen && (
+        <div className="fixed inset-0 z-40" onClick={() => setMobileDrawerOpen(false)}>
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+          <div className="absolute top-14 left-0 bottom-0 w-[260px] bg-[#2D2016] overflow-y-auto animate-in slide-in-from-left duration-300" onClick={e => e.stopPropagation()}>
+            <nav className="px-4 py-4 space-y-1.5">
+              {[
+                { key: 'menu', label: 'Piatti e Menu', icon: <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0" strokeLinecap="round" strokeLinejoin="round"><path d="m2 5 6-3 6 3 6-3v16l-6 3-6-3-6 3v-16Z"/><path d="M8 2v16"/><path d="M16 6v16"/></svg> },
+                { key: 'upsell', label: 'Upselling & Promo', icon: <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0" strokeLinecap="round" strokeLinejoin="round"><path d="m3 3 3 9-3 9 19-9Z"/><path d="M13 13 8 8"/></svg> },
+                { key: 'design', label: 'Tema & Colori', icon: <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg> },
+                { key: 'typography', label: 'Tipografia', icon: <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" x2="15" y1="20" y2="20"/><line x1="12" x2="12" y1="4" y2="20"/></svg> },
+                { key: 'widget', label: 'Integrazione Sito', icon: <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> },
+                { key: 'settings', label: 'Impostazioni', icon: <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/></svg> },
+              ].map(item => (
+                <button key={item.key} onClick={() => { setActiveTab(item.key); setMobileDrawerOpen(false); }} className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all font-bold text-sm ${activeTab === item.key ? 'bg-[#C4622D] text-[#F5F0E8] shadow-lg shadow-[#C4622D]/20' : 'text-[#F5F0E8]/50 hover:text-[#F5F0E8] hover:bg-[#F5F0E8]/10'}`}>
+                  {item.icon}
+                  <span className="truncate">{item.label}</span>
+                </button>
+              ))}
+            </nav>
+            <div className="px-4 pb-6 mt-4 space-y-3 border-t border-[#F5F0E8]/10 pt-4">
+              {user && (
+                <button onClick={() => { router.push('/dashboard'); setMobileDrawerOpen(false); }} className="w-full text-xs font-bold text-[#F5F0E8]/50 hover:text-[#F5F0E8] transition-colors bg-[#F5F0E8]/10 hover:bg-slate-700 py-3 px-4 rounded-xl flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                  Dashboard
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ----------- COLONNA 1: SIDEBAR NAVIGAZIONE (Desktop only) ----------- */}
+      <aside className="hidden sm:flex w-[80px] sm:w-[240px] bg-[#2D2016] flex-col items-center sm:items-stretch py-6 border-r border-[#F5F0E8]/10 z-20 shrink-0">
         <div className="px-0 sm:px-6 mb-8 flex items-center justify-center sm:justify-start gap-3">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
             <Image src="/sm-logo.svg" alt="Smart Menu Logo" width={40} height={40} className="w-full h-full object-contain " />
@@ -563,7 +690,20 @@ function AdminDashboardContent() {
       </aside>
 
       {/* ----------- COLONNA 2: CONTENUTO EDITABILE ----------- */}
-      <main className="flex-1 overflow-y-auto w-full relative scroll-smooth">
+      <main className={`flex-1 overflow-y-auto w-full relative scroll-smooth ${isMobile ? 'pt-14' : ''}`}>
+        {/* Draft Restore Banner */}
+        {showDraftBanner && draftData && (
+          <div className="sticky top-0 z-30 bg-amber-50 border-b border-amber-200 px-4 py-3 flex items-center justify-between gap-3 animate-in slide-in-from-top duration-300">
+            <div className="flex items-center gap-2 min-w-0">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/></svg>
+              <p className="text-xs sm:text-sm font-bold text-amber-800 truncate">Hai modifiche non salvate. Vuoi ripristinarle?</p>
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <button onClick={() => { setItems(draftData.items); setSettings(draftData.settings); setShowDraftBanner(false); setDraftData(null); toast.success('Bozza ripristinata!', 'Ripristino'); }} className="px-3 py-1.5 bg-amber-500 text-white text-xs font-bold rounded-lg hover:bg-amber-600 transition-colors">Ripristina</button>
+              <button onClick={() => { setShowDraftBanner(false); setDraftData(null); try { localStorage.removeItem(`smartmenu-draft-${restaurantId}`); } catch(e){} }} className="px-3 py-1.5 bg-white text-amber-700 text-xs font-bold rounded-lg border border-amber-300 hover:bg-amber-50 transition-colors">Scarta</button>
+            </div>
+          </div>
+        )}
         <div className="max-w-3xl mx-auto px-4 sm:px-8 py-8 sm:py-12 pb-32 space-y-8">
           <div className="mb-8">
             <h2 className="text-3xl font-black text-slate-900 tracking-tight">
@@ -615,11 +755,19 @@ function AdminDashboardContent() {
                       )}
 
                       {settings.languages && settings.languages.includes('en') && (
-                        <div className="mt-6 flex flex-wrap gap-2 justify-center">
-                          <span className="bg-white border border-[#4A7C59]/30 text-[#4A7C59] text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-sm"><span className="text-lg">🇬🇧</span> Inglese ATTIVO</span>
-                          <span className="bg-white border border-[#4A7C59]/30 text-[#4A7C59] text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-sm"><span className="text-lg">🇩🇪</span> Tedesco ATTIVO</span>
-                          <span className="bg-white border border-[#4A7C59]/30 text-[#4A7C59] text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-sm"><span className="text-lg">🇫🇷</span> Francese ATTIVO</span>
-                          <span className="bg-white border border-[#4A7C59]/30 text-[#4A7C59] text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-sm"><span className="text-lg">🇪🇸</span> Spagnolo ATTIVO</span>
+                        <div className="mt-6 flex flex-col items-center gap-4">
+                          <div className="flex flex-wrap gap-2 justify-center">
+                            <span className="bg-white border border-[#4A7C59]/30 text-[#4A7C59] text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-sm"><span className="text-lg">🇬🇧</span> Inglese ATTIVO</span>
+                            <span className="bg-white border border-[#4A7C59]/30 text-[#4A7C59] text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-sm"><span className="text-lg">🇩🇪</span> Tedesco ATTIVO</span>
+                            <span className="bg-white border border-[#4A7C59]/30 text-[#4A7C59] text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-sm"><span className="text-lg">🇫🇷</span> Francese ATTIVO</span>
+                            <span className="bg-white border border-[#4A7C59]/30 text-[#4A7C59] text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-sm"><span className="text-lg">🇪🇸</span> Spagnolo ATTIVO</span>
+                          </div>
+                          <button
+                            onClick={() => setShowDisableTranslateModal(true)}
+                            className="text-xs font-bold text-rose-500 hover:text-rose-600 underline decoration-rose-300 hover:decoration-rose-500 transition-colors"
+                          >
+                            Disattiva Multilingua e rimuovi dati
+                          </button>
                         </div>
                       )}
                     </div>
@@ -1726,10 +1874,31 @@ function AdminDashboardContent() {
         </div>
       </aside>
 
-      {/* FAB Mobile Preview */}
-      <button onClick={() => setShowPreview(true)} className="lg:hidden fixed bottom-6 right-6 bg-slate-900 text-[#F5F0E8] p-4 rounded-full shadow-2xl flex items-center gap-3 z-30 transition-transform active:scale-95">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2" /><path d="M12 18h.01" /></svg>
-      </button>
+      {/* FAB Mobile Actions */}
+      <div className="lg:hidden fixed bottom-6 left-6 right-6 flex items-center justify-between z-30 pointer-events-none">
+        {/* FAB Save */}
+        <button 
+          onClick={handleSaveMenuClick} 
+          disabled={isSaving}
+          className="pointer-events-auto bg-[#C4622D] text-[#F5F0E8] p-4 rounded-full shadow-2xl flex items-center justify-center transition-transform active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+          title="Salva Menu"
+        >
+          {isSaving ? (
+            <svg className="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
+          )}
+        </button>
+
+        {/* FAB Preview */}
+        <button 
+          onClick={() => setShowPreview(true)} 
+          className="pointer-events-auto bg-slate-900 text-[#F5F0E8] p-4 rounded-full shadow-2xl flex items-center justify-center transition-transform active:scale-95"
+          title="Preview Mobile"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2" /><path d="M12 18h.01" /></svg>
+        </button>
+      </div>
 
       {/* SUCCESS MODAL POPUP */}
       {showSuccessModal && (
@@ -1817,7 +1986,7 @@ function AdminDashboardContent() {
               </button>
 
               <button
-                onClick={processSaveMenu}
+                onClick={() => processSaveMenu()}
                 className="w-full bg-white border-2 border-[#2D2016]/10 hover:border-slate-300 hover:bg-[#FAF8F5] text-slate-600 font-bold py-3.5 px-4 rounded-xl transition-all text-sm"
               >
                 Continua e Genera (Senza salvare)
@@ -1857,6 +2026,46 @@ function AdminDashboardContent() {
                 className="w-full bg-amber-500 hover:bg-amber-600 text-[#F5F0E8] font-black uppercase tracking-wider py-4 px-4 rounded-xl transition-all shadow-lg shadow-amber-500/20 text-sm"
               >
                 Continua comunque
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DISABLE TRANSLATIONS WARNING MODAL POPUP */}
+      {showDisableTranslateModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl relative animate-in zoom-in-95 duration-300 flex flex-col items-center text-center border border-slate-100">
+
+            <button
+              onClick={() => setShowDisableTranslateModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+            </button>
+
+            <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mb-5">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+            </div>
+
+            <h3 className="text-2xl font-black tracking-tight text-slate-900 mb-2">Sei Sicuro?</h3>
+            <p className="text-slate-500 mb-8 text-sm leading-relaxed">
+              Stai per disattivare il multilingua. Questo eliminerà definitivamente tutte le traduzioni salvate nel database. Se vorrai riattivarlo, l'Intelligenza Artificiale dovrà tradurre nuovamente tutto.
+            </p>
+
+            <div className="space-y-3 w-full">
+              <button
+                onClick={handleDisableTranslate}
+                className="w-full bg-rose-500 hover:bg-rose-600 text-[#F5F0E8] font-black uppercase tracking-wider py-4 px-4 rounded-xl transition-all shadow-lg shadow-rose-500/20 text-sm"
+              >
+                Sì, Disattiva e Rimuovi
+              </button>
+              
+              <button
+                onClick={() => setShowDisableTranslateModal(false)}
+                className="w-full bg-white border-2 border-[#2D2016]/10 hover:border-slate-300 hover:bg-[#FAF8F5] text-slate-600 font-bold py-3.5 px-4 rounded-xl transition-all text-sm"
+              >
+                Annulla
               </button>
             </div>
           </div>
