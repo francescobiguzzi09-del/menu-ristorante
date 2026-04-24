@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Image from 'next/image';
 import AnalyticsPanel from '@/components/AnalyticsPanel';
 import ReviewsPanel from '@/components/ReviewsPanel';
@@ -32,6 +33,7 @@ export default function DashboardPage() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [hasUnreadUpdates, setHasUnreadUpdates] = useState(false);
   const dropdownRef = useRef(null);
   const router = useRouter();
   const toast = useToast();
@@ -51,6 +53,33 @@ export default function DashboardPage() {
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Fetch updates for notification dot
+  useEffect(() => {
+    const checkUpdates = async () => {
+      try {
+        const res = await fetch('/api/updates');
+        const data = await res.json();
+        if (data.success && data.updates && data.updates.length > 0) {
+          const latestUpdate = data.updates[0];
+          const lastRead = localStorage.getItem('smartmenu_last_read_update');
+          if (!lastRead || new Date(latestUpdate.created_at) > new Date(lastRead)) {
+            setHasUnreadUpdates(true);
+          } else {
+            setHasUnreadUpdates(false);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch updates:", err);
+      }
+    };
+    checkUpdates();
+    
+    // Listen for custom event from updates page
+    const handleUpdatesRead = () => setHasUnreadUpdates(false);
+    window.addEventListener('updates_read', handleUpdatesRead);
+    return () => window.removeEventListener('updates_read', handleUpdatesRead);
   }, []);
 
   useEffect(() => {
@@ -352,14 +381,16 @@ export default function DashboardPage() {
 
             {/* Notifications */}
             {!isMobile && (
-              <button style={{
+              <Link href="/dashboard/updates" style={{
                 width: 36, height: 36, borderRadius: 10, border: '1px solid rgba(45,32,22,0.08)',
                 background: '#FAF8F5', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 cursor: 'pointer', color: 'rgba(45,32,22,0.4)', position: 'relative',
               }}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>
-                <span style={{ position: 'absolute', top: 6, right: 6, width: 7, height: 7, borderRadius: '50%', background: B.terracotta, border: '2px solid #fff' }} />
-              </button>
+                {hasUnreadUpdates && (
+                  <span style={{ position: 'absolute', top: 6, right: 6, width: 7, height: 7, borderRadius: '50%', background: B.terracotta, border: '2px solid #fff' }} />
+                )}
+              </Link>
             )}
 
             {user?.email === 'francesco.biguzzi09@gmail.com' && (
