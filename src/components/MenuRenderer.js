@@ -139,8 +139,9 @@ export default function MenuRenderer({ menu, settings: propSettings, restaurantI
     );
   };
 
-  // Filtraggio per dieta
+  // Filtraggio: rimuovi piatti disabilitati, poi filtra per dieta
   const filteredMenu = menu.filter(item => {
+     if (item.disabled) return false;
      if (activeFilters.length === 0) return true;
      const tags = item.dietaryTags || [];
      return activeFilters.every(f => tags.includes(f));
