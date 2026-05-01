@@ -2,10 +2,10 @@
 import { useState, useMemo } from 'react';
 import NewDishModal from './NewDishModal';
 
-export default function DishManager({ items, setItems, settings, processSaveMenu, enhanceImage, enhancingItemId, generateCopy, generatingCopyId, triggerItemImageUpload, handleItemImageUpload }) {
+export default function DishManager({ items, setItems, settings, ...props }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [collapsedCats, setCollapsedCats] = useState({});
-  const [expandedDish, setExpandedDish] = useState(null);
+  const [editingItem, setEditingItem] = useState(null);
   const [showNewDishModal, setShowNewDishModal] = useState(false);
   const [newCatName, setNewCatName] = useState('');
   const [showNewCatInput, setShowNewCatInput] = useState(false);
@@ -57,7 +57,13 @@ export default function DishManager({ items, setItems, settings, processSaveMenu
     setDeleteConfirm(null);
   };
 
-  const handleAddDish = (dish) => setItems([...items, dish]);
+  const handleSaveDish = (dish) => {
+    if (editingItem) {
+      setItems(items.map(i => i.id === dish.id ? dish : i));
+    } else {
+      setItems([...items, dish]);
+    }
+  };
   const handleAddCategory = () => {
     if (!newCatName.trim()) return;
     // Add a placeholder item to create the category
@@ -184,7 +190,7 @@ export default function DishManager({ items, setItems, settings, processSaveMenu
                   <div key={item.id} draggable onDragStart={e => onDragStart(e, item.id)} onDragOver={onDragOver} onDrop={e => onDropOnItem(e, item.id)}
                     className={`border-t border-slate-50 transition-colors ${item.disabled ? 'opacity-40' : ''} ${dragItem === item.id ? 'bg-teal-50/50' : ''}`}>
                     {/* Riga compatta piatto */}
-                    <div className="flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-[#FAF8F5]/50 transition-colors" onClick={() => setExpandedDish(expandedDish === item.id ? null : item.id)}>
+                    <div className="flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-[#FAF8F5]/50 transition-colors" onClick={() => setEditingItem(item)}>
                       {/* Drag handle */}
                       <div className="text-slate-300 cursor-grab shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>
@@ -206,46 +212,6 @@ export default function DishManager({ items, setItems, settings, processSaveMenu
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                       </button>
                     </div>
-
-                    {/* Dettagli espansi (punto 8 - click per vedere) */}
-                    {expandedDish === item.id && (
-                      <div className="px-5 pb-5 pt-2 bg-[#FAF8F5]/50 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200 border-t border-slate-100">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="text-xs font-bold text-slate-500 block mb-1">NOME</label>
-                            <input type="text" value={item.name} onChange={e => setItems(items.map(i => i.id===item.id ? {...i, name:e.target.value}:i))} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm font-bold bg-white outline-none focus:ring-2 focus:ring-teal-500" />
-                          </div>
-                          <div>
-                            <label className="text-xs font-bold text-slate-500 block mb-1">PREZZO ({currency})</label>
-                            <input type="number" step="0.50" value={item.price} onChange={e => setItems(items.map(i => i.id===item.id ? {...i, price:parseFloat(e.target.value)||0}:i))} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm font-bold bg-white outline-none focus:ring-2 focus:ring-teal-500" />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="text-xs font-bold text-slate-500 block mb-1">DESCRIZIONE</label>
-                          <input type="text" value={item.description||''} onChange={e => setItems(items.map(i => i.id===item.id ? {...i, description:e.target.value}:i))} placeholder="Descrizione opzionale..." className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm bg-white outline-none focus:ring-2 focus:ring-teal-500" />
-                        </div>
-                        <div>
-                          <label className="text-xs font-bold text-slate-500 block mb-1">CATEGORIA</label>
-                          <input type="text" value={item.category||''} onChange={e => setItems(items.map(i => i.id===item.id ? {...i, category:e.target.value}:i))} className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm bg-white outline-none focus:ring-2 focus:ring-teal-500" />
-                        </div>
-                        {/* Foto */}
-                        <div className="flex items-center gap-3">
-                          <div onClick={() => triggerItemImageUpload(item.id)} className="w-14 h-14 rounded-xl bg-slate-100 border-2 border-dashed border-slate-300 hover:border-teal-500 flex items-center justify-center cursor-pointer overflow-hidden shrink-0 transition-colors">
-                            {item.image ? <img src={item.image} className="w-full h-full object-cover" alt="" /> : <span className="text-slate-400 text-lg">📸</span>}
-                          </div>
-                          <input type="file" accept="image/*" id={`upload-image-${item.id}`} className="hidden" onChange={e => handleItemImageUpload(e, item.id)} />
-                          {item.image && <button onClick={() => setItems(items.map(i => i.id===item.id ? {...i, image:null}:i))} className="text-xs text-rose-500 font-bold hover:underline">Rimuovi foto</button>}
-                          {item.image && enhanceImage && <button onClick={() => enhanceImage(item.id)} disabled={enhancingItemId===item.id} className="text-xs text-violet-600 font-bold bg-violet-50 px-2.5 py-1 rounded-lg border border-violet-200 hover:bg-violet-100 disabled:opacity-50">{enhancingItemId===item.id ? '...' : '✨ Migliora'}</button>}
-                        </div>
-                        {/* Copy IA */}
-                        {generateCopy && <button onClick={() => generateCopy(item.id)} disabled={generatingCopyId===item.id} className="text-xs font-bold text-violet-600 bg-violet-50 px-3 py-1.5 rounded-lg border border-violet-200 hover:bg-violet-100 disabled:opacity-50 flex items-center gap-1.5">{generatingCopyId===item.id ? 'Generando...' : (item.description ? '✨ Migliora copy IA' : '✨ Genera copy IA')}</button>}
-                        {/* Ingredienti */}
-                        <div>
-                          <label className="text-xs font-bold text-slate-500 block mb-1">INGREDIENTI</label>
-                          <input type="text" value={item.ingredients||''} onChange={e => setItems(items.map(i => i.id===item.id ? {...i, ingredients:e.target.value}:i))} placeholder="Es. farina, mozzarella..." className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm bg-white outline-none focus:ring-2 focus:ring-teal-500" />
-                        </div>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
@@ -274,8 +240,16 @@ export default function DishManager({ items, setItems, settings, processSaveMenu
         </div>
       </div>
 
-      {/* Modale nuovo piatto */}
-      <NewDishModal isOpen={showNewDishModal} onClose={() => setShowNewDishModal(false)} onAdd={handleAddDish} categories={categories} settings={settings} />
+      {/* Modale nuovo/modifica piatto */}
+      <NewDishModal 
+        isOpen={showNewDishModal || editingItem !== null} 
+        onClose={() => { setShowNewDishModal(false); setEditingItem(null); }} 
+        onSave={handleSaveDish} 
+        categories={categories} 
+        settings={settings}
+        initialData={editingItem}
+        {...props}
+      />
 
       {/* Modale conferma eliminazione */}
       {deleteConfirm && (

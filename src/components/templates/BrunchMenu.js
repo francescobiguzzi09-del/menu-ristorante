@@ -49,37 +49,33 @@ export default function BrunchMenu({ menuByCategory, settings, onItemClick, acti
                   <div 
                      key={item.id} 
                      onClick={() => onItemClick && onItemClick(item)}
-                     className="group cursor-pointer bg-white p-5 rounded-[2rem] shadow-[0_4px_20px_-5px_rgba(6,81,237,0.05)] hover:shadow-[0_8px_30px_-5px_rgba(6,81,237,0.1)] border border-slate-50 flex gap-4 items-center transition-all hover:-translate-y-1"
+                     className="group cursor-pointer bg-white p-5 rounded-[2rem] shadow-[0_4px_20px_-5px_rgba(6,81,237,0.05)] hover:shadow-[0_8px_30px_-5px_rgba(6,81,237,0.1)] border border-slate-50 flex items-center gap-4 transition-all hover:-translate-y-1"
                   >
-                    {item.image && (
-                      <div className="w-20 h-20 shrink-0 rounded-2xl bg-slate-100 overflow-hidden shadow-sm">
-                        <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <div className="flex items-center gap-4 w-full">
+                      <div className="flex-1 min-w-0 pr-4">
+                         <h3 className="font-bold text-slate-800 text-lg mb-1 truncate">
+                           <ItemBadge badge={item.badge} />
+                           {item.name}
+                         </h3>
+                         {item.description && (
+                           <p className="text-sm text-slate-500 line-clamp-2 leading-snug">{item.description}</p>
+                         )}
+                         <ItemIngredients ingredients={item.ingredients} />
                       </div>
-                    )}
-                    
-                    <div className="flex-1 min-w-0 pr-4">
-                       <h3 className="font-bold text-slate-800 text-lg mb-1 truncate">
-                         <ItemBadge badge={item.badge} />
-                         {item.name}
-                       </h3>
-                       {item.description && (
-                         <p className="text-sm text-slate-500 line-clamp-2 leading-snug">{item.description}</p>
-                       )}
-                       <ItemIngredients ingredients={item.ingredients} />
+                      {item.variants && item.variants.length > 0 ? (
+                        <div className="flex flex-col items-end gap-0.5 shrink-0">
+                          {item.variants.map((v, vi) => (
+                            <span key={vi} className={`font-black ${activeColor.text} text-sm`}>
+                              <span className="text-xs text-slate-400 font-medium mr-0.5">{v.name}</span>{currency}{v.price.toFixed(2)}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className={`font-black ${activeColor.text} text-xl shrink-0`}>
+                           {currency}{parseFloat(item.price).toFixed(2)}
+                        </div>
+                      )}
                     </div>
-                    {item.variants && item.variants.length > 0 ? (
-                      <div className="flex flex-col items-end gap-0.5 shrink-0">
-                        {item.variants.map((v, vi) => (
-                          <span key={vi} className={`font-black ${activeColor.text} text-sm`}>
-                            <span className="text-xs text-slate-400 font-medium mr-0.5">{v.name}</span>{currency}{v.price.toFixed(2)}
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className={`font-black ${activeColor.text} text-xl shrink-0`}>
-                         {currency}{parseFloat(item.price).toFixed(2)}
-                      </div>
-                    )}
                   </div>
                 ))}
   

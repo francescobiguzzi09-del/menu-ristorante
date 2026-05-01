@@ -63,8 +63,8 @@ export default function ModernMenu({ menuByCategory, settings, onItemClick, acti
 
                 <div key={item.id} onClick={() => onItemClick && onItemClick(item)} className="group cursor-pointer flex flex-col gap-3 relative hover:opacity-80 transition-opacity">
                   {item.image && (
-                    <div className="w-full rounded-xl bg-white overflow-hidden mb-2">
-                      <img src={item.image} alt={item.name} className="w-full h-auto max-h-64 object-contain grayscale-[15%] group-hover:grayscale-0 transition-all duration-500" />
+                    <div className="w-full max-w-sm mx-auto rounded-xl bg-zinc-50 overflow-hidden mb-2">
+                      <img src={item.image} alt={item.name} className="w-full h-auto object-contain rounded-xl grayscale-[15%] group-hover:grayscale-0 transition-all duration-500" />
                     </div>
                   )}
                   

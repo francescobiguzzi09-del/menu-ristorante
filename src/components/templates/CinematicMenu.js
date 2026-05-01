@@ -59,17 +59,11 @@ export default function CinematicMenu({ menuByCategory, settings, onItemClick, a
                   <div 
                      key={item.id} 
                      onClick={() => onItemClick && onItemClick(item)}
-                     className={`group relative cursor-pointer overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-5 md:p-6 transition-all duration-500 hover:bg-white/10 hover:${theme.border} hover:shadow-[0_0_30px_rgba(255,255,255,0.05)] flex items-center gap-6`}
+                     className={`group relative cursor-pointer overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-5 md:p-6 transition-all duration-500 hover:bg-white/10 hover:${theme.border} hover:shadow-[0_0_30px_rgba(255,255,255,0.05)]`}
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-
-                    {item.image && (
-                      <div className="w-20 h-20 md:w-24 md:h-24 shrink-0 rounded-xl overflow-hidden shadow-2xl bg-black border border-white/10">
-                        <img src={item.image} alt={item.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700" />
-                      </div>
-                    )}
                     
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 relative z-10">
                       <div className="flex justify-between items-start gap-4 mb-2">
                          <h3 className="text-lg md:text-xl font-bold text-white group-hover:text-white transition-colors truncate">
                            <ItemBadge badge={item.badge} dark />

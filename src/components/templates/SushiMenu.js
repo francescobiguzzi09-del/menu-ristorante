@@ -22,9 +22,9 @@ export default function SushiMenu({ menuByCategory, settings, onItemClick, activ
       <main className="relative z-10 max-w-2xl mx-auto px-5 pt-16">
         <header className="mb-14 text-center animate-in fade-in slide-in-from-top-8 duration-1000">
            <h1 className="text-3xl md:text-5xl font-black uppercase tracking-widest text-white mb-6 leading-tight">
-             {restaurantName.split(' ').map((word, i) => <React.Fragment key={i}>{word}<br className="hidden sm:block" /></React.Fragment>)}
-             <span className="sm:hidden">{restaurantName}</span>
-           </h1>
+              <span className="hidden sm:inline">{restaurantName.split(' ').map((word, i) => <React.Fragment key={i}>{word}<br /></React.Fragment>)}</span>
+              <span className="sm:hidden">{restaurantName}</span>
+            </h1>
            {settings?.customHeader && (
              <p className={`text-xs md:text-sm tracking-[0.3em] uppercase ${activeColor.text} mb-6`}>{settings.customHeader}</p>
            )}
@@ -58,11 +58,6 @@ export default function SushiMenu({ menuByCategory, settings, onItemClick, activ
                      onClick={() => onItemClick && onItemClick(item)}
                      className="group cursor-pointer flex gap-4 md:gap-6 p-4 rounded-2xl hover:bg-slate-900/80 transition-colors border border-transparent hover:border-slate-800"
                   >
-                    {item.image && (
-                      <div className="w-16 h-16 md:w-20 md:h-20 shrink-0 rounded-xl bg-slate-800 overflow-hidden shadow-lg border border-slate-700/50">
-                        <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                      </div>
-                    )}
                     
                     <div className="flex-1 min-w-0 flex flex-col justify-center">
                       <div className="flex justify-between items-start gap-4 mb-1">

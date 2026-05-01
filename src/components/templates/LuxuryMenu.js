@@ -59,8 +59,8 @@ export default function LuxuryMenu({ menuByCategory, settings, onItemClick, acti
                      className={`group cursor-pointer flex flex-col items-center justify-center text-center`}
                   >
                     {item.image && (
-                      <div className={`w-full max-w-lg aspect-[4/3] overflow-hidden mb-8 ${theme.border} border shadow-2xl ${theme.card}`}>
-                        <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1.5s] ease-out opacity-90 group-hover:opacity-100" />
+                      <div className="w-full max-w-sm mx-auto overflow-hidden mb-6">
+                        <img src={item.image} alt={item.name} className="w-full h-auto object-contain group-hover:scale-105 transition-transform duration-[1.5s] ease-out opacity-90 group-hover:opacity-100" />
                       </div>
                     )}
                     

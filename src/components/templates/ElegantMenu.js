@@ -67,12 +67,7 @@ export default function ElegantMenu({ menuByCategory, settings, onItemClick, act
               
               {items.map((item, index) => (
 
-                <div key={item.id} onClick={() => onItemClick && onItemClick(item)} className="group cursor-pointer flex gap-5 sm:gap-6 items-start hover:opacity-80 transition-opacity">
-                  {item.image && (
-                    <div className="w-20 h-20 md:w-24 md:h-24 shrink-0 rounded-2xl overflow-hidden border border-[#2a2a2a] shadow-lg mt-1 relative bg-[#111]">
-                      <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    </div>
-                  )}
+                <div key={item.id} onClick={() => onItemClick && onItemClick(item)} className="group cursor-pointer flex flex-col hover:opacity-80 transition-opacity">
                   <div className="flex-1 w-full min-w-0">
                     <div className="flex justify-between items-baseline mb-3 gap-4 sm:gap-6">
                       <h3 className={`text-xl md:text-2xl font-serif text-white tracking-wide ${theme.hoverText} transition-colors leading-tight break-words flex-1 min-w-0`}>

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import QRCode from 'react-qr-code';
@@ -76,86 +76,58 @@ function AdminDashboardContent() {
     { id: 'spicy', label: 'Piccante', color: 'bg-rose-500 text-[#F5F0E8] border-rose-400' },
   ];
 
-  // States per IA Enhancement
-  const [enhancingItemId, setEnhancingItemId] = useState(null);
-  const [generatingCopyId, setGeneratingCopyId] = useState(null);
+  // Reusable AI functions for DishModal
+  const performEnhanceImage = async (imageSrc) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const img = new window.Image();
+        img.crossOrigin = 'anonymous';
+        img.src = imageSrc;
+        await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
 
-  // Migliora foto con Canvas (luminosità, contrasto, saturazione)
-  const enhanceImage = async (itemId) => {
-    const item = items.find(i => i.id === itemId);
-    if (!item?.image) return;
-    setEnhancingItemId(itemId);
-    try {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.src = item.image;
-      await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
 
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
+        ctx.filter = 'brightness(1.2) contrast(1.15) saturate(1.3)';
+        ctx.drawImage(img, 0, 0);
 
-      // Applica filtri: luminosità +20%, contrasto +15%, saturazione +30%
-      ctx.filter = 'brightness(1.2) contrast(1.15) saturate(1.3)';
-      ctx.drawImage(img, 0, 0);
+        ctx.globalCompositeOperation = 'overlay';
+        ctx.globalAlpha = 0.15;
+        ctx.filter = 'blur(0px) contrast(1.5) brightness(1.1)';
+        ctx.drawImage(canvas, 0, 0);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = 1.0;
 
-      // Leggero effetto sharpen via unsharp mask
-      ctx.globalCompositeOperation = 'overlay';
-      ctx.globalAlpha = 0.15;
-      ctx.filter = 'blur(0px) contrast(1.5) brightness(1.1)';
-      ctx.drawImage(canvas, 0, 0);
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.globalAlpha = 1.0;
-
-      const enhancedUrl = canvas.toDataURL('image/jpeg', 0.92);
-      setItems(items.map(i => i.id === itemId ? { ...i, image: enhancedUrl } : i));
-    } catch (err) {
-      console.error('Errore enhancement:', err);
-      toast.error('Errore nel miglioramento immagine.', 'Errore');
-    } finally {
-      setEnhancingItemId(null);
-    }
-  };
-
-  // Genera copy persuasivo con IA
-  const generateCopy = async (itemId) => {
-    const item = items.find(i => i.id === itemId);
-    if (!item) return;
-    setGeneratingCopyId(itemId);
-    try {
-      const res = await fetch('/api/generate-copy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: item.name,
-          category: item.category,
-          currentDescription: item.description
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setItems(items.map(i => i.id === itemId ? { ...i, description: data.description } : i));
-      } else {
-        toast.error(data.error || 'Errore generazione copy', 'Errore IA');
+        resolve(canvas.toDataURL('image/jpeg', 0.92));
+      } catch (e) {
+        reject(e);
       }
-    } catch (err) {
-      console.error(err);
-      toast.error('Errore di connessione al server IA.', 'Errore');
-    } finally {
-      setGeneratingCopyId(null);
-    }
+    });
   };
 
-  // Funzioni per l'upload immagine del piatto
-  const triggerItemImageUpload = (id) => document.getElementById(`upload-image-${id}`).click();
-  const handleItemImageUpload = async (e, id) => {
-    if (!e.target.files || e.target.files.length === 0) return;
-    const file = e.target.files[0];
-    if (file.size > 500 * 1024) { toast.warning("L'immagine deve essere più piccola di 500KB.", 'File troppo grande'); return; }
-    const reader = new FileReader();
-    reader.onloadend = () => setItems(items.map(item => item.id === id ? { ...item, image: reader.result } : item));
-    reader.readAsDataURL(file);
+  const performRemoveBackground = async (imageSrc) => {
+    const { removeBackground: removeBg } = await import('@imgly/background-removal');
+    const blob = await removeBg(imageSrc, { 
+      output: { format: 'image/png', quality: 0.9 }
+    });
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.readAsDataURL(blob);
+    });
+  };
+
+  const performGenerateCopy = async (name, category, description) => {
+    const res = await fetch('/api/generate-copy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, category, currentDescription: description })
+    });
+    const data = await res.json();
+    if (data.success) return data.description;
+    throw new Error(data.error || 'Errore');
   };
 
   const triggerNewItemImageUpload = () => document.getElementById('upload-new-item-image').click();
@@ -811,13 +783,9 @@ function AdminDashboardContent() {
                 items={items}
                 setItems={setItems}
                 settings={settings}
-                processSaveMenu={processSaveMenu}
-                enhanceImage={enhanceImage}
-                enhancingItemId={enhancingItemId}
-                generateCopy={generateCopy}
-                generatingCopyId={generatingCopyId}
-                triggerItemImageUpload={triggerItemImageUpload}
-                handleItemImageUpload={handleItemImageUpload}
+                performEnhanceImage={performEnhanceImage}
+                performRemoveBackground={performRemoveBackground}
+                performGenerateCopy={performGenerateCopy}
               />
 
 
@@ -1069,11 +1037,6 @@ function AdminDashboardContent() {
                             { id: 'default', name: 'Gold', hex: '#fbbf24' },
                             { id: 'sapphire', name: 'Sapphire', hex: '#3b82f6' },
                             { id: 'ruby', name: 'Ruby', hex: '#f43f5e' }
-                          ],
-                          supreme: [
-                            { id: 'default', name: 'Indigo', hex: '#4f46e5' },
-                            { id: 'neon', name: 'Neon', hex: '#a3e635' },
-                            { id: 'sunset', name: 'Sunset', hex: '#f43f5e' }
                           ],
                           sushi: [
                             { id: 'default', name: 'Emerald', hex: '#10b981' },
@@ -1762,6 +1725,8 @@ function AdminDashboardContent() {
 
         </div>
       )}
+
+
 
     </div>
   );
