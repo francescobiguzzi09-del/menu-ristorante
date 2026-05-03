@@ -57,7 +57,7 @@ REGOLE STRETTISSIME:
           ],
         },
       ],
-      max_tokens: 1500,
+      max_tokens: 4000,
       temperature: 0.1, // JSON altamente deterministico
     });
 
